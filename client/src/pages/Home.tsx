@@ -2,8 +2,9 @@
  * SENTINEL CARTOGRAPHY — a forensic, asymmetric India thermal-intelligence workbench.
  * Use graphite, mineral teal, Signal Ember, contour motifs, deliberate evidence-led motion, and DM Mono data labels.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useRef, useState } from "react";
 import { MapView } from "@/components/Map";
+import { trpc } from "@/lib/trpc";
 import {
   Activity,
   AlertTriangle,
@@ -38,7 +39,7 @@ type Hotspot = {
   recency: string;
   score: number;
   outcome: string;
-  mapPosition: [string, string];
+  location: { lat: number; lng: number };
 };
 
 const hotspots: Hotspot[] = [
@@ -52,7 +53,7 @@ const hotspots: Hotspot[] = [
     recency: "Observed 2h 14m ago",
     score: 82,
     outcome: "Escalate for verification",
-    mapPosition: ["43%", "43%"],
+    location: { lat: 27.13, lng: 73.33 },
   },
   {
     id: "IN-22.31-70.82",
@@ -64,7 +65,7 @@ const hotspots: Hotspot[] = [
     recency: "Observed 3h 02m ago",
     score: 28,
     outcome: "Likely routine heat",
-    mapPosition: ["31%", "58%"],
+    location: { lat: 22.31, lng: 70.82 },
   },
   {
     id: "IN-28.57-77.18",
@@ -76,17 +77,8 @@ const hotspots: Hotspot[] = [
     recency: "Observed 1h 26m ago",
     score: 66,
     outcome: "Needs contextual review",
-    mapPosition: ["59%", "30%"],
+    location: { lat: 28.57, lng: 77.18 },
   },
-];
-
-const verificationChecks = [
-  { label: "Observation quality", detail: "Nominal confidence; no low-confidence sun-glint rule triggered.", status: "pass" },
-  { label: "Pixel geometry", detail: "Screen against scan/track footprint and boundary uncertainty.", status: "pass" },
-  { label: "Industrial context", detail: "Intersects an industrial land-use context; facility specificity remains pending.", status: "pass" },
-  { label: "Persistence baseline", detail: "Not co-located with the current static-source baseline.", status: "pass" },
-  { label: "Trajectory", detail: "Facility-relative heat score exceeds the change threshold.", status: "pass" },
-  { label: "Independent corroboration", detail: "Weather / optical or local incident corroboration is still required.", status: "review" },
 ];
 
 const conditionFamilies = [
@@ -153,20 +145,18 @@ export default function Home() {
   const [selected, setSelected] = useState<Hotspot>(hotspots[0]);
   const [activeLayer, setActiveLayer] = useState("Thermal");
   const [verifierOpen, setVerifierOpen] = useState(false);
-  const [checkIndex, setCheckIndex] = useState(0);
   const [copied, setCopied] = useState(false);
+  const mapMarkers = useRef<google.maps.MVCObject[]>([]);
+  const corroboration = trpc.corroboration.run.useMutation();
 
-  const activeChecks = useMemo(() => verificationChecks.slice(0, checkIndex), [checkIndex]);
-
-  useEffect(() => {
-    if (!verifierOpen || checkIndex >= verificationChecks.length) return;
-    const timer = window.setTimeout(() => setCheckIndex(index => index + 1), 420);
-    return () => window.clearTimeout(timer);
-  }, [verifierOpen, checkIndex]);
-
-  const openVerifier = () => {
-    setCheckIndex(0);
+  const openVerifier = (hotspot = selected) => {
+    setSelected(hotspot);
     setVerifierOpen(true);
+    corroboration.mutate({
+      detectionId: hotspot.id,
+      lat: hotspot.location.lat,
+      lng: hotspot.location.lng,
+    });
   };
 
   const copyLink = async () => {
@@ -190,6 +180,53 @@ export default function Home() {
     });
     map.setCenter({ lat: 22.4, lng: 78.2 });
     map.setZoom(5);
+    if (import.meta.env.DEV) {
+      (window as Window & { __indiaFireMap?: google.maps.Map }).__indiaFireMap = map;
+    }
+
+    const infoWindow = new google.maps.InfoWindow();
+    const markerIcon = (color: string) => ({
+      url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="17" fill="${color}" fill-opacity=".18" stroke="${color}" stroke-width="1.5"/><circle cx="21" cy="21" r="8" fill="${color}" stroke="white" stroke-width="3"/></svg>`)}`,
+      scaledSize: new google.maps.Size(42, 42),
+      anchor: new google.maps.Point(21, 21),
+    });
+
+    hotspots.forEach(hotspot => {
+      const color = hotspot.score > 70 ? "#ff5a36" : "#ffb258";
+      const marker = new google.maps.Marker({
+        map,
+        position: hotspot.location,
+        title: `${hotspot.place} — click to verify`,
+        icon: markerIcon(color),
+        zIndex: hotspot.score,
+      });
+      const zone = new google.maps.Circle({
+        map,
+        center: hotspot.location,
+        radius: hotspot.score > 70 ? 9_000 : 6_000,
+        strokeColor: color,
+        strokeOpacity: 0.72,
+        strokeWeight: 1,
+        fillColor: color,
+        fillOpacity: 0.09,
+        clickable: true,
+      });
+      const showSummary = () => {
+        infoWindow.setContent(`<div style="font-family:Arial,sans-serif;min-width:205px;color:#12201d"><strong>${hotspot.place}</strong><div style="margin-top:6px;font-family:monospace;font-size:11px">${hotspot.coords} · FRP ${hotspot.frp}</div><div style="margin-top:8px;color:#a6402c;font-size:11px">Click the zone to run industrial-fire checks</div></div>`);
+        infoWindow.open({ map, anchor: marker, shouldFocus: false });
+      };
+      const verifyZone = () => {
+        infoWindow.close();
+        openVerifier(hotspot);
+      };
+      marker.addListener("mouseover", showSummary);
+      marker.addListener("mouseout", () => infoWindow.close());
+      marker.addListener("click", verifyZone);
+      zone.addListener("mouseover", showSummary);
+      zone.addListener("mouseout", () => infoWindow.close());
+      zone.addListener("click", verifyZone);
+      mapMarkers.current.push(marker, zone);
+    });
   };
 
   return (
@@ -235,23 +272,6 @@ export default function Home() {
               <div className="map-grid" aria-hidden="true" />
               <div className="india-atlas-stamp"><b>IND / OBSERVATION GRID</b><span>68°E–98°E · 8°N–37°N</span><i /></div>
               <div className="monsoon-context"><CloudSun size={14} /><span>MONSOON CONTEXT</span><b>Weather covariate: review</b></div>
-              {hotspots.map(hotspot => (
-                <button
-                  key={hotspot.id}
-                  className={`hotspot-pin ${selected.id === hotspot.id ? "is-selected" : ""} ${hotspot.score > 70 ? "is-alert" : ""}`}
-                  style={{ left: hotspot.mapPosition[0], top: hotspot.mapPosition[1] }}
-                  onClick={() => {
-                    setSelected(hotspot);
-                    setCheckIndex(0);
-                    setVerifierOpen(true);
-                  }}
-                  aria-label={`Open industrial fire condition check for ${hotspot.facility}`}
-                >
-                  <span className="pin-pulse" />
-                  <span className="pin-dot" />
-                  <span className="hotspot-hover"><b>{hotspot.place}</b><small>{hotspot.frp} · {hotspot.confidence} confidence</small><em>Click to check industrial-fire conditions</em></span>
-                </button>
-              ))}
               <div className="map-legend">
                 <span><i className="legend-dot ember" /> Candidate anomaly</span>
                 <span><i className="legend-dot teal" /> Context data</span>
@@ -305,7 +325,7 @@ export default function Home() {
               <span><AlertTriangle size={15} /> SCREENING OUTCOME</span>
               <strong>{selected.outcome}</strong>
               <p>Satellite and map evidence prioritise this candidate. They do not prove an on-site fire.</p>
-              <button onClick={openVerifier}>Run condition check <ChevronRight size={16} /></button>
+              <button onClick={() => openVerifier()}>Run concurrent condition check <ChevronRight size={16} /></button>
             </div>
           </aside>
         </section>
@@ -411,20 +431,20 @@ export default function Home() {
         <div className="verification-overlay" role="dialog" aria-modal="true" aria-labelledby="verifier-title">
           <div className="verification-modal">
             <button className="modal-close" onClick={() => setVerifierOpen(false)} aria-label="Close verifier"><X size={19} /></button>
-            <div className="modal-header"><span className="eyebrow">CONDITIONAL VERIFICATION</span><h2 id="verifier-title">Is this heat anomaly industrial?</h2><p>{selected.facility} · {selected.id} · {selected.coords}</p></div>
-            <div className="check-list">
-              {verificationChecks.map((check, index) => {
-                const revealed = index < checkIndex;
-                return <div className={`verification-row ${revealed ? "revealed" : ""} ${check.status}`} key={check.label}>
-                  <span className="check-state">{revealed ? check.status === "pass" ? <Check size={15} /> : <CircleHelp size={15} /> : index + 1}</span>
-                  <div><b>{check.label}</b><p>{revealed ? check.detail : "Evaluating evidence…"}</p></div>
-                  {revealed && <small>{check.status === "pass" ? "SATISFIED" : "OPEN"}</small>}
-                </div>;
-              })}
-            </div>
-            {checkIndex >= verificationChecks.length ? (
-              <div className="modal-result"><span><AlertTriangle size={16} /> RESULT</span><h3>Escalate as a screened candidate.</h3><p>The candidate passes core quality, context, persistence and change checks. Independent corroboration is still open; no fire incident is confirmed by this result.</p><button onClick={() => setVerifierOpen(false)}>Keep investigating <ArrowRight size={16} /></button></div>
-            ) : <div className="verification-progress"><span>Running {Math.min(checkIndex + 1, verificationChecks.length)} / {verificationChecks.length} conditional checks</span><i style={{ width: `${(checkIndex / verificationChecks.length) * 100}%` }} /></div>}
+            <div className="modal-header"><span className="eyebrow">CONCURRENT CONDITIONAL VERIFICATION</span><h2 id="verifier-title">Is this heat anomaly industrial?</h2><p>{selected.facility} · {selected.id} · {selected.coords}</p></div>
+            {corroboration.isPending && <div className="verification-progress live"><span>Querying FIRMS, OSM industrial context, 7-day persistence, and weather concurrently…</span><i /></div>}
+            {corroboration.isError && <div className="source-error">Live evidence could not be loaded. The verifier will not issue an industrial-fire conclusion.</div>}
+            {corroboration.data && <>
+              <div className="check-list live-evidence">
+                <div className={`verification-row revealed ${corroboration.data.firmsCurrent.state === "available" ? "pass" : "review"}`}><span className="check-state">{corroboration.data.firmsCurrent.state === "available" ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>NASA FIRMS · NOAA-20 thermal evidence</b><p>{corroboration.data.firmsCurrent.detail}</p></div><small>{corroboration.data.firmsCurrent.state.toUpperCase()}</small></div>
+                <div className={`verification-row revealed ${corroboration.data.firmsIndependentCurrent.state === "available" ? "pass" : "review"}`}><span className="check-state">{corroboration.data.firmsIndependentCurrent.state === "available" ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>Independent satellite · SNPP VIIRS</b><p>{corroboration.data.firmsIndependentCurrent.detail}</p></div><small>{corroboration.data.firmsIndependentCurrent.state.toUpperCase()}</small></div>
+                <div className={`verification-row revealed ${corroboration.data.industrial.state === "available" ? "pass" : "review"}`}><span className="check-state">{corroboration.data.industrial.state === "available" ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>OSM · industrial context</b><p>{corroboration.data.industrial.detail}</p></div><small>{corroboration.data.industrial.state.toUpperCase()}</small></div>
+                <div className={`verification-row revealed ${corroboration.data.firmsHistory.state === "available" ? "pass" : "review"}`}><span className="check-state">{corroboration.data.firmsHistory.state === "available" ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>FIRMS · 7-day persistence</b><p>{corroboration.data.firmsHistory.detail}</p></div><small>{corroboration.data.firmsHistory.state.toUpperCase()}</small></div>
+                <div className={`verification-row revealed ${corroboration.data.weather.state === "available" ? "pass" : "review"}`}><span className="check-state">{corroboration.data.weather.state === "available" ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>Weather · independent context</b><p>{corroboration.data.weather.detail}</p></div><small>{corroboration.data.weather.state.toUpperCase()}</small></div>
+                <div className={`verification-row revealed ${corroboration.data.independentCorroboration.state === "cross_platform_match" ? "pass" : "review"}`}><span className="check-state">{corroboration.data.independentCorroboration.state === "cross_platform_match" ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>Independent satellite corroboration</b><p>{corroboration.data.independentCorroboration.detail}</p></div><small>{corroboration.data.independentCorroboration.state.toUpperCase()}</small></div>
+              </div>
+              <div className={`modal-result ${corroboration.data.conclusion.level}`}><span><AlertTriangle size={16} /> LIVE SCREENING RESULT</span><h3>{corroboration.data.conclusion.title}</h3><p>{corroboration.data.conclusion.detail}</p><button onClick={() => setVerifierOpen(false)}>Return to map <ArrowRight size={16} /></button></div>
+            </>}
           </div>
         </div>
       )}
