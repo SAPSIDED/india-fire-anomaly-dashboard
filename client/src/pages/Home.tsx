@@ -188,6 +188,8 @@ export default function Home() {
         { featureType: "poi", elementType: "geometry", stylers: [{ color: "#1a3034" }] },
       ],
     });
+    map.setCenter({ lat: 22.4, lng: 78.2 });
+    map.setZoom(5);
   };
 
   return (
@@ -238,12 +240,16 @@ export default function Home() {
                   key={hotspot.id}
                   className={`hotspot-pin ${selected.id === hotspot.id ? "is-selected" : ""} ${hotspot.score > 70 ? "is-alert" : ""}`}
                   style={{ left: hotspot.mapPosition[0], top: hotspot.mapPosition[1] }}
-                  onClick={() => setSelected(hotspot)}
-                  aria-label={`Inspect ${hotspot.facility}`}
+                  onClick={() => {
+                    setSelected(hotspot);
+                    setCheckIndex(0);
+                    setVerifierOpen(true);
+                  }}
+                  aria-label={`Open industrial fire condition check for ${hotspot.facility}`}
                 >
                   <span className="pin-pulse" />
                   <span className="pin-dot" />
-                  <span className="hotspot-hover"><b>{hotspot.place}</b><small>{hotspot.frp} · {hotspot.confidence} confidence</small></span>
+                  <span className="hotspot-hover"><b>{hotspot.place}</b><small>{hotspot.frp} · {hotspot.confidence} confidence</small><em>Click to check industrial-fire conditions</em></span>
                 </button>
               ))}
               <div className="map-legend">
@@ -405,7 +411,7 @@ export default function Home() {
         <div className="verification-overlay" role="dialog" aria-modal="true" aria-labelledby="verifier-title">
           <div className="verification-modal">
             <button className="modal-close" onClick={() => setVerifierOpen(false)} aria-label="Close verifier"><X size={19} /></button>
-            <div className="modal-header"><span className="eyebrow">CONDITIONAL VERIFICATION</span><h2 id="verifier-title">Inspecting the evidence chain.</h2><p>{selected.id} · {selected.coords} · interface demonstration using illustrative candidate data</p></div>
+            <div className="modal-header"><span className="eyebrow">CONDITIONAL VERIFICATION</span><h2 id="verifier-title">Is this heat anomaly industrial?</h2><p>{selected.facility} · {selected.id} · {selected.coords}</p></div>
             <div className="check-list">
               {verificationChecks.map((check, index) => {
                 const revealed = index < checkIndex;
