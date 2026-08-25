@@ -57,3 +57,5 @@
 
 - [x] Redesign the FireGuard presentation layer as a responsive, restrained satellite thermal-intelligence interface without changing backend code, data flow, routes, authentication, or verifier behavior.
 - [x] Add an accessible, reduced-motion-safe interactive thermal background, pastel map styling, and a geometric display-font refinement without changing any backend or tracker functionality.
+- [x] Rework the presentation layer into a light, playful thermal-canvas experience inspired by the supplied contemporary Japanese design reference, while preserving and revalidating the live conditional-verification workflow unchanged.
+- [x] Complete a post-redesign live browser verification to a returned source-backed screening result and document the verdict text.

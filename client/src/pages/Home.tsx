@@ -118,6 +118,7 @@ export default function Home() {
     details: "",
   });
   const mapMarkers = useRef<google.maps.MVCObject[]>([]);
+  const thermalFieldRef = useRef<HTMLDivElement>(null);
   const { user, isAuthenticated } = useAuth();
   const corroboration = trpc.corroboration.run.useMutation();
   const authorityRecord = trpc.incidentEvidence.record.useMutation();
@@ -158,6 +159,13 @@ export default function Home() {
     await navigator.clipboard?.writeText(window.location.href);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1600);
+  };
+
+  const moveThermalField = (event: React.PointerEvent<HTMLDivElement>) => {
+    const field = thermalFieldRef.current;
+    if (!field) return;
+    field.style.setProperty("--thermal-x", `${Math.round((event.clientX / window.innerWidth) * 100)}%`);
+    field.style.setProperty("--thermal-y", `${Math.round((event.clientY / window.innerHeight) * 100)}%`);
   };
 
   const onMapReady = (map: google.maps.Map) => {
@@ -203,8 +211,8 @@ export default function Home() {
   };
 
   return (
-    <div className="fireguard-page">
-      <div className="thermal-field" aria-hidden="true"><i /><i /><i /></div>
+    <div className="fireguard-page" onPointerMove={moveThermalField}>
+      <div ref={thermalFieldRef} className="thermal-field" aria-hidden="true"><i /><i /><i /></div>
       <header className="mission-header">
         <a className="brand-lockup" href="#top" aria-label="FireGuard India home"><img src="/manus-storage/sentinel-contour-mark_ba2d7e8a.png" alt="FireGuard contour mark" /><span>FIREGUARD / INDIA<small>THERMAL INTELLIGENCE</small></span></a>
         <nav className="mission-nav" aria-label="Primary navigation"><a href="#workbench">Analysis field</a><a href="#pipeline">Method</a><a href="#conditions">Conditions</a><a href="#sources">Sources</a></nav>
