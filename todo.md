@@ -65,3 +65,9 @@
 - [x] Capture and document a completed post-restart verifier verdict with a clean console to prove the full conditional-checking flow remains runtime-error-free.
 - [x] Replace the peach display-text emphasis with a cherry-red gradient without changing the thermal canvas or tracker functionality.
 - [x] Turn the historical-analysis panel into an interactive, clearly labelled statistical visualization without presenting illustrative target context as live historical evidence.
+- [x] Make the historical graph visibly interactive for zero-observation live responses using selectable evidence-safe views and explicit no-detection timeline marks, without inventing historical detections.
+- [x] Verify in the browser that a live zero-detection response renders selectable zero-observation marks and that both preview and live marker selections update the selected-day callout.
+- [x] Verify browser selection changes for both the NOT QUERIED preview markers and live zero-observation markers, then record the updated callout states.
+- [x] Restore and confirm browser-preview availability if the local preview connection becomes unavailable during graph interaction validation.
+- [x] Capture an independently observable NOT QUERIED preview-marker change from its default date to a different selected-day callout before finalizing the historical graph validation.
+- [x] Capture browser readbacks before and after a NOT QUERIED marker activation to document the callout transition from 25 Aug to a different date.

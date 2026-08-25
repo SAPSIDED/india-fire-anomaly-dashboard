@@ -80,14 +80,35 @@ type HistoryEvidence = {
   detail: string;
 };
 
+type HistoryPoint = { date: string; detections: number | null };
+
 function HistoricalAnalysis({ history, selected }: { history?: HistoryEvidence; selected: Hotspot }) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const points = history?.dailyDetections ?? [];
-  const peak = Math.max(1, ...points.map(point => point.detections));
-  const active = points.find(point => point.date === selectedDate) ?? points[points.length - 1];
+  const [view, setView] = useState<"activity" | "coverage">("activity");
   const liveHistory = history?.state === "available" || history?.state === "cached";
+  const sourcePoints: HistoryPoint[] = history?.dailyDetections ?? [];
+  const zeroObservationPoints = liveHistory && history?.detections === 0
+    ? Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(`${history.checkedAt.slice(0, 10)}T00:00:00Z`);
+      date.setUTCDate(date.getUTCDate() - (6 - index));
+      return { date: date.toISOString().slice(0, 10), detections: 0 };
+    })
+    : [];
+  const queryWindowPoints: HistoryPoint[] = !history
+    ? Array.from({ length: 7 }, (_, index) => {
+      const date = new Date();
+      date.setUTCDate(date.getUTCDate() - (6 - index));
+      return { date: date.toISOString().slice(0, 10), detections: null };
+    })
+    : [];
+  const points = sourcePoints.length > 0 ? sourcePoints : zeroObservationPoints.length > 0 ? zeroObservationPoints : queryWindowPoints;
+  const zeroObservation = liveHistory && history?.detections === 0;
+  const queryPreview = !history;
+  const peak = Math.max(1, ...points.map(point => point.detections ?? 0));
+  const active = points.find(point => point.date === selectedDate) ?? points[points.length - 1];
   const activeLabel = active ? new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", timeZone: "UTC" }).format(new Date(`${active.date}T00:00:00Z`)) : "No date-level records";
-  const activeValue = active ? `${active.detections} detection${active.detections === 1 ? "" : "s"}` : "—";
+  const activeValue = active && active.detections !== null ? `${active.detections} detection${active.detections === 1 ? "" : "s"}` : queryPreview ? "NOT QUERIED" : "—";
+  const selectHistoryDate = (date: string) => setSelectedDate(date);
 
   return (
     <article className="history-panel interactive-history-panel">
@@ -95,13 +116,14 @@ function HistoricalAnalysis({ history, selected }: { history?: HistoryEvidence; 
       <p className="history-target">{selected.id} · 7-DAY FIRMS WINDOW</p>
       <div className="history-stat-grid" aria-label="Seven-day history statistics">
         <div><span>DETECTIONS</span><b>{liveHistory ? history.detections : "—"}</b></div>
-        <div><span>ACTIVE DAYS</span><b>{liveHistory ? points.length : "—"}</b></div>
+        <div><span>{view === "activity" ? "ACTIVE DAYS" : "WINDOW DAYS"}</span><b>{liveHistory ? (view === "activity" ? sourcePoints.length : points.length) : "—"}</b></div>
         <div><span>PEAK DAY</span><b>{activeValue}</b></div>
       </div>
+      {liveHistory && <div className="history-view-toggle" role="group" aria-label="Historical graph view"><button type="button" className={view === "activity" ? "active" : ""} onClick={() => setView("activity")} aria-pressed={view === "activity"}>Thermal activity</button><button type="button" className={view === "coverage" ? "active" : ""} onClick={() => setView("coverage")} aria-pressed={view === "coverage"}>Evidence coverage</button></div>}
       <div className="history-chart-wrap">
-        {points.length > 0 ? <div className="history-bars" role="list" aria-label="Daily source-provided FIRMS detections. Select a day for its count.">{points.map(point => <button key={point.date} type="button" role="listitem" className={active?.date === point.date ? "active" : ""} onClick={() => setSelectedDate(point.date)} aria-pressed={active?.date === point.date} aria-label={`${point.date}: ${point.detections} FIRMS detections`}><i style={{ height: `${Math.max(10, Math.round((point.detections / peak) * 100))}%` }} /><span>{new Date(`${point.date}T00:00:00Z`).toLocaleDateString("en-IN", { day: "2-digit", month: "short", timeZone: "UTC" })}</span></button>)}</div> : <div className="history-empty"><b>{liveHistory ? "No local FIRMS detections in the returned seven-day history." : "Run source verification to load live seven-day FIRMS history."}</b><span>The chart only renders daily counts present in the official source response; it does not fill or simulate missing dates.</span></div>}
+        {points.length > 0 ? <div className={`history-bars ${zeroObservation ? "zero-observation" : ""} ${queryPreview ? "query-preview" : ""} ${view === "coverage" ? "coverage-mode" : ""}`} role="list" aria-label={queryPreview ? "Selectable seven-day FIRMS query window. No day has been queried yet." : zeroObservation ? "Seven-day FIRMS query window with no local detections. Select a day to inspect the zero-observation result." : "Daily source-provided FIRMS detections. Select a day for its count."}>{points.map(point => <button key={point.date} type="button" role="listitem" className={active?.date === point.date ? "active" : ""} onMouseDown={() => selectHistoryDate(point.date)} onPointerDown={() => selectHistoryDate(point.date)} onClick={() => selectHistoryDate(point.date)} aria-pressed={active?.date === point.date} aria-label={point.detections === null ? `${point.date}: not queried` : `${point.date}: ${point.detections} FIRMS detections`}><i style={{ height: `${zeroObservation || queryPreview ? 8 : Math.max(10, Math.round(((point.detections ?? 0) / peak) * 100))}%` }} /><span>{new Date(`${point.date}T00:00:00Z`).toLocaleDateString("en-IN", { day: "2-digit", month: "short", timeZone: "UTC" })}</span></button>)}</div> : <div className="history-empty"><b>{liveHistory ? "No dated FIRMS rows were supplied for the returned history." : "Run source verification to load live seven-day FIRMS history."}</b><span>The chart only renders daily counts present in the official source response; it does not fill or simulate missing dates.</span></div>}
       </div>
-      <div className="history-selection" aria-live="polite"><span>SELECTED DAY</span><strong>{activeLabel}</strong><small>{active ? `${activeValue} in the local 8 km screening radius.` : history?.detail ?? "No history source has been requested for this target."}</small></div>
+      <div className="history-selection" aria-live="polite"><span>{queryPreview ? "QUERY-WINDOW PREVIEW" : view === "activity" ? "SELECTED DAY" : "EVIDENCE WINDOW"}</span><strong>{activeLabel}</strong><small>{active ? queryPreview ? "This date is part of the pending seven-day query window. Select Run source verification to replace preview markers with official FIRMS observations." : `${activeValue} in the local 8 km screening radius.${zeroObservation ? " The returned seven-day total is zero, so this is a visible zero-observation marker rather than an inferred value." : ""}` : history?.detail ?? "No history source has been requested for this target."}</small></div>
       <p className="history-caveat">Historical recurrence can support a routine-heat explanation. It does not establish the source or confirm an incident.</p>
     </article>
   );
