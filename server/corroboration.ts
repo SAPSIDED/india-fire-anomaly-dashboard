@@ -20,7 +20,8 @@ type BaseEvidence = {
   provider: string;
 };
 
-type FirmsEvidence = BaseEvidence & { detections: number };
+type DailyDetection = { date: string; detections: number };
+type FirmsEvidence = BaseEvidence & { detections: number; dailyDetections: DailyDetection[] };
 type IndustrialEvidence = BaseEvidence & { features: number };
 type WeatherEvidence = BaseEvidence;
 export type AuthorityIncidentSummary = {
@@ -78,6 +79,29 @@ function parseFirmsRows(csv: string, lat?: number, lng?: number) {
     const candidateLng = Number(values[lngIndex]);
     return Number.isFinite(candidateLat) && Number.isFinite(candidateLng) && haversineKm(lat, lng, candidateLat, candidateLng) <= 8;
   }).length;
+}
+
+function parseFirmsDailyDetections(csv: string, lat?: number, lng?: number): DailyDetection[] {
+  const lines = csv.trim().split(/\r?\n/).filter(Boolean);
+  if (lines.length < 2) return [];
+  const header = lines[0].split(",").map(value => value.trim().toLowerCase());
+  const latIndex = header.indexOf("latitude");
+  const lngIndex = header.indexOf("longitude");
+  const dateIndex = header.indexOf("acq_date");
+  if (dateIndex < 0) return [];
+  const buckets = new Map<string, number>();
+  for (const line of lines.slice(1)) {
+    const values = line.split(",");
+    const date = values[dateIndex]?.trim();
+    if (!date) continue;
+    if (lat !== undefined && lng !== undefined && latIndex >= 0 && lngIndex >= 0) {
+      const candidateLat = Number(values[latIndex]);
+      const candidateLng = Number(values[lngIndex]);
+      if (!Number.isFinite(candidateLat) || !Number.isFinite(candidateLng) || haversineKm(lat, lng, candidateLat, candidateLng) > 8) continue;
+    }
+    buckets.set(date, (buckets.get(date) ?? 0) + 1);
+  }
+  return Array.from(buckets, ([date, detections]) => ({ date, detections })).sort((a, b) => a.date.localeCompare(b.date));
 }
 
 async function wait(ms: number) {
@@ -146,7 +170,7 @@ async function fetchFirms(lat: number, lng: number, days: number, sensor: "VIIRS
   const mapKey = process.env.NASA_FIRMS_MAP_KEY;
   const relayAuthToken = process.env.FIRMS_RELAY_AUTH_TOKEN ?? mapKey;
   const checkedAt = nowIso();
-  if (!relayAuthToken) return { state: "unavailable", detections: 0, provider, checkedAt, detail: `The secure FIRMS relay is not configured with backend authentication.` };
+  if (!relayAuthToken) return { state: "unavailable", detections: 0, dailyDetections: [], provider, checkedAt, detail: `The secure FIRMS relay is not configured with backend authentication.` };
 
   const areaUrl = `${FIRMS_RELAY_BASE_URL}/api/area/csv/${sensor}/${bboxFor(lat, lng)}/${days}`;
   const countryUrl = `${FIRMS_RELAY_BASE_URL}/api/country/csv/${sensor}/IND/${days}`;
@@ -155,41 +179,40 @@ async function fetchFirms(lat: number, lng: number, days: number, sensor: "VIIRS
   const wfsBbox = `${(lat - 0.055).toFixed(4)},${(lng - 0.055).toFixed(4)},${(lat + 0.055).toFixed(4)},${(lng + 0.055).toFixed(4)},urn:ogc:def:crs:EPSG::4326`;
   const wfsUrl = `${FIRMS_RELAY_BASE_URL}/mapserver/wfs/Russia_Asia/?SERVICE=WFS&REQUEST=GetFeature&VERSION=2.0.0&TYPENAME=ms:fires_${wfsSensor}_${wfsPeriod}&STARTINDEX=0&COUNT=1000&SRSNAME=urn:ogc:def:crs:EPSG::4326&BBOX=${encodeURIComponent(wfsBbox)}&outputformat=csv`;
   try {
-    const detections = await Promise.any([
+    const evidence = await Promise.any([
       requestWithRetry(areaUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } }).then(async response => {
         const csv = await response.text();
         if (/invalid\s+map[_ ]key|error/i.test(csv)) throw new Error("FIRMS area route rejected the request.");
-        return parseFirmsRows(csv);
+        return { detections: parseFirmsRows(csv), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv) : [] };
       }),
       requestWithRetry(countryUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } }).then(async response => {
         const csv = await response.text();
         if (/invalid\s+map[_ ]key|error/i.test(csv)) throw new Error("FIRMS country route rejected the request.");
-        return parseFirmsRows(csv, lat, lng);
+        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [] };
       }),
       requestWithRetry(wfsUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } }).then(async response => {
         const csv = await response.text();
         if (/invalid\s+map[_ ]key|serviceexception|error/i.test(csv)) throw new Error("FIRMS WFS route rejected the request.");
-        return parseFirmsRows(csv, lat, lng);
+        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [] };
       }),
     ]);
-    const evidence = { detections };
     await writeCached(key, provider, evidence, days === 1 ? 20 * 60_000 : 6 * 60 * 60_000);
     return {
-      state: "available", detections, provider, checkedAt,
-      detail: detections > 0
-        ? `${detections} live NASA FIRMS ${label} detections in the local ${days}-day window.`
+      state: "available", detections: evidence.detections, dailyDetections: evidence.dailyDetections, provider, checkedAt,
+      detail: evidence.detections > 0
+        ? `${evidence.detections} live NASA FIRMS ${label} detections in the local ${days}-day window.`
         : `No live NASA FIRMS ${label} detections in the local ${days}-day window.`,
     };
   } catch {
-    const cached = await readCached<{ detections: number }>(key);
+    const cached = await readCached<{ detections: number; dailyDetections?: DailyDetection[] }>(key);
     if (cached) {
       return {
-        state: "cached", detections: cached.value.detections, provider, checkedAt,
+        state: "cached", detections: cached.value.detections, dailyDetections: cached.value.dailyDetections ?? [], provider, checkedAt,
         detail: `${cached.value.detections} previously verified NASA FIRMS ${label} detections are shown while the live response is delayed.${cacheSuffix(cached)}`,
       };
     }
     return {
-        state: "unavailable", detections: 0, provider, checkedAt,
+        state: "unavailable", detections: 0, dailyDetections: [], provider, checkedAt,
         detail: `The permanent FIRMS relay could not retrieve NASA ${label} data after bounded Area API, India route, and WFS retries. No verified cached reading is available.`,
     };
   }
@@ -308,7 +331,7 @@ async function fetchAuthorityIncidentEvidence(input: { detectionId: string; lat:
 }
 
 function pendingFirms(provider: string, checkedAt: string): FirmsEvidence {
-  return { state: "unavailable", detections: 0, provider, checkedAt, detail: "The source did not return within the live evidence window. It has been marked pending; no result has been inferred." };
+  return { state: "unavailable", detections: 0, dailyDetections: [], provider, checkedAt, detail: "The source did not return within the live evidence window. It has been marked pending; no result has been inferred." };
 }
 
 function pendingIndustrial(checkedAt: string): IndustrialEvidence {

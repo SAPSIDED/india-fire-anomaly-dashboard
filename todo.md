@@ -64,3 +64,4 @@
 - [x] Capture a completed post-restart source-verification modal state and clean console result to prove the runtime error does not recur during conditional checking.
 - [x] Capture and document a completed post-restart verifier verdict with a clean console to prove the full conditional-checking flow remains runtime-error-free.
 - [x] Replace the peach display-text emphasis with a cherry-red gradient without changing the thermal canvas or tracker functionality.
+- [x] Turn the historical-analysis panel into an interactive, clearly labelled statistical visualization without presenting illustrative target context as live historical evidence.

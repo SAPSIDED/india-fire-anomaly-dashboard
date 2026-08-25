@@ -72,14 +72,38 @@ const conditionFamilies = [
   { number: "08", title: "Corroboration governance", conditions: "Second-satellite agreement, image review, authority input, human analyst review, timestamps, provenance, uncertainty and abstention rules." },
 ];
 
-function TinyTrend() {
+type HistoryEvidence = {
+  state: "available" | "cached" | "unavailable";
+  detections: number;
+  dailyDetections: Array<{ date: string; detections: number }>;
+  checkedAt: string;
+  detail: string;
+};
+
+function HistoricalAnalysis({ history, selected }: { history?: HistoryEvidence; selected: Hotspot }) {
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const points = history?.dailyDetections ?? [];
+  const peak = Math.max(1, ...points.map(point => point.detections));
+  const active = points.find(point => point.date === selectedDate) ?? points[points.length - 1];
+  const liveHistory = history?.state === "available" || history?.state === "cached";
+  const activeLabel = active ? new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", timeZone: "UTC" }).format(new Date(`${active.date}T00:00:00Z`)) : "No date-level records";
+  const activeValue = active ? `${active.detections} detection${active.detections === 1 ? "" : "s"}` : "—";
+
   return (
-    <svg className="thermal-trend" viewBox="0 0 360 86" role="img" aria-label="Illustrative recurrence and anomaly trend">
-      <path d="M0 68H360" stroke="rgba(159,174,174,.34)" strokeDasharray="4 5" />
-      <path d="M0 66C36 65 52 66 79 66S129 61 158 64 201 65 222 57 255 63 278 40 314 25 360 11" fill="none" stroke="#d9683e" strokeWidth="2.5" />
-      <circle cx="360" cy="11" r="4" fill="#f0a144" />
-      <path d="M0 79H360" stroke="rgba(159,174,174,.14)" />
-    </svg>
+    <article className="history-panel interactive-history-panel">
+      <div className="history-heading"><div><p className="eyebrow">HISTORICAL ANALYSIS</p><h3>Source-backed observation history.</h3></div><span className={`history-source ${history?.state ?? "not_queried"}`}>{history ? history.state.toUpperCase() : "NOT QUERIED"}</span></div>
+      <p className="history-target">{selected.id} · 7-DAY FIRMS WINDOW</p>
+      <div className="history-stat-grid" aria-label="Seven-day history statistics">
+        <div><span>DETECTIONS</span><b>{liveHistory ? history.detections : "—"}</b></div>
+        <div><span>ACTIVE DAYS</span><b>{liveHistory ? points.length : "—"}</b></div>
+        <div><span>PEAK DAY</span><b>{activeValue}</b></div>
+      </div>
+      <div className="history-chart-wrap">
+        {points.length > 0 ? <div className="history-bars" role="list" aria-label="Daily source-provided FIRMS detections. Select a day for its count.">{points.map(point => <button key={point.date} type="button" role="listitem" className={active?.date === point.date ? "active" : ""} onClick={() => setSelectedDate(point.date)} aria-pressed={active?.date === point.date} aria-label={`${point.date}: ${point.detections} FIRMS detections`}><i style={{ height: `${Math.max(10, Math.round((point.detections / peak) * 100))}%` }} /><span>{new Date(`${point.date}T00:00:00Z`).toLocaleDateString("en-IN", { day: "2-digit", month: "short", timeZone: "UTC" })}</span></button>)}</div> : <div className="history-empty"><b>{liveHistory ? "No local FIRMS detections in the returned seven-day history." : "Run source verification to load live seven-day FIRMS history."}</b><span>The chart only renders daily counts present in the official source response; it does not fill or simulate missing dates.</span></div>}
+      </div>
+      <div className="history-selection" aria-live="polite"><span>SELECTED DAY</span><strong>{activeLabel}</strong><small>{active ? `${activeValue} in the local 8 km screening radius.` : history?.detail ?? "No history source has been requested for this target."}</small></div>
+      <p className="history-caveat">Historical recurrence can support a routine-heat explanation. It does not establish the source or confirm an incident.</p>
+    </article>
   );
 }
 
@@ -239,7 +263,7 @@ export default function Home() {
 
         <section id="pipeline" className="investigation-section" aria-label="Thermal investigation method"><div className="section-cap"><div><p className="eyebrow">INVESTIGATION PIPELINE</p><h2>A thermal anomaly does not explain itself.</h2></div><p>Every assessment keeps acquisition, context and corroboration separate so the conclusion can be reviewed rather than merely accepted.</p></div><ol className="investigation-flow"><li><b>01</b><div><h3>Thermal signal</h3><p>Something unusual was observed.</p></div></li><li><b>02</b><div><h3>Location context</h3><p>What exists around the coordinate?</p></div></li><li><b>03</b><div><h3>Temporal behaviour</h3><p>Does the signal recur in place?</p></div></li><li><b>04</b><div><h3>Satellite evidence</h3><p>Does a second source agree?</p></div></li><li><b>05</b><div><h3>Screened outcome</h3><p>What can responsibly be said?</p></div></li></ol></section>
 
-        <section className="evidence-board" aria-label="Data, spatial, and historical analysis"><div className="source-flow"><p className="eyebrow">EVIDENCE INPUTS</p><div><span>NASA FIRMS<small>Thermal detection</small></span><i /><span>OPENSTREETMAP<small>Location context</small></span><i /><span>HISTORICAL OBSERVATIONS<small>Temporal behaviour</small></span><i /><span>WEATHER CONTEXT<small>Environmental conditions</small></span></div><b>CONCURRENT SCREENING</b></div><div className="evidence-grid"><article className="classification-panel"><p className="eyebrow">CLASSIFICATION INTERFACE</p><h2>Observed heat is not its source.</h2><div className="classification-state"><span>SCREENING CLASS</span><strong>INDUSTRIAL / FIRE / OTHER / UNCERTAIN</strong><small>Demonstration of evidence categories. Live verifier results remain source-backed.</small></div><ul><li><i /> Industrial setting nearby</li><li><i /> Recurrence assessed over time</li><li><i /> Cross-platform check recorded</li><li><i /> Authority evidence required for confirmation</li></ul></article><article className="history-panel"><p className="eyebrow">HISTORICAL ANALYSIS</p><h3>Observation opportunity matters.</h3><TinyTrend /><div className="timeline-labels"><span>PASS 01</span><span>PASS 04</span><span>PASS 08</span><span>CHANGE</span></div><p>Repeated observations can indicate persistent activity. Persistence alone does not establish the source.</p></article><article className="spatial-panel"><p className="eyebrow">SPATIAL RELATIONSHIP</p><div className="spatial-link"><b>THERMAL<br />ANOMALY</b><i /><span>LOCAL<br />CONTEXT</span><i /><strong>INDUSTRIAL<br />ASSET</strong></div><p>Map context helps establish proximity, not causation. The verifier retains the location and source state for review.</p></article></div></section>
+        <section className="evidence-board" aria-label="Data, spatial, and historical analysis"><div className="source-flow"><p className="eyebrow">EVIDENCE INPUTS</p><div><span>NASA FIRMS<small>Thermal detection</small></span><i /><span>OPENSTREETMAP<small>Location context</small></span><i /><span>HISTORICAL OBSERVATIONS<small>Temporal behaviour</small></span><i /><span>WEATHER CONTEXT<small>Environmental conditions</small></span></div><b>CONCURRENT SCREENING</b></div><div className="evidence-grid"><article className="classification-panel"><p className="eyebrow">CLASSIFICATION INTERFACE</p><h2>Observed heat is not its source.</h2><div className="classification-state"><span>SCREENING CLASS</span><strong>INDUSTRIAL / FIRE / OTHER / UNCERTAIN</strong><small>Demonstration of evidence categories. Live verifier results remain source-backed.</small></div><ul><li><i /> Industrial setting nearby</li><li><i /> Recurrence assessed over time</li><li><i /> Cross-platform check recorded</li><li><i /> Authority evidence required for confirmation</li></ul></article><HistoricalAnalysis selected={selected} history={corroboration.data?.detectionId === selected.id ? corroboration.data.firmsHistory : undefined} /><article className="spatial-panel"><p className="eyebrow">SPATIAL RELATIONSHIP</p><div className="spatial-link"><b>THERMAL<br />ANOMALY</b><i /><span>LOCAL<br />CONTEXT</span><i /><strong>INDUSTRIAL<br />ASSET</strong></div><p>Map context helps establish proximity, not causation. The verifier retains the location and source state for review.</p></article></div></section>
 
         <section id="conditions" className="conditions-section"><div className="section-cap"><div><p className="eyebrow">SCREENING CONDITIONS</p><h2>Conditions before escalation.</h2></div><p>This catalogue makes the uncertainty surface visible. Thresholds must remain calibrated against verified outcomes and facility-specific behaviour.</p></div><div className="condition-register">{conditionFamilies.map(family => <article key={family.number}><b>{family.number}</b><div><h3>{family.title}</h3><p>{family.conditions}</p></div></article>)}</div></section>
 
