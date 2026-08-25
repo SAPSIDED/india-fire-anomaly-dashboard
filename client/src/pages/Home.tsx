@@ -165,12 +165,15 @@ export default function Home() {
       disableDefaultUI: true,
       zoomControl: true,
       styles: [
-        { elementType: "geometry", stylers: [{ color: "#1a1e20" }] },
-        { elementType: "labels.text.fill", stylers: [{ color: "#aeb8b4" }] },
-        { elementType: "labels.text.stroke", stylers: [{ color: "#1a1e20" }] },
-        { featureType: "water", elementType: "geometry", stylers: [{ color: "#111719" }] },
-        { featureType: "road", elementType: "geometry", stylers: [{ color: "#3a4244" }] },
-        { featureType: "poi", elementType: "geometry", stylers: [{ color: "#252b2d" }] },
+        { elementType: "geometry", stylers: [{ color: "#eee8df" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#59676d" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#f6f0e8" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#bdd5df" }] },
+        { featureType: "landscape.man_made", elementType: "geometry", stylers: [{ color: "#e6dacb" }] },
+        { featureType: "road", elementType: "geometry", stylers: [{ color: "#dbc7b9" }] },
+        { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#d5b3a4" }] },
+        { featureType: "poi", elementType: "geometry", stylers: [{ color: "#dce4d6" }] },
+        { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#aeb7ab" }] },
       ],
     });
     map.setCenter({ lat: 22.4, lng: 78.2 });
@@ -185,11 +188,11 @@ export default function Home() {
     });
 
     hotspots.forEach(hotspot => {
-      const color = hotspot.score > 70 ? "#c94e36" : "#d79a42";
+      const color = hotspot.score > 70 ? "#d46b63" : "#e0ac68";
       const marker = new google.maps.Marker({ map, position: hotspot.location, title: `${hotspot.place} — click to verify`, icon: markerIcon(color), zIndex: hotspot.score });
       const zone = new google.maps.Circle({ map, center: hotspot.location, radius: hotspot.score > 70 ? 9_000 : 6_000, strokeColor: color, strokeOpacity: 0.72, strokeWeight: 1, fillColor: color, fillOpacity: 0.07, clickable: true });
       const showSummary = () => {
-        infoWindow.setContent(`<div style="font-family:Arial,sans-serif;min-width:205px;color:#202326"><strong>${hotspot.place}</strong><div style="margin-top:6px;font-family:monospace;font-size:11px">${hotspot.coords} · FRP ${hotspot.frp}</div><div style="margin-top:8px;color:#9a3e2a;font-size:11px">Click the zone to start source verification</div></div>`);
+        infoWindow.setContent(`<div style="font-family:Arial,sans-serif;min-width:205px;color:#4f5a5d"><strong>${hotspot.place}</strong><div style="margin-top:6px;font-family:monospace;font-size:11px">${hotspot.coords} · FRP ${hotspot.frp}</div><div style="margin-top:8px;color:#b65f58;font-size:11px">Click the zone to start source verification</div></div>`);
         infoWindow.open({ map, anchor: marker, shouldFocus: false });
       };
       const verifyZone = () => { infoWindow.close(); openVerifier(hotspot); };
@@ -201,6 +204,7 @@ export default function Home() {
 
   return (
     <div className="fireguard-page">
+      <div className="thermal-field" aria-hidden="true"><i /><i /><i /></div>
       <header className="mission-header">
         <a className="brand-lockup" href="#top" aria-label="FireGuard India home"><img src="/manus-storage/sentinel-contour-mark_ba2d7e8a.png" alt="FireGuard contour mark" /><span>FIREGUARD / INDIA<small>THERMAL INTELLIGENCE</small></span></a>
         <nav className="mission-nav" aria-label="Primary navigation"><a href="#workbench">Analysis field</a><a href="#pipeline">Method</a><a href="#conditions">Conditions</a><a href="#sources">Sources</a></nav>
