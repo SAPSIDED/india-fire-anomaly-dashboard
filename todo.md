@@ -26,3 +26,29 @@
 - [x] Verify and document the no-cache evidence-pending state in the running verifier UI.
 - [x] Bound the overall live-evidence window so delayed upstream calls cannot leave the verifier loading indefinitely.
 - [x] Prove bounded retry and alternate-Overpass mirror handling with a deterministic test.
+
+## Operational Evidence Recovery Tasks
+
+- [x] Diagnose the effective NASA FIRMS credential and server-to-source connectivity for each live evidence provider.
+- [x] Replace avoidable external-source outages with validated, operational fallback providers or official alternative routes.
+- [ ] Add an authoritative facility/incident evidence input path required for a confirmed industrial-fire conclusion.
+- [x] Present a source-backed conclusion only when all required evidence conditions are actually met.
+- [x] Validate the repaired verifier with a live source-backed run and document any remaining user-supplied requirement.
+- [x] Add the official NASA FIRMS WFS route for Russia and Asia as a thermal-detection fallback and use NOAA-21 as the independent VIIRS sensor.
+- [x] Validate the official WFS fallback with a deterministic server test and a live verifier request.
+- [x] Prevent deterministic test fixtures from being persisted or displayed as live cached evidence, then remove any existing fixture cache records.
+- [x] Add an authenticated Google Places facility-context fallback for OSM outages and label its provenance clearly in the verdict.
+
+## Permanent NASA FIRMS Relay Tasks
+
+- [x] Assess connected Cloudflare deployment credentials and the required secure environment variables for a persistent Worker relay.
+- [x] Implement a transparent Worker relay that permits only official NASA FIRMS request paths and keeps NASA_FIRMS_MAP_KEY server-side.
+- [x] Deploy the Worker to a permanent HTTPS URL and configure its production secrets without exposing them to the frontend.
+- [x] Configure the FireGuard backend to use the relay base URL, retaining retries, cache policy, OSM, and weather integrations.
+- [x] Verify the live FireGuard frontend-to-backend-to-relay-to-NASA and response path with a real FIRMS request.
+- [x] Validate the replacement Cloudflare token from the permitted deployment environment.
+- [x] Explicitly verify the completed relay-backed verdict text in the browser after a map-zone check.
+
+## Backend Review Package
+
+- [x] Package the complete FireGuard backend source, schema, tests, and runtime guide for review.

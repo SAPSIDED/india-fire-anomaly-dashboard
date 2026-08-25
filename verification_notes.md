@@ -19,3 +19,11 @@ After the extraction hardening, a live map-zone click opened the verifier and di
 The verifier was reloaded after the parallel Overpass-fallback change and a fresh zone check was started. The same map selection remained stable while the concurrent source requests were in progress, ready for the final bounded-result inspection.
 
 The fresh verification run completed after the eight-second live-evidence window. The visible modal labelled each late source as pending/unavailable and displayed **“Evidence pending — sources still delayed”** with a clear statement that no industrial-fire conclusion had been issued. The map selection and Return to map control remained usable; no crash or indefinite loading occurred.
+
+After the permanent relay configuration and FireGuard server restart, the browser frontend was opened against the workbench and the Western India candidate’s concurrent verification was started. The modal entered its expected loading state, initiating the frontend-to-backend leg of the permanent relay verification.
+
+The completed browser verification returned **AVAILABLE** live evidence for NOAA-20, independent NOAA-21, Google Places industrial context, NOAA-20 seven-day persistence, and weather. The final live result was **“No current FIRMS thermal detection”** for the selected location—not an unavailable or pending state—so the application correctly declined an industrial-fire conclusion on the real current data. This confirms the full frontend → FireGuard backend → permanent Cloudflare relay → official NASA FIRMS → backend → frontend path.
+
+The active browser modal was explicitly searched for the completed verdict text and returned one match: **“LIVE SCREENING RESULT No current FIRMS thermal detection — The live local one-day FIRMS search found no thermal detection; an industrial-fire conclusion is not supported.”** This is a direct browser-visible confirmation of the relay-backed response.
+
+The remaining external requirement for a **confirmed industrial-fire incident** is an authority, emergency-service, facility, or on-site incident feed. The live relay now supplies authentic satellite, industrial-context, persistence, and weather evidence; it intentionally classifies only a screened thermal candidate when those sources agree. It does not invent on-site confirmation where no such authoritative input has been integrated.

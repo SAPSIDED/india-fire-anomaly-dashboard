@@ -41,3 +41,29 @@ The flaring study by Franklin and colleagues used VIIRS Nightfire observations, 
 Ma and colleagues built an industrial-heat-source inventory from long-term VIIRS active-fire records using spatial-temporal clustering, hotspot counts, density, time span, night-time lights, high-resolution imagery, points of interest, and OpenStreetMap validation. The study notes a prior India inventory and illustrates why an operational tracker should learn facility-specific baselines instead of relying only on a global temperature or FRP threshold. [RES-2]
 
 NASA's 2025 FIRMS feature description similarly differentiates vegetation burning from natural and industrial heat sources, including mineral processing, gas flares, waste incinerators, cement, steel, and petrochemical facilities. Its static mask is provisional and NASA explicitly advises users to apply caution regarding the accuracy and comprehensiveness of industrial/natural heat-source data. The SIH project should therefore show **“probable / needs verification”** outcomes, retain source provenance, and never phrase a satellite-only decision as a verified on-site incident. [NASA-5]
+
+## Official FIRMS service routes and platform transition — reviewed 25 Aug 2026
+
+NASA documents the authenticated Area API as `/api/area/csv/[MAP_KEY]/[SOURCE]/[AREA_COORDINATES]/[DAY_RANGE]` and supports NOAA-20, NOAA-21, and S-NPP VIIRS NRT sources. The same documentation specifies a MAP_KEY transaction ceiling of 5,000 requests per 10-minute interval. [NASA-6]
+
+NASA also documents an authenticated WFS service, updated every 15 minutes. For India, the appropriate WFS regional path is `Russia_Asia`; its relevant 24-hour and seven-day layers include `ms:fires_noaa20_*` and `ms:fires_noaa21_*`. The permanent relay uses only these official NASA FIRMS endpoints. [NASA-7]
+
+NASA currently announces that S-NPP delivery will cease on 1 November 2026 and recommends NOAA-21 and NOAA-20 alternatives. The verifier therefore uses NOAA-20 plus NOAA-21 as its independent satellite pair. The FIRMS academy confirms that MAP_KEYs can be used with API, WMS, and WFS services. [NASA-6] [NASA-8]
+
+| ID | Source | Status | Use in production relay |
+| --- | --- | --- | --- |
+| NASA-6 | [NASA FIRMS API and Area API](https://firms.modaps.eosdis.nasa.gov/api/area/) | Directly extracted 25 Aug 2026 | Official authenticated Area API format, sources, and transaction limits. |
+| NASA-7 | [NASA FIRMS WFS Information](https://firms.modaps.eosdis.nasa.gov/mapserver/wfs-info/) | Directly extracted 25 Aug 2026 | Official WFS route, 15-minute update cycle, and India regional layer names. |
+| NASA-8 | [NASA FIRMS API Academy](https://firms.modaps.eosdis.nasa.gov/content/academy/data_api/firms_api_use.html) | Directly extracted 25 Aug 2026 | MAP_KEY applicability to API, WMS, and WFS. |
+
+## Cloudflare production relay references — reviewed 25 Aug 2026
+
+Cloudflare documents account-level Workers subdomains through `GET`, `PUT`, and `DELETE /accounts/{account_id}/workers/subdomain`; creating a subdomain requires the `subdomain` field. The FireGuard account subdomain was initialized through this official API. [CF-1]
+
+Cloudflare documents that a Worker can have a `workers.dev` subdomain configuration with an explicit `enabled` setting. The `workers.dev` documentation notes that a Worker receives a route of the form `<worker-name>.<account-subdomain>.workers.dev` only when the worker subdomain is enabled. [CF-2] [CF-3]
+
+| ID | Source | Status | Use in production relay |
+| --- | --- | --- | --- |
+| CF-1 | [Cloudflare API — Workers Subdomains](https://developers.cloudflare.com/api/resources/workers/subresources/subdomains/) | Directly extracted 25 Aug 2026 | Account workers.dev subdomain initialization. |
+| CF-2 | [Cloudflare Workers API](https://developers.cloudflare.com/api/resources/workers/) | Directly extracted 25 Aug 2026 | Worker subdomain `enabled` setting. |
+| CF-3 | [Cloudflare workers.dev documentation](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/) | Directly extracted 25 Aug 2026 | Public workers.dev route behavior and production routing caveat. |
