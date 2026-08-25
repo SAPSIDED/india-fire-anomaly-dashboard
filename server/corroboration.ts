@@ -4,7 +4,7 @@
  * Cached evidence is labelled with its timestamp and cannot become a live fire confirmation.
  */
 import { setDefaultResultOrder } from "node:dns";
-import { getSourceEvidenceCache, saveSourceEvidenceCache } from "./db";
+import { getActiveIncidentEvidence, getSourceEvidenceCache, saveSourceEvidenceCache } from "./db";
 import { makeRequest, type PlacesSearchResult } from "./_core/map";
 
 // Some scientific-data hosts are intermittently unreachable over IPv6 from cloud runtimes.
@@ -23,6 +23,15 @@ type BaseEvidence = {
 type FirmsEvidence = BaseEvidence & { detections: number };
 type IndustrialEvidence = BaseEvidence & { features: number };
 type WeatherEvidence = BaseEvidence;
+export type AuthorityIncidentSummary = {
+  id: number;
+  sourceType: "authority" | "facility";
+  sourceName: string;
+  incidentReference: string;
+  reportedAt: string;
+  verifiedAt: string;
+};
+type AuthorityIncidentEvidence = BaseEvidence & { records: AuthorityIncidentSummary[] };
 
 type CacheRecord<T> = { value: T; fetchedAt: Date; expiresAt: Date };
 
@@ -31,6 +40,7 @@ const RETRY_DELAYS_MS = [0, 300];
 let liveEvidenceWindowMs = 27_000;
 const memoryCache = new Map<string, CacheRecord<unknown>>();
 let persistEvidenceCacheWrites = process.env.VITEST !== "true";
+let authorityEvidenceTestOverride: AuthorityIncidentSummary[] | undefined;
 const FIRMS_RELAY_BASE_URL = (process.env.FIRMS_RELAY_BASE_URL ?? "https://fireguard-firms-relay.fireguard-2cddbeab.workers.dev").replace(/\/+$/, "");
 
 function nowIso() {
@@ -260,6 +270,43 @@ async function fetchWeather(lat: number, lng: number): Promise<WeatherEvidence> 
   }
 }
 
+async function fetchAuthorityIncidentEvidence(input: { detectionId: string; lat: number; lng: number }): Promise<AuthorityIncidentEvidence> {
+  const checkedAt = nowIso();
+  try {
+    let summaries: AuthorityIncidentSummary[];
+    if (authorityEvidenceTestOverride) {
+      summaries = authorityEvidenceTestOverride;
+    } else {
+      const records = await getActiveIncidentEvidence(input.detectionId, input.lat, input.lng);
+      if (records === undefined) {
+        return {
+          state: "unavailable", records: [], provider: "fireguard-incident-ledger", checkedAt,
+          detail: "The controlled authority/facility incident ledger is unavailable. No confirmed-incident verdict can be issued.",
+        };
+      }
+      summaries = records.map(record => ({
+        id: record.id,
+        sourceType: record.sourceType,
+        sourceName: record.sourceName,
+        incidentReference: record.incidentReference,
+        reportedAt: record.reportedAt.toISOString(),
+        verifiedAt: record.createdAt.toISOString(),
+      }));
+    }
+    return {
+      state: "available", records: summaries, provider: "fireguard-incident-ledger", checkedAt,
+      detail: summaries.length > 0
+        ? `${summaries.length} time-aligned, administrator-reviewed ${summaries.length === 1 ? "incident record is" : "incident records are"} linked to an external ${summaries[0].sourceType} source.`
+        : "No time-aligned authority or verified-facility incident record is linked to this detection.",
+    };
+  } catch {
+    return {
+      state: "unavailable", records: [], provider: "fireguard-incident-ledger", checkedAt,
+      detail: "The controlled authority/facility incident ledger could not be read. No confirmed-incident verdict can be issued.",
+    };
+  }
+}
+
 function pendingFirms(provider: string, checkedAt: string): FirmsEvidence {
   return { state: "unavailable", detections: 0, provider, checkedAt, detail: "The source did not return within the live evidence window. It has been marked pending; no result has been inferred." };
 }
@@ -273,6 +320,7 @@ function pendingWeather(checkedAt: string): WeatherEvidence {
 }
 
 export async function evaluateCorroboration(input: { lat: number; lng: number; detectionId: string }) {
+  const authorityIncidentEvidence = fetchAuthorityIncidentEvidence(input);
   const checks = Promise.all([
     fetchFirms(input.lat, input.lng, 1, "VIIRS_NOAA20_NRT", "NOAA-20"),
     fetchFirms(input.lat, input.lng, 7, "VIIRS_NOAA20_NRT", "NOAA-20"),
@@ -291,21 +339,24 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     const firmsIndependentCurrent = pendingFirms("firms-viirs_noaa21_nrt", checkedAt);
     const industrial = pendingIndustrial(checkedAt);
     const weather = pendingWeather(checkedAt);
+    const incidentEvidence = await authorityIncidentEvidence;
     return {
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
-      firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather,
+      firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence,
       independentCorroboration: { state: "evidence_pending", detail: "The live evidence window closed before all sources responded. The screen remains operational and no industrial-fire conclusion has been issued." },
       conclusion: { level: "evidence_pending" as const, title: "Evidence pending — sources still delayed", detail: "The verifier closed the 27-second live request window to keep the investigation usable. It will not convert a delayed upstream response into a fire conclusion." },
     };
   }
   const [firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather] = await checks;
+  const incidentEvidence = await authorityIncidentEvidence;
 
   const hasOnlyLiveCore = [firmsCurrent, firmsIndependentCurrent, industrial].every(source => source.state === "available");
   const persistent = firmsHistory.state === "available" && firmsHistory.detections >= 5;
   const crossPlatformMatch = firmsCurrent.state === "available" && firmsIndependentCurrent.state === "available" && firmsCurrent.detections > 0 && firmsIndependentCurrent.detections > 0;
   const hasCache = [firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial].some(source => source.state === "cached");
 
-  let conclusion: { level: "evidence_pending" | "no_current_detection" | "routine_heat" | "candidate"; title: string; detail: string };
+  const hasAuthorityIncident = incidentEvidence.state === "available" && incidentEvidence.records.length > 0;
+  let conclusion: { level: "evidence_pending" | "no_current_detection" | "routine_heat" | "candidate" | "confirmed_incident"; title: string; detail: string };
   if (firmsCurrent.state === "unavailable" || firmsIndependentCurrent.state === "unavailable" || industrial.state === "unavailable") {
     conclusion = { level: "evidence_pending", title: "Evidence pending — live source delayed", detail: "The verifier is still operational, but a required live source did not answer within its retry budget. It has not inferred an industrial fire from missing data." };
   } else if (hasCache) {
@@ -316,6 +367,13 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     conclusion = { level: "evidence_pending", title: "Industrial context not established", detail: "A live thermal record is present but no nearby industrial feature was returned. The industrial-fire conclusion is withheld." };
   } else if (!crossPlatformMatch) {
     conclusion = { level: "evidence_pending", title: "No cross-platform thermal agreement", detail: "NOAA-20 is not corroborated by the independent SNPP local search window. The industrial-fire conclusion is withheld." };
+  } else if (hasAuthorityIncident) {
+    const record = incidentEvidence.records[0];
+    conclusion = {
+      level: "confirmed_incident",
+      title: "Confirmed industrial incident — external report recorded",
+      detail: `Current paired NOAA-20/NOAA-21 detections and live industrial context are aligned with a time-limited, administrator-reviewed ${record.sourceType} incident record from ${record.sourceName} (${record.incidentReference}).`,
+    };
   } else if (persistent) {
     conclusion = { level: "routine_heat", title: "Likely recurring industrial heat", detail: "Live seven-day persistence supports a routine/static heat-source explanation rather than a new incident claim." };
   } else {
@@ -324,7 +382,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
 
   return {
     detectionId: input.detectionId, checkedAt: nowIso(), sourcesRunInParallel: true,
-    firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather,
+    firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence,
     independentCorroboration: {
       state: crossPlatformMatch ? "cross_platform_match" : hasOnlyLiveCore ? "no_cross_platform_match" : hasCache ? "cached_evidence" : "evidence_pending",
       detail: crossPlatformMatch
@@ -350,4 +408,9 @@ export function setLiveEvidenceWindowForTests(windowMs = 27_000) {
 /** Deterministic test-only hook; production keeps cache persistence enabled. */
 export function setEvidenceCachePersistenceForTests(enabled = true) {
   persistEvidenceCacheWrites = enabled;
+}
+
+/** Deterministic test-only hook; production can only read the controlled ledger. */
+export function setAuthorityIncidentEvidenceForTests(records?: AuthorityIncidentSummary[]) {
+  authorityEvidenceTestOverride = records;
 }

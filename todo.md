@@ -31,7 +31,7 @@
 
 - [x] Diagnose the effective NASA FIRMS credential and server-to-source connectivity for each live evidence provider.
 - [x] Replace avoidable external-source outages with validated, operational fallback providers or official alternative routes.
-- [ ] Add an authoritative facility/incident evidence input path required for a confirmed industrial-fire conclusion.
+- [x] Add an administrator-controlled authority or verified-facility incident-evidence input path required for a confirmed industrial-fire conclusion.
 - [x] Present a source-backed conclusion only when all required evidence conditions are actually met.
 - [x] Validate the repaired verifier with a live source-backed run and document any remaining user-supplied requirement.
 - [x] Add the official NASA FIRMS WFS route for Russia and Asia as a thermal-detection fallback and use NOAA-21 as the independent VIIRS sensor.

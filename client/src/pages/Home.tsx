@@ -2,9 +2,11 @@
  * SENTINEL CARTOGRAPHY — a forensic, asymmetric India thermal-intelligence workbench.
  * Use graphite, mineral teal, Signal Ember, contour motifs, deliberate evidence-led motion, and DM Mono data labels.
  */
-import { useRef, useState } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { MapView } from "@/components/Map";
 import { trpc } from "@/lib/trpc";
+import { startLogin } from "@/const";
+import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Activity,
   AlertTriangle,
@@ -146,16 +148,52 @@ export default function Home() {
   const [activeLayer, setActiveLayer] = useState("Thermal");
   const [verifierOpen, setVerifierOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [authorityForm, setAuthorityForm] = useState({
+    sourceType: "authority" as "authority" | "facility",
+    sourceName: "",
+    sourceUrl: "",
+    incidentReference: "",
+    reportedAt: "",
+    details: "",
+  });
   const mapMarkers = useRef<google.maps.MVCObject[]>([]);
+  const { user, isAuthenticated } = useAuth();
   const corroboration = trpc.corroboration.run.useMutation();
+  const authorityRecord = trpc.incidentEvidence.record.useMutation();
 
-  const openVerifier = (hotspot = selected) => {
-    setSelected(hotspot);
-    setVerifierOpen(true);
+  const runVerifier = (hotspot = selected) => {
     corroboration.mutate({
       detectionId: hotspot.id,
       lat: hotspot.location.lat,
       lng: hotspot.location.lng,
+    });
+  };
+
+  const openVerifier = (hotspot = selected) => {
+    setSelected(hotspot);
+    setVerifierOpen(true);
+    runVerifier(hotspot);
+  };
+
+  const submitAuthorityEvidence = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const reportedAt = new Date(authorityForm.reportedAt);
+    if (Number.isNaN(reportedAt.getTime())) return;
+    authorityRecord.mutate({
+      detectionId: selected.id,
+      lat: selected.location.lat,
+      lng: selected.location.lng,
+      sourceType: authorityForm.sourceType,
+      sourceName: authorityForm.sourceName,
+      sourceUrl: authorityForm.sourceUrl,
+      incidentReference: authorityForm.incidentReference,
+      reportedAt: reportedAt.toISOString(),
+      details: authorityForm.details,
+    }, {
+      onSuccess: () => {
+        setAuthorityForm({ sourceType: "authority", sourceName: "", sourceUrl: "", incidentReference: "", reportedAt: "", details: "" });
+        runVerifier(selected);
+      },
     });
   };
 
@@ -442,8 +480,30 @@ export default function Home() {
                 <div className={`verification-row revealed ${corroboration.data.firmsHistory.state === "available" ? "pass" : "review"}`}><span className="check-state">{corroboration.data.firmsHistory.state === "available" ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>FIRMS · 7-day persistence</b><p>{corroboration.data.firmsHistory.detail}</p></div><small>{corroboration.data.firmsHistory.state.toUpperCase()}</small></div>
                 <div className={`verification-row revealed ${corroboration.data.weather.state === "available" ? "pass" : "review"}`}><span className="check-state">{corroboration.data.weather.state === "available" ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>Weather · independent context</b><p>{corroboration.data.weather.detail}</p></div><small>{corroboration.data.weather.state.toUpperCase()}</small></div>
                 <div className={`verification-row revealed ${corroboration.data.independentCorroboration.state === "cross_platform_match" ? "pass" : "review"}`}><span className="check-state">{corroboration.data.independentCorroboration.state === "cross_platform_match" ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>Independent satellite corroboration</b><p>{corroboration.data.independentCorroboration.detail}</p></div><small>{corroboration.data.independentCorroboration.state.toUpperCase()}</small></div>
+                <div className={`verification-row revealed ${corroboration.data.incidentEvidence.records.length > 0 ? "pass" : "review"}`}><span className="check-state">{corroboration.data.incidentEvidence.records.length > 0 ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>Authority / verified-facility incident evidence</b><p>{corroboration.data.incidentEvidence.detail}</p></div><small>{corroboration.data.incidentEvidence.records.length > 0 ? "RECORDED" : corroboration.data.incidentEvidence.state.toUpperCase()}</small></div>
               </div>
               <div className={`modal-result ${corroboration.data.conclusion.level}`}><span><AlertTriangle size={16} /> LIVE SCREENING RESULT</span><h3>{corroboration.data.conclusion.title}</h3><p>{corroboration.data.conclusion.detail}</p><small className="evidence-meta">Checked {new Date(corroboration.data.checkedAt).toLocaleTimeString()} · live, cached and pending sources are labelled individually</small><button onClick={() => setVerifierOpen(false)}>Return to map <ArrowRight size={16} /></button></div>
+              <section className="authority-evidence-panel" aria-label="Authoritative incident evidence">
+                <p className="eyebrow">CONTROLLED CONFIRMATION PATH</p>
+                <h3>Authority or verified-facility record</h3>
+                <p>A confirmed incident requires a time-aligned report from an official authority or a verified facility representative. The entry retains a provenance link and expires after 48 hours; it does not replace the original report.</p>
+                {user?.role === "admin" ? (
+                  <form onSubmit={submitAuthorityEvidence}>
+                    <div className="authority-evidence-grid">
+                      <label>Source type<select value={authorityForm.sourceType} onChange={event => setAuthorityForm(current => ({ ...current, sourceType: event.target.value as "authority" | "facility" }))}><option value="authority">Official authority</option><option value="facility">Verified facility</option></select></label>
+                      <label>Source name<input required minLength={3} value={authorityForm.sourceName} onChange={event => setAuthorityForm(current => ({ ...current, sourceName: event.target.value }))} placeholder="e.g., district fire service" /></label>
+                      <label>Report reference<input required minLength={3} value={authorityForm.incidentReference} onChange={event => setAuthorityForm(current => ({ ...current, incidentReference: event.target.value }))} placeholder="case or bulletin number" /></label>
+                      <label>Reported at (local)<input required type="datetime-local" value={authorityForm.reportedAt} onChange={event => setAuthorityForm(current => ({ ...current, reportedAt: event.target.value }))} /></label>
+                    </div>
+                    <label className="authority-evidence-full">HTTPS source URL<input required type="url" value={authorityForm.sourceUrl} onChange={event => setAuthorityForm(current => ({ ...current, sourceUrl: event.target.value }))} placeholder="https://…" /></label>
+                    <label className="authority-evidence-full">Verification notes<textarea required minLength={20} maxLength={2000} value={authorityForm.details} onChange={event => setAuthorityForm(current => ({ ...current, details: event.target.value }))} placeholder="State the time/location linkage and how the source was independently checked." /></label>
+                    {authorityRecord.isError && <p className="authority-evidence-error">{authorityRecord.error.message}</p>}
+                    <button type="submit" disabled={authorityRecord.isPending}>{authorityRecord.isPending ? "Recording provenance…" : "Record verified external evidence"}</button>
+                  </form>
+                ) : (
+                  <div className="authority-evidence-gate"><p>{isAuthenticated ? "This signed-in account is not authorised to record incident evidence." : "Only the project administrator can record evidence after signing in."}</p>{!isAuthenticated && <button type="button" onClick={startLogin}>Sign in for controlled evidence entry</button>}</div>
+                )}
+              </section>
             </>}
           </div>
         </div>

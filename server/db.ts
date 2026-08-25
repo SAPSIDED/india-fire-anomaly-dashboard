@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq, gte, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, sourceEvidenceCache, users } from "../drizzle/schema";
+import { incidentEvidence, InsertUser, sourceEvidenceCache, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -113,4 +113,52 @@ export async function saveSourceEvidenceCache(entry: {
       expiresAt: entry.expiresAt,
     },
   });
+}
+
+export async function recordIncidentEvidence(entry: {
+  detectionId: string;
+  latitude: string;
+  longitude: string;
+  sourceType: "authority" | "facility";
+  sourceName: string;
+  sourceUrl: string;
+  incidentReference: string;
+  reportedAt: Date;
+  expiresAt: Date;
+  details: string;
+  verifiedByUserId: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("The incident-evidence ledger is not available.");
+  await db.insert(incidentEvidence).values(entry);
+}
+
+function isWithinTenKilometres(latA: number, lngA: number, latB: number, lngB: number) {
+  const radians = (value: number) => value * Math.PI / 180;
+  const dLat = radians(latB - latA);
+  const dLng = radians(lngB - lngA);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(radians(latA)) * Math.cos(radians(latB)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h)) <= 10;
+}
+
+/** Returns only unrevoked, unexpired reports that are spatially aligned with the verified detection. */
+export async function getActiveIncidentEvidence(detectionId: string, lat: number, lng: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const records = await db
+    .select()
+    .from(incidentEvidence)
+    .where(and(
+      eq(incidentEvidence.detectionId, detectionId),
+      isNull(incidentEvidence.revokedAt),
+      gte(incidentEvidence.expiresAt, new Date()),
+    ))
+    .orderBy(desc(incidentEvidence.reportedAt));
+
+  return records.filter(record => isWithinTenKilometres(
+    Number(record.latitude),
+    Number(record.longitude),
+    lat,
+    lng,
+  ));
 }

@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { decimal, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -36,3 +36,26 @@ export const sourceEvidenceCache = mysqlTable("sourceEvidenceCache", {
 });
 
 export type SourceEvidenceCache = typeof sourceEvidenceCache.$inferSelect;
+
+/**
+ * A reviewed, time-limited pointer to an external incident report. This table
+ * deliberately stores provenance, not a copied authority or facility report.
+ */
+export const incidentEvidence = mysqlTable("incidentEvidence", {
+  id: int("id").autoincrement().primaryKey(),
+  detectionId: varchar("detectionId", { length: 96 }).notNull(),
+  latitude: decimal("latitude", { precision: 9, scale: 6 }).notNull(),
+  longitude: decimal("longitude", { precision: 9, scale: 6 }).notNull(),
+  sourceType: mysqlEnum("sourceType", ["authority", "facility"]).notNull(),
+  sourceName: varchar("sourceName", { length: 160 }).notNull(),
+  sourceUrl: varchar("sourceUrl", { length: 1024 }).notNull(),
+  incidentReference: varchar("incidentReference", { length: 255 }).notNull(),
+  reportedAt: timestamp("reportedAt").notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  details: text("details").notNull(),
+  verifiedByUserId: int("verifiedByUserId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  revokedAt: timestamp("revokedAt"),
+});
+
+export type IncidentEvidence = typeof incidentEvidence.$inferSelect;

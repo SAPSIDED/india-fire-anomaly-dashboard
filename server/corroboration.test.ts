@@ -1,6 +1,6 @@
 /** LIVE CORROBORATION — verifies parallel source handling and conservative conclusions with deterministic network mocks. */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clearEvidenceCacheForTests, evaluateCorroboration, setEvidenceCachePersistenceForTests, setLiveEvidenceWindowForTests } from "./corroboration";
+import { clearEvidenceCacheForTests, evaluateCorroboration, setAuthorityIncidentEvidenceForTests, setEvidenceCachePersistenceForTests, setLiveEvidenceWindowForTests } from "./corroboration";
 
 const originalFetch = global.fetch;
 const originalKey = process.env.NASA_FIRMS_MAP_KEY;
@@ -15,6 +15,7 @@ afterEach(() => {
   clearEvidenceCacheForTests();
   setLiveEvidenceWindowForTests();
   setEvidenceCachePersistenceForTests();
+  setAuthorityIncidentEvidenceForTests();
 });
 
 describe("evaluateCorroboration", () => {
@@ -171,5 +172,29 @@ describe("evaluateCorroboration", () => {
     expect([...areaAttempts.values()]).toEqual(expect.arrayContaining([2]));
     expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("overpass.kumi.systems"), expect.any(Object));
     expect(result.industrial.state).toBe("available");
+  });
+
+  it("only elevates a live, cross-platform industrial candidate when a time-aligned authority or facility record exists", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    setAuthorityIncidentEvidenceForTests([{
+      id: 42,
+      sourceType: "authority",
+      sourceName: "Official fire service bulletin",
+      incidentReference: "FS-2026-042",
+      reportedAt: "2026-08-25T08:15:00.000Z",
+      verifiedAt: "2026-08-25T08:20:00.000Z",
+    }]);
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("fireguard-firms-relay")) return new Response("latitude,longitude\n27.13,73.33\n", { status: 200 });
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [{ id: 1 }] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "authority-zone" });
+
+    expect(result.incidentEvidence.records).toHaveLength(1);
+    expect(result.conclusion.level).toBe("confirmed_incident");
+    expect(result.conclusion.title).toContain("external report recorded");
   });
 });
