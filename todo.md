@@ -59,3 +59,7 @@
 - [x] Add an accessible, reduced-motion-safe interactive thermal background, pastel map styling, and a geometric display-font refinement without changing any backend or tracker functionality.
 - [x] Rework the presentation layer into a light, playful thermal-canvas experience inspired by the supplied contemporary Japanese design reference, while preserving and revalidating the live conditional-verification workflow unchanged.
 - [x] Complete a post-redesign live browser verification to a returned source-backed screening result and document the verdict text.
+- [x] Apply the FF Mark Pro–first geometric font stack consistently across interface text and make the light thermal background more visibly heat-driven and pointer-responsive, without changing tracker logic.
+- [x] Resolve the reported incidentEvidence module-export error and reverify the live map, source-verification modal, and corrected visual presentation without runtime errors.
+- [x] Capture a completed post-restart source-verification modal state and clean console result to prove the runtime error does not recur during conditional checking.
+- [x] Capture and document a completed post-restart verifier verdict with a clean console to prove the full conditional-checking flow remains runtime-error-free.
