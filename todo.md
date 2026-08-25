@@ -52,3 +52,7 @@
 ## Backend Review Package
 
 - [x] Package the complete FireGuard backend source, schema, tests, and runtime guide for review.
+
+## Presentation-Only Redesign
+
+- [x] Redesign the FireGuard presentation layer as a responsive, restrained satellite thermal-intelligence interface without changing backend code, data flow, routes, authentication, or verifier behavior.
