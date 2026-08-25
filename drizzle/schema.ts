@@ -25,4 +25,14 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/** Timestamped, auditable cache of successful upstream evidence responses. */
+export const sourceEvidenceCache = mysqlTable("sourceEvidenceCache", {
+  cacheKey: varchar("cacheKey", { length: 255 }).primaryKey(),
+  provider: varchar("provider", { length: 64 }).notNull(),
+  payload: text("payload").notNull(),
+  fetchedAt: timestamp("fetchedAt").notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SourceEvidenceCache = typeof sourceEvidenceCache.$inferSelect;

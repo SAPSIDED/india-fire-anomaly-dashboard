@@ -13,3 +13,9 @@ With the map focused, a live keyboard ArrowRight pan was issued. The live map co
 An automated synthetic pointer-drag attempt did not change the measured marker screen position, so it is not sufficient evidence of a completed physical pan. The geographic-marker implementation is in place, but the final pan task remains open for a direct manual pan check in the preview.
 
 The final controlled Google Maps pan check used the live map instance itself. The map centre moved from **22.4°N, 78.2°E** to **22.4°N, 84.7918°E**, while the Western India marker moved on screen from **x=344** to **x=194** at the same vertical position. This confirms that the marker follows the map’s geographic transform during a genuine pan rather than remaining at a fixed page coordinate.
+
+After the extraction hardening, a live map-zone click opened the verifier and displayed its bounded concurrent-loading state while FIRMS, OSM context, persistence, and weather checks executed. The selection remained open rather than crashing during delayed upstream calls.
+
+The verifier was reloaded after the parallel Overpass-fallback change and a fresh zone check was started. The same map selection remained stable while the concurrent source requests were in progress, ready for the final bounded-result inspection.
+
+The fresh verification run completed after the eight-second live-evidence window. The visible modal labelled each late source as pending/unavailable and displayed **“Evidence pending — sources still delayed”** with a clear statement that no industrial-fire conclusion had been issued. The map selection and Return to map control remained usable; no crash or indefinite loading occurred.

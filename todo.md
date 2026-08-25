@@ -14,3 +14,15 @@
 - [x] Validate marker anchoring while zooming and panning the India map.
 - [x] Query an independent second VIIRS platform and make cross-platform agreement an explicit concurrent corroboration condition.
 - [x] Verify and document marker persistence after a live map-pan interaction.
+
+## Live Extraction Resilience Tasks
+
+- [x] Diagnose FIRMS and Overpass upstream failures from the server runtime.
+- [x] Add bounded retry, endpoint fallback, and clear failure classification for live FIRMS and OSM lookups.
+- [x] Cache recent successful source responses and make their timestamp/freshness visible in the verifier.
+- [x] Ensure an upstream outage produces a professional evidence-pending result, never a crash or false industrial-fire conclusion.
+- [x] Add deterministic tests for retry, fallback, cached evidence, and failure-safe conclusions.
+- [x] Test a full no-cache outage path and assert that it returns evidence-pending rather than a candidate or crash.
+- [x] Verify and document the no-cache evidence-pending state in the running verifier UI.
+- [x] Bound the overall live-evidence window so delayed upstream calls cannot leave the verifier loading indefinitely.
+- [x] Prove bounded retry and alternate-Overpass mirror handling with a deterministic test.

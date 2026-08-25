@@ -1,193 +1,291 @@
 /**
- * LIVE CORROBORATION — retrieves independent satellite, map-context, persistence, and weather evidence in parallel.
- * A source outage or missing on-site incident feed never becomes a positive fire conclusion.
+ * LIVE CORROBORATION — resilient, evidence-first ingestion for the industrial-fire verifier.
+ * Live sources are retried within a strict budget, OSM uses fallback hosts, and only successful responses are cached.
+ * Cached evidence is labelled with its timestamp and cannot become a live fire confirmation.
  */
-export type SourceState = "available" | "unavailable";
+import { getSourceEvidenceCache, saveSourceEvidenceCache } from "./db";
 
-type FirmsEvidence = {
-  state: SourceState;
-  detections: number;
-  detail: string;
-};
+export type SourceState = "available" | "cached" | "unavailable";
 
-type IndustrialEvidence = {
-  state: SourceState;
-  features: number;
-  detail: string;
-};
-
-type WeatherEvidence = {
+type BaseEvidence = {
   state: SourceState;
   detail: string;
+  checkedAt: string;
+  provider: string;
 };
 
-const API_TIMEOUT_MS = 12_000;
+type FirmsEvidence = BaseEvidence & { detections: number };
+type IndustrialEvidence = BaseEvidence & { features: number };
+type WeatherEvidence = BaseEvidence;
+
+type CacheRecord<T> = { value: T; fetchedAt: Date; expiresAt: Date };
+
+const REQUEST_TIMEOUT_MS = 5_000;
+const RETRY_DELAYS_MS = [0, 300];
+const memoryCache = new Map<string, CacheRecord<unknown>>();
+
+function nowIso() {
+  return new Date().toISOString();
+}
 
 function bboxFor(lat: number, lng: number, delta = 0.055) {
-  return [lng - delta, lat - delta, lng + delta, lat + delta]
-    .map(value => value.toFixed(4))
-    .join(",");
+  return [lng - delta, lat - delta, lng + delta].map(value => value.toFixed(4)).join(",");
+}
+
+function cacheKey(provider: string, lat: number, lng: number, days?: number) {
+  return `${provider}:${lat.toFixed(3)}:${lng.toFixed(3)}${days ? `:${days}` : ""}`;
+}
+
+function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number) {
+  const radians = (value: number) => value * Math.PI / 180;
+  const dLat = radians(bLat - aLat);
+  const dLng = radians(bLng - aLng);
+  const startLat = radians(aLat);
+  const endLat = radians(bLat);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(startLat) * Math.cos(endLat) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}
+
+function parseFirmsRows(csv: string, lat?: number, lng?: number) {
+  const lines = csv.trim().split(/\r?\n/).filter(Boolean);
+  if (lines.length < 2) return 0;
+  const header = lines[0].split(",").map(value => value.trim().toLowerCase());
+  const latIndex = header.indexOf("latitude");
+  const lngIndex = header.indexOf("longitude");
+  if (lat === undefined || lng === undefined || latIndex < 0 || lngIndex < 0) return lines.length - 1;
+  return lines.slice(1).filter(line => {
+    const values = line.split(",");
+    const candidateLat = Number(values[latIndex]);
+    const candidateLng = Number(values[lngIndex]);
+    return Number.isFinite(candidateLat) && Number.isFinite(candidateLng) && haversineKm(lat, lng, candidateLat, candidateLng) <= 8;
+  }).length;
+}
+
+async function wait(ms: number) {
+  if (ms > 0) await new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function requestWithRetry(url: string, init?: RequestInit) {
+  let lastError: unknown;
+  for (const delay of RETRY_DELAYS_MS) {
+    await wait(delay);
+    try {
+      const response = await fetch(url, { ...init, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+      if (response.ok) return response;
+      lastError = new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("Upstream request failed.");
+}
+
+async function readCached<T>(key: string): Promise<CacheRecord<T> | undefined> {
+  const memory = memoryCache.get(key) as CacheRecord<T> | undefined;
+  if (memory && memory.expiresAt.getTime() > Date.now()) return memory;
+  try {
+    const persisted = await getSourceEvidenceCache(key);
+    if (!persisted || persisted.expiresAt.getTime() <= Date.now()) return undefined;
+    const record = { value: JSON.parse(persisted.payload) as T, fetchedAt: persisted.fetchedAt, expiresAt: persisted.expiresAt };
+    memoryCache.set(key, record);
+    return record;
+  } catch {
+    return undefined;
+  }
+}
+
+async function writeCached<T>(key: string, provider: string, value: T, ttlMs: number) {
+  const fetchedAt = new Date();
+  const expiresAt = new Date(fetchedAt.getTime() + ttlMs);
+  const record = { value, fetchedAt, expiresAt };
+  memoryCache.set(key, record);
+  try {
+    await saveSourceEvidenceCache({ cacheKey: key, provider, payload: JSON.stringify(value), fetchedAt, expiresAt });
+  } catch {
+    // In-memory cache still protects the current instance when a database write is temporarily unavailable.
+  }
+  return record;
+}
+
+function cacheSuffix(record: CacheRecord<unknown>) {
+  return ` Last verified ${record.fetchedAt.toISOString().replace("T", " ").slice(0, 16)} UTC.`;
 }
 
 async function fetchFirms(lat: number, lng: number, days: number, sensor: "VIIRS_NOAA20_NRT" | "VIIRS_SNPP_NRT", label: string): Promise<FirmsEvidence> {
+  const provider = `firms-${sensor.toLowerCase()}`;
+  const key = cacheKey(provider, lat, lng, days);
   const mapKey = process.env.NASA_FIRMS_MAP_KEY;
-  if (!mapKey) {
-    return { state: "unavailable", detections: 0, detail: "NASA FIRMS MAP_KEY is not configured." };
-  }
+  const checkedAt = nowIso();
+  if (!mapKey) return { state: "unavailable", detections: 0, provider, checkedAt, detail: `NASA FIRMS ${label} is not configured.` };
 
+  const areaUrl = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${mapKey}/${sensor}/${bboxFor(lat, lng)}/${days}`;
+  const countryUrl = `https://firms.modaps.eosdis.nasa.gov/api/country/csv/${mapKey}/${sensor}/IND/${days}`;
   try {
-    const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${mapKey}/${sensor}/${bboxFor(lat, lng)}/${days}`;
-    const response = await fetch(url, { signal: AbortSignal.timeout(API_TIMEOUT_MS) });
-    const csv = await response.text();
-    if (!response.ok || /invalid\s+map[_ ]key|error/i.test(csv)) {
-      throw new Error("FIRMS did not accept the request.");
+    let response: Response;
+    let detections: number;
+    try {
+      response = await requestWithRetry(areaUrl);
+      const csv = await response.text();
+      if (/invalid\s+map[_ ]key|error/i.test(csv)) throw new Error("FIRMS rejected the request.");
+      detections = parseFirmsRows(csv);
+    } catch {
+      response = await requestWithRetry(countryUrl);
+      const csv = await response.text();
+      if (/invalid\s+map[_ ]key|error/i.test(csv)) throw new Error("FIRMS country fallback rejected the request.");
+      detections = parseFirmsRows(csv, lat, lng);
     }
-    const rows = csv.trim().split(/\r?\n/).filter(Boolean);
-    const detections = Math.max(0, rows.length - 1);
+    const evidence = { detections };
+    await writeCached(key, provider, evidence, days === 1 ? 20 * 60_000 : 6 * 60 * 60_000);
     return {
-      state: "available",
-      detections,
+      state: "available", detections, provider, checkedAt,
       detail: detections > 0
-        ? `${detections} NASA FIRMS ${label} detections within the ${days}-day local search window.`
-        : `No NASA FIRMS ${label} detections in the ${days}-day local search window.`,
+        ? `${detections} live NASA FIRMS ${label} detections in the local ${days}-day window.`
+        : `No live NASA FIRMS ${label} detections in the local ${days}-day window.`,
     };
   } catch {
+    const cached = await readCached<{ detections: number }>(key);
+    if (cached) {
+      return {
+        state: "cached", detections: cached.value.detections, provider, checkedAt,
+        detail: `${cached.value.detections} previously verified NASA FIRMS ${label} detections are shown while the live response is delayed.${cacheSuffix(cached)}`,
+      };
+    }
     return {
-      state: "unavailable",
-      detections: 0,
-      detail: `NASA FIRMS ${label} is currently unreachable; this source is withheld.`,
+      state: "unavailable", detections: 0, provider, checkedAt,
+      detail: `NASA FIRMS ${label} did not respond after bounded retries and the India fallback route. No verified cached reading is available.`,
     };
   }
 }
 
 async function fetchIndustrialContext(lat: number, lng: number): Promise<IndustrialEvidence> {
+  const provider = "osm-overpass";
+  const key = cacheKey(provider, lat, lng);
+  const checkedAt = nowIso();
   const query = `[out:json][timeout:12];(way(around:5000,${lat},${lng})["landuse"="industrial"];way(around:5000,${lat},${lng})["man_made"="works"];way(around:5000,${lat},${lng})["industrial"];node(around:5000,${lat},${lng})["man_made"="works"];);out tags;`;
+  const hosts = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"];
   try {
-    const response = await fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-      body: new URLSearchParams({ data: query }),
-      signal: AbortSignal.timeout(API_TIMEOUT_MS),
-    });
-    if (!response.ok) throw new Error("Overpass request failed.");
-    const data = await response.json() as { elements?: unknown[] };
+    const data = await Promise.any(hosts.map(async host => {
+      const response = await requestWithRetry(host, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body: new URLSearchParams({ data: query }),
+      });
+      return response.json() as Promise<{ elements?: unknown[] }>;
+    }));
     const features = data.elements?.length ?? 0;
+    await writeCached(key, provider, { features }, 7 * 24 * 60 * 60_000);
     return {
-      state: "available",
-      features,
-      detail: features > 0
-        ? `${features} nearby OSM industrial-context features found within 5 km.`
-        : "No nearby OSM industrial-context feature was returned within 5 km.",
+      state: "available", features, provider, checkedAt,
+      detail: features > 0 ? `${features} live nearby OSM industrial-context features found within 5 km.` : "No live nearby OSM industrial-context feature was returned within 5 km.",
     };
   } catch {
-    return { state: "unavailable", features: 0, detail: "OSM industrial context is currently unreachable." };
+    const cached = await readCached<{ features: number }>(key);
+    if (cached) {
+      return {
+        state: "cached", features: cached.value.features, provider, checkedAt,
+        detail: `${cached.value.features} previously verified OSM industrial-context features are shown while all live mirrors are delayed.${cacheSuffix(cached)}`,
+      };
+    }
+    return {
+      state: "unavailable", features: 0, provider, checkedAt,
+      detail: "OSM industrial context did not respond after bounded retries across three Overpass mirrors. No verified cached context is available.",
+    };
   }
 }
 
 async function fetchWeather(lat: number, lng: number): Promise<WeatherEvidence> {
+  const provider = "open-meteo";
+  const checkedAt = nowIso();
   try {
-    const query = new URLSearchParams({
-      latitude: lat.toString(),
-      longitude: lng.toString(),
-      current: "temperature_2m,wind_speed_10m,wind_direction_10m,precipitation,weather_code",
-    });
-    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${query}`, {
-      signal: AbortSignal.timeout(API_TIMEOUT_MS),
-    });
-    if (!response.ok) throw new Error("Weather request failed.");
-    const data = await response.json() as {
-      current?: { temperature_2m?: number; wind_speed_10m?: number; wind_direction_10m?: number; precipitation?: number };
-    };
+    const query = new URLSearchParams({ latitude: lat.toString(), longitude: lng.toString(), current: "temperature_2m,wind_speed_10m,wind_direction_10m,precipitation,weather_code" });
+    const response = await requestWithRetry(`https://api.open-meteo.com/v1/forecast?${query}`);
+    const data = await response.json() as { current?: { temperature_2m?: number; wind_speed_10m?: number; wind_direction_10m?: number; precipitation?: number } };
     const current = data.current;
     if (!current) throw new Error("Weather payload missing current conditions.");
-    return {
-      state: "available",
-      detail: `${current.temperature_2m ?? "–"}°C · wind ${current.wind_speed_10m ?? "–"} km/h at ${current.wind_direction_10m ?? "–"}° · precipitation ${current.precipitation ?? "–"} mm.`,
-    };
+    return { state: "available", provider, checkedAt, detail: `${current.temperature_2m ?? "–"}°C · wind ${current.wind_speed_10m ?? "–"} km/h at ${current.wind_direction_10m ?? "–"}° · precipitation ${current.precipitation ?? "–"} mm.` };
   } catch {
-    return { state: "unavailable", detail: "Weather context is currently unreachable." };
+    return { state: "unavailable", provider, checkedAt, detail: "Weather context did not respond within the retry budget." };
   }
 }
 
+function pendingFirms(provider: string, checkedAt: string): FirmsEvidence {
+  return { state: "unavailable", detections: 0, provider, checkedAt, detail: "The source did not return within the live evidence window. It has been marked pending; no result has been inferred." };
+}
+
+function pendingIndustrial(checkedAt: string): IndustrialEvidence {
+  return { state: "unavailable", features: 0, provider: "osm-overpass", checkedAt, detail: "The industrial-context source did not return within the live evidence window. It has been marked pending." };
+}
+
+function pendingWeather(checkedAt: string): WeatherEvidence {
+  return { state: "unavailable", provider: "open-meteo", checkedAt, detail: "Weather context did not return within the live evidence window." };
+}
+
 export async function evaluateCorroboration(input: { lat: number; lng: number; detectionId: string }) {
-  const [firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather] = await Promise.all([
+  const checks = Promise.all([
     fetchFirms(input.lat, input.lng, 1, "VIIRS_NOAA20_NRT", "NOAA-20"),
     fetchFirms(input.lat, input.lng, 7, "VIIRS_NOAA20_NRT", "NOAA-20"),
     fetchFirms(input.lat, input.lng, 1, "VIIRS_SNPP_NRT", "SNPP"),
     fetchIndustrialContext(input.lat, input.lng),
     fetchWeather(input.lat, input.lng),
   ]);
+  const timedOut = await Promise.race([
+    checks.then(() => false),
+    new Promise<true>(resolve => setTimeout(() => resolve(true), 8_000)),
+  ]);
+  const checkedAt = nowIso();
+  if (timedOut) {
+    const firmsCurrent = pendingFirms("firms-viirs_noaa20_nrt", checkedAt);
+    const firmsHistory = pendingFirms("firms-viirs_noaa20_nrt", checkedAt);
+    const firmsIndependentCurrent = pendingFirms("firms-viirs_snpp_nrt", checkedAt);
+    const industrial = pendingIndustrial(checkedAt);
+    const weather = pendingWeather(checkedAt);
+    return {
+      detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
+      firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather,
+      independentCorroboration: { state: "evidence_pending", detail: "The live evidence window closed before all sources responded. The screen remains operational and no industrial-fire conclusion has been issued." },
+      conclusion: { level: "evidence_pending" as const, title: "Evidence pending — sources still delayed", detail: "The verifier closed the live request window to keep the investigation usable. It will not convert a delayed upstream response into a fire conclusion." },
+    };
+  }
+  const [firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather] = await checks;
 
-  const sourceStates = [firmsCurrent.state, firmsHistory.state, firmsIndependentCurrent.state, industrial.state, weather.state];
-  const allSourcesAvailable = sourceStates.every(state => state === "available");
+  const hasOnlyLiveCore = [firmsCurrent, firmsIndependentCurrent, industrial].every(source => source.state === "available");
   const persistent = firmsHistory.state === "available" && firmsHistory.detections >= 5;
-  const crossPlatformMatch = firmsCurrent.state === "available"
-    && firmsIndependentCurrent.state === "available"
-    && firmsCurrent.detections > 0
-    && firmsIndependentCurrent.detections > 0;
+  const crossPlatformMatch = firmsCurrent.state === "available" && firmsIndependentCurrent.state === "available" && firmsCurrent.detections > 0 && firmsIndependentCurrent.detections > 0;
+  const hasCache = [firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial].some(source => source.state === "cached");
 
-  let conclusion: { level: "withheld" | "no_current_detection" | "routine_heat" | "candidate"; title: string; detail: string };
-  if (firmsCurrent.state !== "available") {
-    conclusion = {
-      level: "withheld",
-      title: "Live conclusion withheld",
-      detail: "NASA FIRMS could not be reached, so this verifier will not infer a current anomaly from stale or illustrative map data.",
-    };
+  let conclusion: { level: "evidence_pending" | "no_current_detection" | "routine_heat" | "candidate"; title: string; detail: string };
+  if (firmsCurrent.state === "unavailable" || firmsIndependentCurrent.state === "unavailable" || industrial.state === "unavailable") {
+    conclusion = { level: "evidence_pending", title: "Evidence pending — live source delayed", detail: "The verifier is still operational, but a required live source did not answer within its retry budget. It has not inferred an industrial fire from missing data." };
+  } else if (hasCache) {
+    conclusion = { level: "evidence_pending", title: "Evidence pending — cached context shown", detail: "Some upstream evidence is cached and timestamped. It may guide review, but a current industrial-fire conclusion is withheld until live satellite evidence returns." };
   } else if (firmsCurrent.detections === 0) {
-    conclusion = {
-      level: "no_current_detection",
-      title: "No current FIRMS thermal detection",
-      detail: "The mapped zone has no NASA FIRMS detection in the local one-day search window; an industrial-fire conclusion is not supported.",
-    };
-  } else if (industrial.state !== "available" || industrial.features === 0) {
-    conclusion = {
-      level: "withheld",
-      title: "Industrial context not established",
-      detail: "A thermal record alone is insufficient because the nearby OSM industrial context is missing or unavailable.",
-    };
-  } else if (firmsIndependentCurrent.state !== "available") {
-    conclusion = {
-      level: "withheld",
-      title: "Independent satellite corroboration unavailable",
-      detail: "The second VIIRS platform could not be checked. A single-sensor thermal record is not sufficient for an industrial-fire candidate conclusion.",
-    };
+    conclusion = { level: "no_current_detection", title: "No current FIRMS thermal detection", detail: "The live local one-day FIRMS search found no thermal detection; an industrial-fire conclusion is not supported." };
+  } else if (industrial.features === 0) {
+    conclusion = { level: "evidence_pending", title: "Industrial context not established", detail: "A live thermal record is present but no nearby industrial feature was returned. The industrial-fire conclusion is withheld." };
   } else if (!crossPlatformMatch) {
-    conclusion = {
-      level: "withheld",
-      title: "No cross-platform thermal agreement",
-      detail: "The local NOAA-20 detection is not matched by the independent SNPP search window. The system withholds an industrial-fire candidate conclusion.",
-    };
+    conclusion = { level: "evidence_pending", title: "No cross-platform thermal agreement", detail: "NOAA-20 is not corroborated by the independent SNPP local search window. The industrial-fire conclusion is withheld." };
   } else if (persistent) {
-    conclusion = {
-      level: "routine_heat",
-      title: "Likely recurring industrial heat",
-      detail: "The seven-day local thermal history is persistent. This supports a routine/static heat-source hypothesis, not a new incident claim.",
-    };
+    conclusion = { level: "routine_heat", title: "Likely recurring industrial heat", detail: "Live seven-day persistence supports a routine/static heat-source explanation rather than a new incident claim." };
   } else {
-    conclusion = {
-      level: "candidate",
-      title: "Screened industrial thermal candidate",
-      detail: "A current thermal detection and industrial context are present, but an on-site report, authority alert, or second independent incident feed is still required to confirm a fire.",
-    };
+    conclusion = { level: "candidate", title: "Screened industrial thermal candidate", detail: "Live NOAA-20 and SNPP detections plus live industrial context are present. This is a prioritised candidate, not confirmation; authority or on-site corroboration is still required." };
   }
 
   return {
-    detectionId: input.detectionId,
-    checkedAt: new Date().toISOString(),
-    sourcesRunInParallel: true,
-    firmsCurrent,
-    firmsHistory,
-    firmsIndependentCurrent,
-    industrial,
-    weather,
+    detectionId: input.detectionId, checkedAt: nowIso(), sourcesRunInParallel: true,
+    firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather,
     independentCorroboration: {
-      state: !allSourcesAvailable ? "unavailable" : crossPlatformMatch ? "cross_platform_match" : "no_cross_platform_match",
-      detail: !allSourcesAvailable
-        ? "At least one live source is unavailable. The system cannot issue an authentic industrial-fire conclusion."
-        : crossPlatformMatch
-          ? "NOAA-20 and the independent SNPP VIIRS platform both report local thermal detections in the same one-day search window. This corroborates a thermal observation, but it is not an on-site fire confirmation."
-          : "The two VIIRS platform searches do not agree in the same one-day local window; corroboration is not established.",
+      state: crossPlatformMatch ? "cross_platform_match" : hasOnlyLiveCore ? "no_cross_platform_match" : hasCache ? "cached_evidence" : "evidence_pending",
+      detail: crossPlatformMatch
+        ? "NOAA-20 and independent SNPP both returned live local detections in the same one-day window. This corroborates a thermal observation, not an on-site fire."
+        : hasCache
+          ? "At least one source is a timestamped cache fallback; live corroboration remains pending."
+          : "Required live sources are incomplete or disagree, so independent corroboration is not established.",
     },
     conclusion,
   };
+}
+
+/** Deterministic test-only hook; never surfaced through the public API. */
+export function clearEvidenceCacheForTests() {
+  memoryCache.clear();
 }

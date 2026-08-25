@@ -433,7 +433,7 @@ export default function Home() {
             <button className="modal-close" onClick={() => setVerifierOpen(false)} aria-label="Close verifier"><X size={19} /></button>
             <div className="modal-header"><span className="eyebrow">CONCURRENT CONDITIONAL VERIFICATION</span><h2 id="verifier-title">Is this heat anomaly industrial?</h2><p>{selected.facility} · {selected.id} · {selected.coords}</p></div>
             {corroboration.isPending && <div className="verification-progress live"><span>Querying FIRMS, OSM industrial context, 7-day persistence, and weather concurrently…</span><i /></div>}
-            {corroboration.isError && <div className="source-error">Live evidence could not be loaded. The verifier will not issue an industrial-fire conclusion.</div>}
+            {corroboration.isError && <div className="source-error">The live verifier encountered a recoverable request error. It is preserving the map selection and will not issue an industrial-fire conclusion from incomplete evidence; please retry the same zone.</div>}
             {corroboration.data && <>
               <div className="check-list live-evidence">
                 <div className={`verification-row revealed ${corroboration.data.firmsCurrent.state === "available" ? "pass" : "review"}`}><span className="check-state">{corroboration.data.firmsCurrent.state === "available" ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>NASA FIRMS · NOAA-20 thermal evidence</b><p>{corroboration.data.firmsCurrent.detail}</p></div><small>{corroboration.data.firmsCurrent.state.toUpperCase()}</small></div>
@@ -443,7 +443,7 @@ export default function Home() {
                 <div className={`verification-row revealed ${corroboration.data.weather.state === "available" ? "pass" : "review"}`}><span className="check-state">{corroboration.data.weather.state === "available" ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>Weather · independent context</b><p>{corroboration.data.weather.detail}</p></div><small>{corroboration.data.weather.state.toUpperCase()}</small></div>
                 <div className={`verification-row revealed ${corroboration.data.independentCorroboration.state === "cross_platform_match" ? "pass" : "review"}`}><span className="check-state">{corroboration.data.independentCorroboration.state === "cross_platform_match" ? <Check size={15} /> : <CircleHelp size={15} />}</span><div><b>Independent satellite corroboration</b><p>{corroboration.data.independentCorroboration.detail}</p></div><small>{corroboration.data.independentCorroboration.state.toUpperCase()}</small></div>
               </div>
-              <div className={`modal-result ${corroboration.data.conclusion.level}`}><span><AlertTriangle size={16} /> LIVE SCREENING RESULT</span><h3>{corroboration.data.conclusion.title}</h3><p>{corroboration.data.conclusion.detail}</p><button onClick={() => setVerifierOpen(false)}>Return to map <ArrowRight size={16} /></button></div>
+              <div className={`modal-result ${corroboration.data.conclusion.level}`}><span><AlertTriangle size={16} /> LIVE SCREENING RESULT</span><h3>{corroboration.data.conclusion.title}</h3><p>{corroboration.data.conclusion.detail}</p><small className="evidence-meta">Checked {new Date(corroboration.data.checkedAt).toLocaleTimeString()} · live, cached and pending sources are labelled individually</small><button onClick={() => setVerifierOpen(false)}>Return to map <ArrowRight size={16} /></button></div>
             </>}
           </div>
         </div>

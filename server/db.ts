@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, sourceEvidenceCache, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,28 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+export async function getSourceEvidenceCache(cacheKey: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(sourceEvidenceCache).where(eq(sourceEvidenceCache.cacheKey, cacheKey)).limit(1);
+  return result[0];
+}
+
+export async function saveSourceEvidenceCache(entry: {
+  cacheKey: string;
+  provider: string;
+  payload: string;
+  fetchedAt: Date;
+  expiresAt: Date;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(sourceEvidenceCache).values(entry).onDuplicateKeyUpdate({
+    set: {
+      provider: entry.provider,
+      payload: entry.payload,
+      fetchedAt: entry.fetchedAt,
+      expiresAt: entry.expiresAt,
+    },
+  });
+}
