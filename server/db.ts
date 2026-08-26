@@ -1,7 +1,8 @@
-import { and, desc, eq, gte, isNull } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { incidentEvidence, InsertUser, sourceEvidenceCache, users } from "../drizzle/schema";
+import { detectionHistory, incidentEvidence, InsertUser, sourceEvidenceCache, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { dedupeDetectionHistoryRows, summarizeLongTermPersistence, type LongTermPersistenceSummary } from "./history";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -161,4 +162,48 @@ export async function getActiveIncidentEvidence(detectionId: string, lat: number
     lat,
     lng,
   ));
+}
+
+export type DetectionHistoryInput = {
+  latitude: string;
+  longitude: string;
+  detectionDate: string;
+  brightness: string | null;
+  confidence: string | null;
+};
+
+/** Stores only detections already returned by FIRMS; duplicate date/location rows are ignored. */
+export async function recordDetectionHistory(rows: DetectionHistoryInput[]) {
+  if (process.env.VITEST === "true") return;
+  const db = await getDb();
+  if (!db || rows.length === 0) return;
+  const uniqueRows = dedupeDetectionHistoryRows(rows);
+  const insertRows = uniqueRows.map(row => ({
+    ...row,
+    detectionDate: new Date(`${row.detectionDate}T00:00:00.000Z`),
+  }));
+  await db.insert(detectionHistory).values(insertRows).onDuplicateKeyUpdate({
+    set: { id: sql`${detectionHistory.id}` },
+  });
+}
+
+/** Database-only long-term persistence summary for detections within the established 8 km local screening area. */
+export async function getLongTermPersistence(lat: number, lng: number): Promise<LongTermPersistenceSummary> {
+  const db = await getDb();
+  if (!db) {
+    return { state: "unavailable", totalDetectionCount: 0, firstSeen: null, lastSeen: null, activeMonths: 0 };
+  }
+  try {
+    const latitudeDelta = 8 / 111;
+    const longitudeDelta = 8 / Math.max(1, 111 * Math.cos(lat * Math.PI / 180));
+    const rows = await db.select({ detectionDate: detectionHistory.detectionDate }).from(detectionHistory).where(and(
+      gte(detectionHistory.latitude, (lat - latitudeDelta).toFixed(6)),
+      lte(detectionHistory.latitude, (lat + latitudeDelta).toFixed(6)),
+      gte(detectionHistory.longitude, (lng - longitudeDelta).toFixed(6)),
+      lte(detectionHistory.longitude, (lng + longitudeDelta).toFixed(6)),
+    ));
+    return { state: "available", ...summarizeLongTermPersistence(rows) };
+  } catch {
+    return { state: "unavailable", totalDetectionCount: 0, firstSeen: null, lastSeen: null, activeMonths: 0 };
+  }
 }

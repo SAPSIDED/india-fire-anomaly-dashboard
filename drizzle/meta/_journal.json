@@ -15,6 +15,13 @@
       "when": 1787656750021,
       "tag": "0001_fluffy_blockbuster",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1787711215076,
+      "tag": "0002_married_red_wolf",
+      "breakpoints": true
     }
   ]
 }

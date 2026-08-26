@@ -1,4 +1,4 @@
-import { decimal, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { date, decimal, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -59,3 +59,22 @@ export const incidentEvidence = mysqlTable("incidentEvidence", {
 });
 
 export type IncidentEvidence = typeof incidentEvidence.$inferSelect;
+
+/**
+ * Locally observed FIRMS detections accumulated from the existing live
+ * corroboration path. The unique key prevents the same date/location from
+ * being counted again when the same source row is returned on later checks.
+ */
+export const detectionHistory = mysqlTable("detectionHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  latitude: decimal("latitude", { precision: 9, scale: 6 }).notNull(),
+  longitude: decimal("longitude", { precision: 9, scale: 6 }).notNull(),
+  detectionDate: date("detectionDate").notNull(),
+  brightness: decimal("brightness", { precision: 10, scale: 3 }),
+  confidence: varchar("confidence", { length: 32 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, table => [
+  uniqueIndex("detectionHistory_unique_location_date").on(table.latitude, table.longitude, table.detectionDate),
+]);
+
+export type DetectionHistory = typeof detectionHistory.$inferSelect;

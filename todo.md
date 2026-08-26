@@ -77,3 +77,20 @@
 - [x] Add a pure classification module for industrial thermal source, likely wildfire vegetation, and uncertain other labels using only existing corroboration evidence.
 - [x] Attach the additive classification field to the existing corroboration response without changing source retrieval, database, dependencies, or existing procedure contracts.
 - [x] Add deterministic tests for each classification rule and run the full existing validation suite.
+
+## Database-Backed FIRMS History
+
+- [x] Add an additive detection-history table for deduplicated FIRMS location, date, brightness/confidence, and created-at records.
+- [x] Store real FIRMS detection rows returned by the existing live capture path without changing Stage 1 classification rules or live request behavior.
+- [x] Add a database-only long-term persistence summary and attach it additively to the corroboration response.
+- [x] Test history capture, duplicate safety, empty-history behavior, and source-outage handling.
+- [x] Add deterministic coverage that live FIRMS rows reach the detection-history capture path while cached and unavailable results do not.
+- [x] Add deterministic coverage for the additive longTermHistory response field under empty-history and database-unavailable conditions.
+- [x] Inspect a non-test live verification response and the detectionHistory database table to confirm real persistence and long-term-history readback end to end.
+- [x] Automatically retrieve the first current valid Indian FIRMS detection from the configured official relay and use it for the real write/read-back validation.
+- [x] Retrieve a real Indian FIRMS detection from an official 24-hour relay route and verify `firmsCurrent` is available with at least one local detection.
+- [x] Repeat the write/read-back and duplicate-safe database checks using that genuinely current detection coordinate.
+- [x] Prefer a completed live official FIRMS response with valid local detections over an earlier successful zero-row response, while keeping the three existing relay requests, retries, caching, response contract, and Stage 1 classification unchanged.
+- [x] Add deterministic coverage for the detected-row preference and rerun the real 24-hour FIRMS persistence validation.
+- [x] Make positive local FIRMS detections win without waiting for slower empty, failed, or hanging sibling routes.
+- [x] Add a timing regression test for a fast zero-row route, a positive route, and a hanging sibling route.

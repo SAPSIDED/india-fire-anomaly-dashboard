@@ -5,7 +5,7 @@
  */
 import { setDefaultResultOrder } from "node:dns";
 import { classifyCorroborationEvidence } from "./classification";
-import { getActiveIncidentEvidence, getSourceEvidenceCache, saveSourceEvidenceCache } from "./db";
+import { getActiveIncidentEvidence, getLongTermPersistence, getSourceEvidenceCache, recordDetectionHistory, saveSourceEvidenceCache, type DetectionHistoryInput } from "./db";
 import { makeRequest, type PlacesSearchResult } from "./_core/map";
 
 // Some scientific-data hosts are intermittently unreachable over IPv6 from cloud runtimes.
@@ -39,10 +39,13 @@ type CacheRecord<T> = { value: T; fetchedAt: Date; expiresAt: Date };
 
 const REQUEST_TIMEOUT_MS = 12_000;
 const RETRY_DELAYS_MS = [0, 300];
+const FIRMS_DETECTION_PREFERENCE_MS = 6_000;
 let liveEvidenceWindowMs = 27_000;
 const memoryCache = new Map<string, CacheRecord<unknown>>();
 let persistEvidenceCacheWrites = process.env.VITEST !== "true";
 let authorityEvidenceTestOverride: AuthorityIncidentSummary[] | undefined;
+let detectionHistoryRecorder = recordDetectionHistory;
+let longTermPersistenceReader = getLongTermPersistence;
 const FIRMS_RELAY_BASE_URL = (process.env.FIRMS_RELAY_BASE_URL ?? "https://fireguard-firms-relay.fireguard-2cddbeab.workers.dev").replace(/\/+$/, "");
 
 function nowIso() {
@@ -105,6 +108,31 @@ function parseFirmsDailyDetections(csv: string, lat?: number, lng?: number): Dai
   return Array.from(buckets, ([date, detections]) => ({ date, detections })).sort((a, b) => a.date.localeCompare(b.date));
 }
 
+/** Extracts only returned FIRMS row fields needed for additive local history storage. */
+function parseFirmsDetectionHistoryRows(csv: string, lat?: number, lng?: number): DetectionHistoryInput[] {
+  const lines = csv.trim().split(/\r?\n/).filter(Boolean);
+  if (lines.length < 2) return [];
+  const header = lines[0].split(",").map(value => value.trim().toLowerCase());
+  const latIndex = header.indexOf("latitude");
+  const lngIndex = header.indexOf("longitude");
+  const dateIndex = header.indexOf("acq_date");
+  const brightnessIndex = ["bright_ti4", "brightness", "bright_t31"].map(field => header.indexOf(field)).find(index => index >= 0) ?? -1;
+  const confidenceIndex = header.indexOf("confidence");
+  if (latIndex < 0 || lngIndex < 0 || dateIndex < 0) return [];
+  return lines.slice(1).flatMap(line => {
+    const values = line.split(",");
+    const detectionLat = Number(values[latIndex]);
+    const detectionLng = Number(values[lngIndex]);
+    const detectionDate = values[dateIndex]?.trim();
+    if (!Number.isFinite(detectionLat) || !Number.isFinite(detectionLng) || !detectionDate) return [];
+    if (lat !== undefined && lng !== undefined && haversineKm(lat, lng, detectionLat, detectionLng) > 8) return [];
+    const rawBrightness = brightnessIndex >= 0 ? values[brightnessIndex]?.trim() : undefined;
+    const brightness = rawBrightness && Number.isFinite(Number(rawBrightness)) ? rawBrightness : null;
+    const confidence = confidenceIndex >= 0 ? values[confidenceIndex]?.trim() || null : null;
+    return [{ latitude: detectionLat.toFixed(6), longitude: detectionLng.toFixed(6), detectionDate, brightness, confidence }];
+  });
+}
+
 async function wait(ms: number) {
   if (ms > 0) await new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -130,6 +158,52 @@ async function requestWithRetry(url: string, init?: RequestInit) {
     }
   }
   throw lastError instanceof Error ? lastError : new Error("Upstream request failed.");
+}
+
+type FirmsFetchPayload = {
+  detections: number;
+  dailyDetections: DailyDetection[];
+  historyRows: DetectionHistoryInput[];
+};
+
+/** Selects a positive local reading as soon as one arrives, but bounds the wait behind an early zero-row response. */
+function preferDetectedFirmsResponse(requests: Array<Promise<FirmsFetchPayload>>) {
+  return new Promise<FirmsFetchPayload>((resolve, reject) => {
+    let pending = requests.length;
+    let firstZeroRowResponse: FirmsFetchPayload | undefined;
+    let settled = false;
+    const settle = (callback: () => void) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(preferenceTimer);
+      callback();
+    };
+    const preferenceTimer = setTimeout(() => {
+      const fallback = firstZeroRowResponse;
+      if (fallback) settle(() => resolve(fallback));
+    }, FIRMS_DETECTION_PREFERENCE_MS);
+
+    for (const request of requests) {
+      request.then(response => {
+        if (settled) return;
+        if (response.detections > 0) {
+          settle(() => resolve(response));
+          return;
+        }
+        firstZeroRowResponse ??= response;
+        pending -= 1;
+        if (pending === 0) settle(() => resolve(firstZeroRowResponse!));
+      }).catch(() => {
+        if (settled) return;
+        pending -= 1;
+        if (pending === 0) {
+          const fallback = firstZeroRowResponse;
+          if (fallback) settle(() => resolve(fallback));
+          else settle(() => reject(new Error("All official FIRMS routes failed.")));
+        }
+      });
+    }
+  });
 }
 
 async function readCached<T>(key: string): Promise<CacheRecord<T> | undefined> {
@@ -180,23 +254,28 @@ async function fetchFirms(lat: number, lng: number, days: number, sensor: "VIIRS
   const wfsBbox = `${(lat - 0.055).toFixed(4)},${(lng - 0.055).toFixed(4)},${(lat + 0.055).toFixed(4)},${(lng + 0.055).toFixed(4)},urn:ogc:def:crs:EPSG::4326`;
   const wfsUrl = `${FIRMS_RELAY_BASE_URL}/mapserver/wfs/Russia_Asia/?SERVICE=WFS&REQUEST=GetFeature&VERSION=2.0.0&TYPENAME=ms:fires_${wfsSensor}_${wfsPeriod}&STARTINDEX=0&COUNT=1000&SRSNAME=urn:ogc:def:crs:EPSG::4326&BBOX=${encodeURIComponent(wfsBbox)}&outputformat=csv`;
   try {
-    const evidence = await Promise.any([
+    const evidence = await preferDetectedFirmsResponse([
       requestWithRetry(areaUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } }).then(async response => {
         const csv = await response.text();
         if (/invalid\s+map[_ ]key|error/i.test(csv)) throw new Error("FIRMS area route rejected the request.");
-        return { detections: parseFirmsRows(csv), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv) : [] };
+        return { detections: parseFirmsRows(csv), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv) : [], historyRows: parseFirmsDetectionHistoryRows(csv) };
       }),
       requestWithRetry(countryUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } }).then(async response => {
         const csv = await response.text();
         if (/invalid\s+map[_ ]key|error/i.test(csv)) throw new Error("FIRMS country route rejected the request.");
-        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [] };
+        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [], historyRows: parseFirmsDetectionHistoryRows(csv, lat, lng) };
       }),
       requestWithRetry(wfsUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } }).then(async response => {
         const csv = await response.text();
         if (/invalid\s+map[_ ]key|serviceexception|error/i.test(csv)) throw new Error("FIRMS WFS route rejected the request.");
-        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [] };
+        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [], historyRows: parseFirmsDetectionHistoryRows(csv, lat, lng) };
       }),
     ]);
+    try {
+      await detectionHistoryRecorder(evidence.historyRows);
+    } catch {
+      // Persistence must not block the existing live corroboration response.
+    }
     await writeCached(key, provider, evidence, days === 1 ? 20 * 60_000 : 6 * 60 * 60_000);
     return {
       state: "available", detections: evidence.detections, dailyDetections: evidence.dailyDetections, provider, checkedAt,
@@ -364,6 +443,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     const industrial = pendingIndustrial(checkedAt);
     const weather = pendingWeather(checkedAt);
     const incidentEvidence = await authorityIncidentEvidence;
+    const longTermHistory = await longTermPersistenceReader(input.lat, input.lng);
     const classification = classifyCorroborationEvidence({
       industrialFeatures: industrial.features,
       industrialState: industrial.state,
@@ -372,13 +452,14 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     });
     return {
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
-      firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification,
+      firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
       independentCorroboration: { state: "evidence_pending", detail: "The live evidence window closed before all sources responded. The screen remains operational and no industrial-fire conclusion has been issued." },
       conclusion: { level: "evidence_pending" as const, title: "Evidence pending — sources still delayed", detail: "The verifier closed the 27-second live request window to keep the investigation usable. It will not convert a delayed upstream response into a fire conclusion." },
     };
   }
   const [firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather] = await checks;
   const incidentEvidence = await authorityIncidentEvidence;
+  const longTermHistory = await longTermPersistenceReader(input.lat, input.lng);
   const classification = classifyCorroborationEvidence({
     industrialFeatures: industrial.features,
     industrialState: industrial.state,
@@ -418,7 +499,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
 
   return {
     detectionId: input.detectionId, checkedAt: nowIso(), sourcesRunInParallel: true,
-    firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification,
+    firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
     independentCorroboration: {
       state: crossPlatformMatch ? "cross_platform_match" : hasOnlyLiveCore ? "no_cross_platform_match" : hasCache ? "cached_evidence" : "evidence_pending",
       detail: crossPlatformMatch
@@ -449,4 +530,14 @@ export function setEvidenceCachePersistenceForTests(enabled = true) {
 /** Deterministic test-only hook; production can only read the controlled ledger. */
 export function setAuthorityIncidentEvidenceForTests(records?: AuthorityIncidentSummary[]) {
   authorityEvidenceTestOverride = records;
+}
+
+/** Deterministic test-only hook; production always records real returned FIRMS rows. */
+export function setDetectionHistoryRecorderForTests(recorder?: typeof recordDetectionHistory) {
+  detectionHistoryRecorder = recorder ?? recordDetectionHistory;
+}
+
+/** Deterministic test-only hook; production always reads the project database summary. */
+export function setLongTermPersistenceReaderForTests(reader?: typeof getLongTermPersistence) {
+  longTermPersistenceReader = reader ?? getLongTermPersistence;
 }

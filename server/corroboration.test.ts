@@ -1,6 +1,6 @@
 /** LIVE CORROBORATION — verifies parallel source handling and conservative conclusions with deterministic network mocks. */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clearEvidenceCacheForTests, evaluateCorroboration, setAuthorityIncidentEvidenceForTests, setEvidenceCachePersistenceForTests, setLiveEvidenceWindowForTests } from "./corroboration";
+import { clearEvidenceCacheForTests, evaluateCorroboration, setAuthorityIncidentEvidenceForTests, setDetectionHistoryRecorderForTests, setEvidenceCachePersistenceForTests, setLiveEvidenceWindowForTests, setLongTermPersistenceReaderForTests } from "./corroboration";
 
 const originalFetch = global.fetch;
 const originalKey = process.env.NASA_FIRMS_MAP_KEY;
@@ -16,6 +16,8 @@ afterEach(() => {
   setLiveEvidenceWindowForTests();
   setEvidenceCachePersistenceForTests();
   setAuthorityIncidentEvidenceForTests();
+  setDetectionHistoryRecorderForTests();
+  setLongTermPersistenceReaderForTests();
 });
 
 describe("evaluateCorroboration", () => {
@@ -63,6 +65,57 @@ describe("evaluateCorroboration", () => {
     expect(result.firmsHistory.detections).toBe(3);
   });
 
+  it("passes only live returned FIRMS rows to additive detection-history storage and exposes a long-term summary", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    const captured: Array<Array<{ latitude: string; longitude: string; detectionDate: string; brightness: string | null; confidence: string | null }>> = [];
+    setDetectionHistoryRecorderForTests(async rows => { captured.push(rows); });
+    setLongTermPersistenceReaderForTests(async () => ({ state: "available", totalDetectionCount: 3, firstSeen: "2026-06-20", lastSeen: "2026-08-25", activeMonths: 3 }));
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("fireguard-firms-relay")) return new Response("latitude,longitude,acq_date,bright_ti4,confidence\n27.13,73.33,2026-08-25,332.5,h\n", { status: 200 });
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [{ id: 1 }] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "history-capture-zone" });
+
+    expect(captured.flat()).toEqual(expect.arrayContaining([
+      expect.objectContaining({ latitude: "27.130000", longitude: "73.330000", detectionDate: "2026-08-25", brightness: "332.5", confidence: "h" }),
+    ]));
+    expect(result.longTermHistory).toEqual({ state: "available", totalDetectionCount: 3, firstSeen: "2026-06-20", lastSeen: "2026-08-25", activeMonths: 3 });
+  });
+
+  it("does not send cached or unavailable FIRMS results to detection-history storage and keeps database history additive", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    const captured: unknown[] = [];
+    setDetectionHistoryRecorderForTests(async rows => { captured.push(rows); });
+    setLongTermPersistenceReaderForTests(async () => ({ state: "unavailable", totalDetectionCount: 0, firstSeen: null, lastSeen: null, activeMonths: 0 }));
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("fireguard-firms-relay")) return new Response("latitude,longitude,acq_date\n27.13,73.33,2026-08-25\n", { status: 200 });
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [{ id: 1 }] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+    await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "history-cache-zone" });
+    captured.length = 0;
+
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("fireguard-firms-relay")) throw new Error("live FIRMS offline");
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [{ id: 1 }] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+    const cached = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "history-cache-zone" });
+    clearEvidenceCacheForTests();
+    const unavailable = await evaluateCorroboration({ lat: 31.411, lng: 75.991, detectionId: "history-unavailable-zone" });
+
+    expect(captured).toEqual([]);
+    expect(cached.firmsCurrent.state).toBe("cached");
+    expect(cached.longTermHistory.state).toBe("unavailable");
+    expect(unavailable.firmsCurrent.state).toBe("unavailable");
+    expect(unavailable.longTermHistory.state).toBe("unavailable");
+  });
+
   it("falls back from the bounded-retry area route to the FIRMS India route", async () => {
     process.env.NASA_FIRMS_MAP_KEY = "test-key";
     global.fetch = vi.fn(async (input: RequestInfo | URL) => {
@@ -78,6 +131,49 @@ describe("evaluateCorroboration", () => {
     expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("/api/country/"), expect.any(Object));
     expect(result.firmsCurrent.state).toBe("available");
     expect(result.conclusion.level).toBe("candidate");
+  });
+
+  it("prefers a completed local WFS detection over an earlier successful zero-row Area response", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/api/area/") || url.includes("/api/country/")) return new Response("latitude,longitude,acq_date\n", { status: 200 });
+      if (url.includes("ms:fires_noaa20_24hrs")) {
+        await new Promise(resolve => setTimeout(resolve, 10));
+        return new Response("latitude,longitude,acq_date\n29.45627,76.8924,2026-08-25\n", { status: 200 });
+      }
+      if (url.includes("/mapserver/wfs/Russia_Asia/")) return new Response("latitude,longitude,acq_date\n", { status: 200 });
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [{ id: 1 }] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await evaluateCorroboration({ lat: 29.45627, lng: 76.8924, detectionId: "prefer-local-wfs-zone" });
+
+    expect(result.firmsCurrent.state).toBe("available");
+    expect(result.firmsCurrent.detections).toBe(1);
+    expect(result.firmsCurrent.detail).toContain("1 live NASA FIRMS NOAA-20 detection");
+  });
+
+  it("returns a positive FIRMS response without waiting for a hanging sibling route", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("VIIRS_NOAA20_NRT/IND/1")) return new Promise<Response>(() => undefined);
+      if (url.includes("/api/area/") || url.includes("/api/country/")) return new Response("latitude,longitude,acq_date\n", { status: 200 });
+      if (url.includes("ms:fires_noaa20_24hrs")) {
+        await new Promise(resolve => setTimeout(resolve, 25));
+        return new Response("latitude,longitude,acq_date\n29.45627,76.8924,2026-08-25\n", { status: 200 });
+      }
+      if (url.includes("/mapserver/wfs/Russia_Asia/")) return new Response("latitude,longitude,acq_date\n", { status: 200 });
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [{ id: 1 }] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+
+    const startedAt = Date.now();
+    const result = await evaluateCorroboration({ lat: 29.45627, lng: 76.8924, detectionId: "positive-before-hanging-sibling-zone" });
+
+    expect(result.firmsCurrent.detections).toBe(1);
+    expect(Date.now() - startedAt).toBeLessThan(1_000);
   });
 
   it("uses the official FIRMS Russia and Asia WFS route when API routes are unavailable", async () => {
