@@ -119,3 +119,9 @@
 - [x] Disclose the active snapshot source and freshness timestamp in the India map interface without changing Stage 1–3 conclusions.
 - [x] Complete authentic fallback snapshot write/read-back and repeat-refresh validation with no synthetic data.
 - [x] Inspect the first platform-triggered 20-minute callback execution and confirm it preserves the current snapshot on failure or atomically refreshes it on success.
+
+## Managed Snapshot Refresh Reliability
+
+- [ ] Inspect recurring managed callback timeouts and corresponding production runtime logs.
+- [ ] Correct the identified callback reliability issue without changing the official-country-first snapshot behavior.
+- [ ] Verify a subsequent platform-triggered refresh succeeds and report the actual cadence and error status.

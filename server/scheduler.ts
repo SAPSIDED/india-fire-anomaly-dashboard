@@ -38,6 +38,11 @@ export function startIndiaHotspotSnapshotRefresh() {
 /** Cron-only callback: returns 5xx on failure so the platform can retry while existing rows remain untouched. */
 export async function handleIndiaHotspotRefresh(req: Request, res: Response) {
   try {
+    console.info("[IndiaHotspotSnapshot] Scheduled callback received.", {
+      hasCookie: Boolean(req.headers.cookie),
+      hasAuthorization: Boolean(req.headers.authorization),
+      headerNames: Object.keys(req.headers).sort(),
+    });
     const user = await sdk.authenticateRequest(req);
     if (!user.isCron) return res.status(403).json({ error: "cron-only" });
     const result = await refreshIndiaHotspotSnapshot();
