@@ -94,3 +94,12 @@
 - [x] Add deterministic coverage for the detected-row preference and rerun the real 24-hour FIRMS persistence validation.
 - [x] Make positive local FIRMS detections win without waiting for slower empty, failed, or hanging sibling routes.
 - [x] Add a timing regression test for a fast zero-row route, a positive route, and a hanging sibling route.
+
+## Additive Land-Cover Evidence
+
+- [x] Research a free public land-cover source suitable for point lookups in India and record its class mapping and source attribution.
+- [x] Add a failure-safe `server/landcover.ts` lookup with successful-response caching for approximately 30 days and cached fallback.
+- [x] Expose land-cover evidence additively in `corroboration.run` without changing Stage 1 classification, existing FIRMS/OSM logic, or Stage 2 history.
+- [x] Add deterministic live, cached-fallback, and unavailable-source coverage, then validate the full application build.
+- [x] Prove a hanging land-cover request cannot delay the existing corroboration result.
+- [x] Run and record a production build after the additive land-cover implementation.

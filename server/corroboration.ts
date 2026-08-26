@@ -6,6 +6,7 @@
 import { setDefaultResultOrder } from "node:dns";
 import { classifyCorroborationEvidence } from "./classification";
 import { getActiveIncidentEvidence, getLongTermPersistence, getSourceEvidenceCache, recordDetectionHistory, saveSourceEvidenceCache, type DetectionHistoryInput } from "./db";
+import { fetchLandCover, type LandCoverResult } from "./landcover";
 import { makeRequest, type PlacesSearchResult } from "./_core/map";
 
 // Some scientific-data hosts are intermittently unreachable over IPv6 from cloud runtimes.
@@ -46,6 +47,7 @@ let persistEvidenceCacheWrites = process.env.VITEST !== "true";
 let authorityEvidenceTestOverride: AuthorityIncidentSummary[] | undefined;
 let detectionHistoryRecorder = recordDetectionHistory;
 let longTermPersistenceReader = getLongTermPersistence;
+let landCoverFetcher = fetchLandCover;
 const FIRMS_RELAY_BASE_URL = (process.env.FIRMS_RELAY_BASE_URL ?? "https://fireguard-firms-relay.fireguard-2cddbeab.workers.dev").replace(/\/+$/, "");
 
 function nowIso() {
@@ -424,6 +426,8 @@ function pendingWeather(checkedAt: string): WeatherEvidence {
 
 export async function evaluateCorroboration(input: { lat: number; lng: number; detectionId: string }) {
   const authorityIncidentEvidence = fetchAuthorityIncidentEvidence(input);
+  let landCover: LandCoverResult | undefined;
+  void landCoverFetcher(input.lat, input.lng).then(result => { landCover = result; }).catch(() => undefined);
   const checks = Promise.all([
     fetchFirms(input.lat, input.lng, 1, "VIIRS_NOAA20_NRT", "NOAA-20"),
     fetchFirms(input.lat, input.lng, 7, "VIIRS_NOAA20_NRT", "NOAA-20"),
@@ -453,6 +457,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     return {
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
       firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
+      ...(landCover ? { landCover } : {}),
       independentCorroboration: { state: "evidence_pending", detail: "The live evidence window closed before all sources responded. The screen remains operational and no industrial-fire conclusion has been issued." },
       conclusion: { level: "evidence_pending" as const, title: "Evidence pending — sources still delayed", detail: "The verifier closed the 27-second live request window to keep the investigation usable. It will not convert a delayed upstream response into a fire conclusion." },
     };
@@ -500,6 +505,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
   return {
     detectionId: input.detectionId, checkedAt: nowIso(), sourcesRunInParallel: true,
     firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
+    ...(landCover ? { landCover } : {}),
     independentCorroboration: {
       state: crossPlatformMatch ? "cross_platform_match" : hasOnlyLiveCore ? "no_cross_platform_match" : hasCache ? "cached_evidence" : "evidence_pending",
       detail: crossPlatformMatch
@@ -540,4 +546,9 @@ export function setDetectionHistoryRecorderForTests(recorder?: typeof recordDete
 /** Deterministic test-only hook; production always reads the project database summary. */
 export function setLongTermPersistenceReaderForTests(reader?: typeof getLongTermPersistence) {
   longTermPersistenceReader = reader ?? getLongTermPersistence;
+}
+
+/** Deterministic test-only hook; production always calls the public land-cover source. */
+export function setLandCoverFetcherForTests(fetcher?: typeof fetchLandCover) {
+  landCoverFetcher = fetcher ?? fetchLandCover;
 }

@@ -1,6 +1,6 @@
 /** LIVE CORROBORATION — verifies parallel source handling and conservative conclusions with deterministic network mocks. */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clearEvidenceCacheForTests, evaluateCorroboration, setAuthorityIncidentEvidenceForTests, setDetectionHistoryRecorderForTests, setEvidenceCachePersistenceForTests, setLiveEvidenceWindowForTests, setLongTermPersistenceReaderForTests } from "./corroboration";
+import { clearEvidenceCacheForTests, evaluateCorroboration, setAuthorityIncidentEvidenceForTests, setDetectionHistoryRecorderForTests, setEvidenceCachePersistenceForTests, setLandCoverFetcherForTests, setLiveEvidenceWindowForTests, setLongTermPersistenceReaderForTests } from "./corroboration";
 
 const originalFetch = global.fetch;
 const originalKey = process.env.NASA_FIRMS_MAP_KEY;
@@ -18,6 +18,7 @@ afterEach(() => {
   setAuthorityIncidentEvidenceForTests();
   setDetectionHistoryRecorderForTests();
   setLongTermPersistenceReaderForTests();
+  setLandCoverFetcherForTests();
 });
 
 describe("evaluateCorroboration", () => {
@@ -63,6 +64,40 @@ describe("evaluateCorroboration", () => {
       { date: "2026-08-23", detections: 1 },
     ]);
     expect(result.firmsHistory.detections).toBe(3);
+  });
+
+  it("adds independently fetched land-cover context without changing the existing conclusion inputs", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    setLandCoverFetcherForTests(async () => ({ landCoverClass: "built_up", source: "test-public-land-cover" }));
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("fireguard-firms-relay")) return new Response("latitude,longitude\n27.13,73.33\n", { status: 200 });
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [{ id: 1 }] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "land-cover-zone" });
+
+    expect(result.landCover).toEqual({ landCoverClass: "built_up", source: "test-public-land-cover" });
+    expect(result.classification.classification).toBe("uncertain_other");
+  });
+
+  it("does not let a hanging land-cover request delay the existing corroboration response", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    setLandCoverFetcherForTests(() => new Promise<undefined>(() => undefined));
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("fireguard-firms-relay")) return new Response("latitude,longitude\n27.13,73.33\n", { status: 200 });
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [{ id: 1 }] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+
+    const startedAt = Date.now();
+    const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "land-cover-hang-zone" });
+
+    expect(Date.now() - startedAt).toBeLessThan(1_000);
+    expect(result).not.toHaveProperty("landCover");
+    expect(result.conclusion.level).toBe("candidate");
   });
 
   it("passes only live returned FIRMS rows to additive detection-history storage and exposes a long-term summary", async () => {
