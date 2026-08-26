@@ -8,3 +8,5 @@ The selected execution model is a platform-managed HTTP callback rather than an 
 | NASA FIRMS API status page | Currently marks both the `countries` and `country` API features as “currently not available.” The existing authenticated `countryUrl` returned HTTP 400 with `Invalid API call.` for 1- and 7-day NOAA-20 India requests during implementation. | https://firms.modaps.eosdis.nasa.gov/api/ |
 
 The existing per-coordinate corroboration procedure remains unaffected because it already uses independent Area and WFS routes alongside the unavailable country route. No alternate country-wide source has been substituted pending explicit approval.
+
+After production publication, the project-level managed Heartbeat `fireguard-india-hotspot-refresh` was created with task UID `oTyEtJozMT3Bz3aANmMevR`. It is enabled as a `POST` callback to `/api/scheduled/refreshIndiaHotspots` on the six-field UTC expression `0 */20 * * * *`. The platform-owned schedule persists outside the sandbox; its first scheduled execution remains to be inspected in the project schedule history.

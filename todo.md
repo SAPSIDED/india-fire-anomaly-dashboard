@@ -110,11 +110,12 @@
 - [x] Add an additive `india_hotspot_snapshot` database table and migration for the latest FIRMS detection snapshot.
 - [x] Rename the physical snapshot table to the exact required `india_hotspot_snapshot` name without losing stored official FIRMS rows, then re-verify refresh and reads.
 - [x] Extract a shared country-wide FIRMS retrieval helper from the existing approved request construction without changing the per-coordinate verification flow.
-- [ ] Implement an immediate-start and scheduled snapshot refresh that atomically replaces rows only after a successful FIRMS retrieval, preserving the prior snapshot on failure.
+- [x] Implement an immediate-start and scheduled snapshot refresh that atomically replaces rows only after a successful FIRMS retrieval, preserving the prior snapshot on failure.
 - [x] Add a read-only `getIndiaHotspots` tRPC query that returns snapshot rows without making a live FIRMS request.
 - [x] Add deterministic startup, success, failure-preservation, and repeat-refresh tests; verify stored rows after an authentic refresh.
-- [ ] Add a cron-authenticated `/api/scheduled/refreshIndiaHotspots` callback and a 20-minute managed schedule after the application is published.
+- [x] Add a cron-authenticated `/api/scheduled/refreshIndiaHotspots` callback and a 20-minute managed schedule after the application is published.
 - [x] Keep the official country FIRMS route preferred and use only the approved existing official WFS/Area fallback with an India-wide bounding box when that route fails.
 - [x] Normalize country and fallback rows to the same snapshot schema and persist the active official source with the refresh timestamp.
 - [x] Disclose the active snapshot source and freshness timestamp in the India map interface without changing Stage 1–3 conclusions.
 - [x] Complete authentic fallback snapshot write/read-back and repeat-refresh validation with no synthetic data.
+- [x] Inspect the first platform-triggered 20-minute callback execution and confirm it preserves the current snapshot on failure or atomically refreshes it on success.
