@@ -5,7 +5,7 @@
  */
 import { setDefaultResultOrder } from "node:dns";
 import { classifyCorroborationEvidence } from "./classification";
-import { getActiveIncidentEvidence, getLongTermPersistence, getSourceEvidenceCache, recordDetectionHistory, saveSourceEvidenceCache, type DetectionHistoryInput } from "./db";
+import { getActiveIncidentEvidence, getLongTermPersistence, getSourceEvidenceCache, recordDetectionHistory, saveSourceEvidenceCache, type DetectionHistoryInput, type IndiaHotspotSnapshotInput, type IndiaHotspotSnapshotSource } from "./db";
 import { fetchLandCover, type LandCoverResult } from "./landcover";
 import { makeRequest, type PlacesSearchResult } from "./_core/map";
 
@@ -168,6 +168,79 @@ type FirmsFetchPayload = {
   historyRows: DetectionHistoryInput[];
 };
 
+type FirmsSensor = "VIIRS_NOAA20_NRT" | "VIIRS_NOAA21_NRT";
+
+function firmsCountryUrl(sensor: FirmsSensor, days: number) {
+  return `${FIRMS_RELAY_BASE_URL}/api/country/csv/${sensor}/IND/${days}`;
+}
+
+/** Parses the country-wide CSV returned by the existing authenticated FIRMS country route for the map snapshot. */
+function parseIndiaHotspotSnapshotRows(csv: string): IndiaHotspotSnapshotInput[] {
+  const lines = csv.trim().split(/\r?\n/).filter(Boolean);
+  if (lines.length < 2) return [];
+  const header = lines[0].split(",").map(value => value.trim().toLowerCase());
+  const latitudeIndex = header.indexOf("latitude");
+  const longitudeIndex = header.indexOf("longitude");
+  const acquiredDateIndex = header.indexOf("acq_date");
+  const acquiredTimeIndex = header.indexOf("acq_time");
+  const brightnessIndex = ["bright_ti4", "brightness", "bright_t31"].map(field => header.indexOf(field)).find(index => index >= 0) ?? -1;
+  const confidenceIndex = header.indexOf("confidence");
+  if (latitudeIndex < 0 || longitudeIndex < 0 || acquiredDateIndex < 0) return [];
+  return lines.slice(1).flatMap(line => {
+    const values = line.split(",");
+    const latitude = Number(values[latitudeIndex]);
+    const longitude = Number(values[longitudeIndex]);
+    const acquiredDate = values[acquiredDateIndex]?.trim();
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !acquiredDate) return [];
+    const rawBrightness = brightnessIndex >= 0 ? values[brightnessIndex]?.trim() : undefined;
+    const brightness = rawBrightness && Number.isFinite(Number(rawBrightness)) ? rawBrightness : null;
+    const confidence = confidenceIndex >= 0 ? values[confidenceIndex]?.trim() || null : null;
+    const acquiredTime = acquiredTimeIndex >= 0 ? values[acquiredTimeIndex]?.trim() || null : null;
+    return [{ latitude: latitude.toFixed(6), longitude: longitude.toFixed(6), brightness, confidence, acquiredDate, acquiredTime }];
+  });
+}
+
+/** Reuses the existing secured country FIRMS route for the current India-wide hotspot snapshot. */
+async function fetchIndiaCountryRows(): Promise<IndiaHotspotSnapshotInput[]> {
+  const mapKey = process.env.NASA_FIRMS_MAP_KEY;
+  const relayAuthToken = process.env.FIRMS_RELAY_AUTH_TOKEN ?? mapKey;
+  if (!relayAuthToken) throw new Error("The secure FIRMS relay is not configured with backend authentication.");
+  const response = await requestWithRetry(firmsCountryUrl("VIIRS_NOAA20_NRT", 1), {
+    headers: { Authorization: `Bearer ${relayAuthToken}` },
+  });
+  const csv = await response.text();
+  if (/invalid\s+map[_ ]key|error/i.test(csv)) throw new Error("FIRMS country route rejected the request.");
+  return parseIndiaHotspotSnapshotRows(csv);
+}
+
+/** Reuses the existing secured official NOAA-20 WFS request shape with only an India-wide bounding box after country-route failure. */
+async function fetchIndiaWfsRows(): Promise<IndiaHotspotSnapshotInput[]> {
+  const mapKey = process.env.NASA_FIRMS_MAP_KEY;
+  const relayAuthToken = process.env.FIRMS_RELAY_AUTH_TOKEN ?? mapKey;
+  if (!relayAuthToken) throw new Error("The secure FIRMS relay is not configured with backend authentication.");
+  const indiaWfsBbox = "6.0000,68.0000,38.0000,98.0000,urn:ogc:def:crs:EPSG::4326";
+  const wfsUrl = `${FIRMS_RELAY_BASE_URL}/mapserver/wfs/Russia_Asia/?SERVICE=WFS&REQUEST=GetFeature&VERSION=2.0.0&TYPENAME=ms:fires_noaa20_24hrs&STARTINDEX=0&COUNT=1000&SRSNAME=urn:ogc:def:crs:EPSG::4326&BBOX=${encodeURIComponent(indiaWfsBbox)}&outputformat=csv`;
+  const response = await requestWithRetry(wfsUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } });
+  const csv = await response.text();
+  if (/serviceexception|error/i.test(csv)) throw new Error("FIRMS WFS route rejected the request.");
+  return parseIndiaHotspotSnapshotRows(csv);
+}
+
+export type IndiaFirmsSnapshotFetch = { rows: IndiaHotspotSnapshotInput[]; source: IndiaHotspotSnapshotSource };
+
+/** Uses the existing official country route first and only then the explicitly approved official WFS India-bounds fallback. */
+export async function fetchIndiaCountryFirmsSnapshot(): Promise<IndiaFirmsSnapshotFetch> {
+  try {
+    return { rows: await fetchIndiaCountryRows(), source: "firms-country" };
+  } catch (countryError) {
+    try {
+      return { rows: await fetchIndiaWfsRows(), source: "firms-wfs-india-fallback" };
+    } catch (wfsError) {
+      throw new Error(`FIRMS country route failed (${countryError instanceof Error ? countryError.message : "unknown"}); approved WFS fallback also failed (${wfsError instanceof Error ? wfsError.message : "unknown"}).`);
+    }
+  }
+}
+
 /** Selects a positive local reading as soon as one arrives, but bounds the wait behind an early zero-row response. */
 function preferDetectedFirmsResponse(requests: Array<Promise<FirmsFetchPayload>>) {
   return new Promise<FirmsFetchPayload>((resolve, reject) => {
@@ -241,7 +314,7 @@ function cacheSuffix(record: CacheRecord<unknown>) {
   return ` Last verified ${record.fetchedAt.toISOString().replace("T", " ").slice(0, 16)} UTC.`;
 }
 
-async function fetchFirms(lat: number, lng: number, days: number, sensor: "VIIRS_NOAA20_NRT" | "VIIRS_NOAA21_NRT", label: string): Promise<FirmsEvidence> {
+async function fetchFirms(lat: number, lng: number, days: number, sensor: FirmsSensor, label: string): Promise<FirmsEvidence> {
   const provider = `firms-${sensor.toLowerCase()}`;
   const key = cacheKey(provider, lat, lng, days);
   const mapKey = process.env.NASA_FIRMS_MAP_KEY;
@@ -250,7 +323,7 @@ async function fetchFirms(lat: number, lng: number, days: number, sensor: "VIIRS
   if (!relayAuthToken) return { state: "unavailable", detections: 0, dailyDetections: [], provider, checkedAt, detail: `The secure FIRMS relay is not configured with backend authentication.` };
 
   const areaUrl = `${FIRMS_RELAY_BASE_URL}/api/area/csv/${sensor}/${bboxFor(lat, lng)}/${days}`;
-  const countryUrl = `${FIRMS_RELAY_BASE_URL}/api/country/csv/${sensor}/IND/${days}`;
+  const countryUrl = firmsCountryUrl(sensor, days);
   const wfsSensor = sensor === "VIIRS_NOAA21_NRT" ? "noaa21" : "noaa20";
   const wfsPeriod = days >= 7 ? "7days" : "24hrs";
   const wfsBbox = `${(lat - 0.055).toFixed(4)},${(lng - 0.055).toFixed(4)},${(lat + 0.055).toFixed(4)},${(lng + 0.055).toFixed(4)},urn:ogc:def:crs:EPSG::4326`;

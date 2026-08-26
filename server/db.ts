@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, isNull, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { detectionHistory, incidentEvidence, InsertUser, sourceEvidenceCache, users } from "../drizzle/schema";
+import { detectionHistory, incidentEvidence, indiaHotspotSnapshot, InsertUser, sourceEvidenceCache, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { dedupeDetectionHistoryRows, summarizeLongTermPersistence, type LongTermPersistenceSummary } from "./history";
 
@@ -206,4 +206,40 @@ export async function getLongTermPersistence(lat: number, lng: number): Promise<
   } catch {
     return { state: "unavailable", totalDetectionCount: 0, firstSeen: null, lastSeen: null, activeMonths: 0 };
   }
+}
+
+export type IndiaHotspotSnapshotInput = {
+  latitude: string;
+  longitude: string;
+  brightness: string | null;
+  confidence: string | null;
+  acquiredDate: string;
+  acquiredTime: string | null;
+};
+
+export type IndiaHotspotSnapshotSource = "firms-country" | "firms-wfs-india-fallback";
+
+/** Replaces the current map snapshot only inside a single successful database transaction. */
+export async function replaceIndiaHotspotSnapshot(rows: IndiaHotspotSnapshotInput[], source: IndiaHotspotSnapshotSource) {
+  const db = await getDb();
+  if (!db) throw new Error("The India hotspot snapshot database is unavailable.");
+  const fetchedAt = new Date();
+  await db.transaction(async tx => {
+    await tx.delete(indiaHotspotSnapshot);
+    if (rows.length === 0) return;
+    await tx.insert(indiaHotspotSnapshot).values(rows.map(row => ({
+      ...row,
+      acquiredDate: new Date(`${row.acquiredDate}T00:00:00.000Z`),
+      source,
+      fetchedAt,
+    })));
+  });
+  return { fetchedAt, rowCount: rows.length };
+}
+
+/** Reads only the latest stored country-wide hotspot snapshot; it never calls FIRMS. */
+export async function getIndiaHotspotSnapshot() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(indiaHotspotSnapshot).orderBy(desc(indiaHotspotSnapshot.acquiredDate), desc(indiaHotspotSnapshot.acquiredTime), desc(indiaHotspotSnapshot.id));
 }

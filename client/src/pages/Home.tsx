@@ -2,7 +2,7 @@
  * FireGuard presentation layer. The map, verifier, authentication, and data bindings
  * intentionally remain unchanged; this file only reshapes how that information is presented.
  */
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { MapView } from "@/components/Map";
 import { trpc } from "@/lib/trpc";
 import { startLogin } from "@/const";
@@ -21,6 +21,24 @@ type Hotspot = {
   outcome: string;
   location: { lat: number; lng: number };
 };
+
+type IndiaSnapshotHotspot = {
+  id: number;
+  latitude: string;
+  longitude: string;
+  brightness: string | null;
+  confidence: string | null;
+  acquiredDate: Date | string;
+  acquiredTime: string | null;
+  source: "firms-country" | "firms-wfs-india-fallback";
+  fetchedAt: Date | string;
+};
+
+const snapshotSourceLabel = (source?: IndiaSnapshotHotspot["source"]) => source === "firms-country"
+  ? "NASA FIRMS country feed"
+  : source === "firms-wfs-india-fallback"
+    ? "NASA FIRMS WFS fallback · India bounds"
+    : "Awaiting snapshot";
 
 const hotspots: Hotspot[] = [
   {
@@ -163,11 +181,36 @@ export default function Home() {
     reportedAt: "",
     details: "",
   });
-  const mapMarkers = useRef<google.maps.MVCObject[]>([]);
+  const mapMarkers = useRef<Array<google.maps.Marker | google.maps.Circle>>([]);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
   const thermalFieldRef = useRef<HTMLDivElement>(null);
   const { user, isAuthenticated } = useAuth();
   const corroboration = trpc.corroboration.run.useMutation();
   const authorityRecord = trpc.incidentEvidence.record.useMutation();
+  const indiaHotspots = trpc.getIndiaHotspots.useQuery(undefined, { refetchInterval: 5 * 60_000 });
+  const snapshotRows = (indiaHotspots.data ?? []) as IndiaSnapshotHotspot[];
+  const snapshotSource = snapshotRows[0]?.source;
+  const snapshotFetchedAt = snapshotRows[0]?.fetchedAt;
+  const snapshotTargets: Hotspot[] = snapshotRows.map(row => {
+    const latitude = Number(row.latitude);
+    const longitude = Number(row.longitude);
+    return {
+      id: `FIRMS-${row.id}`,
+      facility: "Current NASA FIRMS hotspot",
+      place: "Current India-wide thermal observation",
+      coords: `${latitude.toFixed(4)}°N · ${longitude.toFixed(4)}°E`,
+      frp: row.brightness ? `${Number(row.brightness).toFixed(1)} K` : "—",
+      confidence: row.confidence ?? "—",
+      recency: `${String(row.acquiredDate).slice(0, 10)} ${row.acquiredTime ?? ""} UTC`.trim(),
+      score: 55,
+      outcome: "Requires source verification",
+      location: { lat: latitude, lng: longitude },
+    };
+  }).filter(target => Number.isFinite(target.location.lat) && Number.isFinite(target.location.lng));
+
+  useEffect(() => {
+    if (snapshotTargets.length > 0 && selected.id === hotspots[0].id) setSelected(snapshotTargets[0]);
+  }, [snapshotRows, selected.id]);
 
   const runVerifier = (hotspot = selected) => {
     corroboration.mutate({ detectionId: hotspot.id, lat: hotspot.location.lat, lng: hotspot.location.lng });
@@ -233,15 +276,21 @@ export default function Home() {
     map.setCenter({ lat: 22.4, lng: 78.2 });
     map.setZoom(5);
     if (import.meta.env.DEV) (window as Window & { __indiaFireMap?: google.maps.Map }).__indiaFireMap = map;
+    setMap(map);
+  };
 
+  useEffect(() => {
+    if (!map) return;
+    mapMarkers.current.forEach(marker => marker.setMap(null));
+    mapMarkers.current = [];
     const infoWindow = new google.maps.InfoWindow();
     const markerIcon = (color: string) => ({
       url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="17" fill="${color}" fill-opacity=".13" stroke="${color}" stroke-width="1.5"/><circle cx="21" cy="21" r="7" fill="${color}" stroke="#f2eee6" stroke-width="2.5"/></svg>`)}`,
       scaledSize: new google.maps.Size(42, 42),
       anchor: new google.maps.Point(21, 21),
     });
-
-    hotspots.forEach(hotspot => {
+    const targets = snapshotTargets.length > 0 ? snapshotTargets : hotspots;
+    targets.forEach(hotspot => {
       const color = hotspot.score > 70 ? "#d46b63" : "#e0ac68";
       const marker = new google.maps.Marker({ map, position: hotspot.location, title: `${hotspot.place} — click to verify`, icon: markerIcon(color), zIndex: hotspot.score });
       const zone = new google.maps.Circle({ map, center: hotspot.location, radius: hotspot.score > 70 ? 9_000 : 6_000, strokeColor: color, strokeOpacity: 0.72, strokeWeight: 1, fillColor: color, fillOpacity: 0.07, clickable: true });
@@ -254,7 +303,8 @@ export default function Home() {
       zone.addListener("mouseover", showSummary); zone.addListener("mouseout", () => infoWindow.close()); zone.addListener("click", verifyZone);
       mapMarkers.current.push(marker, zone);
     });
-  };
+    return () => { mapMarkers.current.forEach(marker => marker.setMap(null)); mapMarkers.current = []; };
+  }, [map, snapshotRows]);
 
   return (
     <div className="fireguard-page" onPointerMove={moveThermalField}>
@@ -272,11 +322,11 @@ export default function Home() {
         </section>
 
         <section id="workbench" className="analysis-field" aria-label="Thermal anomaly analysis workbench">
-          <div className="section-cap"><div><p className="eyebrow">ACTIVE ANALYSIS FIELD</p><h2>From thermal signal to an evidence-backed screen.</h2></div><p>The markers are illustrative map candidates. Opening one preserves its geographic position and starts the unchanged concurrent verification flow.</p></div>
+          <div className="section-cap"><div><p className="eyebrow">ACTIVE ANALYSIS FIELD</p><h2>From thermal signal to an evidence-backed screen.</h2></div><p>{snapshotTargets.length > 0 ? "Stored current FIRMS snapshot markers are read from the application database; opening one starts the unchanged per-coordinate verification flow." : "No stored FIRMS snapshot is currently available. Visiting the map does not call FIRMS; the managed refresh will populate it after a successful source pull."}</p></div>
           <div className="workbench-shell">
             <div className="map-workbench">
               <div className="map-topline"><span>OBSERVATION MAP</span><span>INDIA / 68°E–98°E / 8°N–37°N</span><b>BASE MAP + ANALYTIC OVERLAYS</b></div>
-              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} /><div className="map-frame-label"><b>THERMAL ANOMALY FIELD</b><span>Click a geographic target to verify</span></div><div className="map-legend"><span><i className="legend-dot critical" /> Critical signal</span><span><i className="legend-dot elevated" /> Elevated signal</span><span><i className="legend-line" /> Investigation radius</span></div><div className="map-attribution">GOOGLE BASE MAP · DEMONSTRATIVE TARGETS</div></div>
+              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} /><div className="map-frame-label"><b>THERMAL ANOMALY FIELD</b><span>{snapshotTargets.length > 0 ? `${snapshotTargets.length} stored FIRMS hotspots · click to verify` : "Awaiting scheduled FIRMS snapshot"}</span></div><div className="map-legend"><span><i className="legend-dot critical" /> Critical signal</span><span><i className="legend-dot elevated" /> Elevated signal</span><span><i className="legend-line" /> Investigation radius</span></div><div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
               <div className="layer-row" aria-label="Demonstrative layers">{["Thermal", "OSM context", "Persistence", "Exposure"].map(layer => <button key={layer} onClick={() => setActiveLayer(layer)} className={activeLayer === layer ? "active" : ""}>{layer}</button>)}<span>{activeLayer} layer selected</span></div>
             </div>
             <aside className="analysis-rail" aria-label="Selected anomaly analysis"><div className="rail-topline"><span>SELECTED TARGET</span><b className={selected.score > 70 ? "critical" : "elevated"}>{selected.score}/100</b></div><h3>{selected.facility}</h3><p className="target-location"><MapPin size={13} /> {selected.place}</p><div className="target-code"><span>{selected.id}</span><span>{selected.coords}</span></div><dl className="instrument-grid"><div><dt>FRP</dt><dd>{selected.frp}</dd></div><div><dt>CONFIDENCE</dt><dd>{selected.confidence}</dd></div><div><dt>RECENCY</dt><dd>{selected.recency.replace("Observed ", "")}</dd></div></dl><div className="screening-ladder"><p>INVESTIGATION PATH</p><div><b>01</b><span>Thermal observation<small>Signal available</small></span></div><div><b>02</b><span>Geographic context<small>Industrial proximity</small></span></div><div><b>03</b><span>Historical behaviour<small>Baseline and recurrence</small></span></div><div><b>04</b><span>Independent evidence<small>Required for conclusion</small></span></div></div><div className="screening-callout"><span>SCREENING STATUS</span><strong>{selected.outcome}</strong><p>A thermal candidate is not a confirmed industrial fire. Review the actual source responses before escalation.</p><button onClick={() => openVerifier()}>Run source verification <ChevronRight size={15} /></button></div></aside>

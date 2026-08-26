@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { evaluateCorroboration } from "./corroboration";
-import { recordIncidentEvidence } from "./db";
+import { getIndiaHotspotSnapshot, recordIncidentEvidence } from "./db";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
@@ -30,6 +30,8 @@ export const appRouter = router({
       }))
       .mutation(({ input }) => evaluateCorroboration(input)),
   }),
+
+  getIndiaHotspots: publicProcedure.query(() => getIndiaHotspotSnapshot()),
 
   incidentEvidence: router({
     record: adminProcedure

@@ -1,0 +1,1 @@
+ALTER TABLE `indiaHotspotSnapshot` ADD `source` varchar(64) NOT NULL;

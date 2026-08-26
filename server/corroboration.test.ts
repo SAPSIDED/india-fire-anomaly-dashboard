@@ -1,6 +1,6 @@
 /** LIVE CORROBORATION — verifies parallel source handling and conservative conclusions with deterministic network mocks. */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clearEvidenceCacheForTests, evaluateCorroboration, setAuthorityIncidentEvidenceForTests, setDetectionHistoryRecorderForTests, setEvidenceCachePersistenceForTests, setLandCoverFetcherForTests, setLiveEvidenceWindowForTests, setLongTermPersistenceReaderForTests } from "./corroboration";
+import { clearEvidenceCacheForTests, evaluateCorroboration, fetchIndiaCountryFirmsSnapshot, setAuthorityIncidentEvidenceForTests, setDetectionHistoryRecorderForTests, setEvidenceCachePersistenceForTests, setLandCoverFetcherForTests, setLiveEvidenceWindowForTests, setLongTermPersistenceReaderForTests } from "./corroboration";
 
 const originalFetch = global.fetch;
 const originalKey = process.env.NASA_FIRMS_MAP_KEY;
@@ -22,6 +22,25 @@ afterEach(() => {
 });
 
 describe("evaluateCorroboration", () => {
+  it("keeps the country query preferred and normalizes the approved India-wide WFS fallback into snapshot rows", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/api/country/")) return new Response("Invalid API call.", { status: 400 });
+      if (url.includes("/mapserver/wfs/Russia_Asia/")) {
+        return new Response("latitude,longitude,brightness,acq_date,acq_time,confidence\n15.38928,75.22285,331.45,2026-08-25,841,n\n", { status: 200 });
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    }) as typeof fetch;
+
+    const snapshot = await fetchIndiaCountryFirmsSnapshot();
+
+    expect(snapshot.source).toBe("firms-wfs-india-fallback");
+    expect(snapshot.rows).toEqual([{ latitude: "15.389280", longitude: "75.222850", brightness: "331.45", confidence: "n", acquiredDate: "2026-08-25", acquiredTime: "841" }]);
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("/api/country/"), expect.any(Object));
+    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("ms:fires_noaa20_24hrs"), expect.any(Object));
+  });
+
   it("runs FIRMS, OSM, persistence, and weather checks concurrently before returning a cautious candidate", async () => {
     process.env.NASA_FIRMS_MAP_KEY = "test-key";
     global.fetch = vi.fn(async (input: RequestInfo | URL) => {

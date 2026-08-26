@@ -78,3 +78,21 @@ export const detectionHistory = mysqlTable("detectionHistory", {
 ]);
 
 export type DetectionHistory = typeof detectionHistory.$inferSelect;
+
+/**
+ * The latest successful country-wide FIRMS pull for the map. This is replaced
+ * transactionally after each successful scheduled refresh; it is not history.
+ */
+export const indiaHotspotSnapshot = mysqlTable("india_hotspot_snapshot", {
+  id: int("id").autoincrement().primaryKey(),
+  latitude: decimal("latitude", { precision: 9, scale: 6 }).notNull(),
+  longitude: decimal("longitude", { precision: 9, scale: 6 }).notNull(),
+  brightness: decimal("brightness", { precision: 10, scale: 3 }),
+  confidence: varchar("confidence", { length: 32 }),
+  acquiredDate: date("acquiredDate").notNull(),
+  acquiredTime: varchar("acquiredTime", { length: 8 }),
+  source: varchar("source", { length: 64 }).notNull(),
+  fetchedAt: timestamp("fetchedAt").notNull(),
+});
+
+export type IndiaHotspotSnapshot = typeof indiaHotspotSnapshot.$inferSelect;
