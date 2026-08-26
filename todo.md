@@ -122,6 +122,9 @@
 
 ## Managed Snapshot Refresh Reliability
 
-- [ ] Inspect recurring managed callback timeouts and corresponding production runtime logs.
-- [ ] Correct the identified callback reliability issue without changing the official-country-first snapshot behavior.
-- [ ] Verify a subsequent platform-triggered refresh succeeds and report the actual cadence and error status.
+- [x] Inspect recurring managed callback timeouts and corresponding production runtime logs.
+- [x] Correct the identified callback reliability issue without changing the official-country-first snapshot behavior.
+- [x] Verify a subsequent platform-triggered refresh succeeds and report the actual cadence and error status.
+- [x] Observe a second platform-triggered run of the replacement job and record its scheduled and finished times.
+- [x] Compare the stale timeout history with replacement-job logs and confirm whether any post-replacement errors occurred.
+- [x] Set an explicit 30-minute managed schedule to keep observed dispatch cadence safely within the requested 20–30 minute rate window.
