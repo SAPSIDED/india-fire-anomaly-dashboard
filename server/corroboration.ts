@@ -4,6 +4,7 @@
  * Cached evidence is labelled with its timestamp and cannot become a live fire confirmation.
  */
 import { setDefaultResultOrder } from "node:dns";
+import { classifyCorroborationEvidence } from "./classification";
 import { getActiveIncidentEvidence, getSourceEvidenceCache, saveSourceEvidenceCache } from "./db";
 import { makeRequest, type PlacesSearchResult } from "./_core/map";
 
@@ -363,15 +364,27 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     const industrial = pendingIndustrial(checkedAt);
     const weather = pendingWeather(checkedAt);
     const incidentEvidence = await authorityIncidentEvidence;
+    const classification = classifyCorroborationEvidence({
+      industrialFeatures: industrial.features,
+      industrialState: industrial.state,
+      historyDailyDetections: firmsHistory.dailyDetections,
+      historyState: firmsHistory.state,
+    });
     return {
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
-      firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence,
+      firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification,
       independentCorroboration: { state: "evidence_pending", detail: "The live evidence window closed before all sources responded. The screen remains operational and no industrial-fire conclusion has been issued." },
       conclusion: { level: "evidence_pending" as const, title: "Evidence pending — sources still delayed", detail: "The verifier closed the 27-second live request window to keep the investigation usable. It will not convert a delayed upstream response into a fire conclusion." },
     };
   }
   const [firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather] = await checks;
   const incidentEvidence = await authorityIncidentEvidence;
+  const classification = classifyCorroborationEvidence({
+    industrialFeatures: industrial.features,
+    industrialState: industrial.state,
+    historyDailyDetections: firmsHistory.dailyDetections,
+    historyState: firmsHistory.state,
+  });
 
   const hasOnlyLiveCore = [firmsCurrent, firmsIndependentCurrent, industrial].every(source => source.state === "available");
   const persistent = firmsHistory.state === "available" && firmsHistory.detections >= 5;
@@ -405,7 +418,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
 
   return {
     detectionId: input.detectionId, checkedAt: nowIso(), sourcesRunInParallel: true,
-    firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence,
+    firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification,
     independentCorroboration: {
       state: crossPlatformMatch ? "cross_platform_match" : hasOnlyLiveCore ? "no_cross_platform_match" : hasCache ? "cached_evidence" : "evidence_pending",
       detail: crossPlatformMatch

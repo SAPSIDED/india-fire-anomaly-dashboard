@@ -71,3 +71,9 @@
 - [x] Restore and confirm browser-preview availability if the local preview connection becomes unavailable during graph interaction validation.
 - [x] Capture an independently observable NOT QUERIED preview-marker change from its default date to a different selected-day callout before finalizing the historical graph validation.
 - [x] Capture browser readbacks before and after a NOT QUERIED marker activation to document the callout transition from 25 Aug to a different date.
+
+## Additive Rule-Based Classification
+
+- [x] Add a pure classification module for industrial thermal source, likely wildfire vegetation, and uncertain other labels using only existing corroboration evidence.
+- [x] Attach the additive classification field to the existing corroboration response without changing source retrieval, database, dependencies, or existing procedure contracts.
+- [x] Add deterministic tests for each classification rule and run the full existing validation suite.

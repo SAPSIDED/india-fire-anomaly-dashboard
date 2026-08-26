@@ -40,6 +40,7 @@ describe("evaluateCorroboration", () => {
     expect(result.sourcesRunInParallel).toBe(true);
     expect(result.conclusion.level).toBe("candidate");
     expect(result.independentCorroboration.state).toBe("cross_platform_match");
+    expect(result.classification.classification).toBe("uncertain_other");
   });
 
   it("returns source-provided daily counts for the seven-day FIRMS history, without inventing missing dates", async () => {
