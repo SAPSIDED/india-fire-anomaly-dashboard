@@ -21,6 +21,7 @@ export type VerificationRailResult = {
   industrial: SourceEvidence & {
     industrialFacilityName?: string | null;
     industrialFacilityType?: string | null;
+    industrialFacilityCategory?: string | null;
     industrialFacilityDistanceM?: number | null;
     industrialFacilityOsmUrl?: string | null;
   };
@@ -69,7 +70,7 @@ export function HotspotVerificationRail({ selected, state, result, onVerify }: P
             <span className="facility-context-label">CONTEXT ONLY — NOT INCIDENT PROOF</span>
             {result.industrial.industrialFacilityType && <span className="facility-context-item">
               <b>Nearest OSM feature</b>
-              <span>{result.industrial.industrialFacilityName ?? "Unnamed OSM feature"} · {result.industrial.industrialFacilityType}{result.industrial.industrialFacilityDistanceM !== null && result.industrial.industrialFacilityDistanceM !== undefined ? ` · ${formatDistance(result.industrial.industrialFacilityDistanceM)}` : ""}</span>
+              <span>{result.industrial.industrialFacilityName ?? "Unnamed OSM feature"} · {result.industrial.industrialFacilityType}{result.industrial.industrialFacilityCategory ? ` · ${result.industrial.industrialFacilityCategory.replaceAll("_", " ")}` : ""}{result.industrial.industrialFacilityDistanceM !== null && result.industrial.industrialFacilityDistanceM !== undefined ? ` · ${formatDistance(result.industrial.industrialFacilityDistanceM)}` : ""}</span>
               {result.industrial.industrialFacilityOsmUrl && <a href={result.industrial.industrialFacilityOsmUrl} target="_blank" rel="noreferrer">Open in OpenStreetMap ↗</a>}
             </span>}
             {result.gppdReference && <span className="facility-context-item">

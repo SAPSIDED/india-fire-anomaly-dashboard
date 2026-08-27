@@ -23,10 +23,27 @@ describe("nearestIndustrialFacility", () => {
     expect(result.industrialFacilityDistanceM).toBeGreaterThan(0);
   });
 
+  it.each([
+    [{ man_made: "works", industrial: "refinery" }, "refinery"],
+    [{ power: "plant" }, "power_plant"],
+    [{ landuse: "industrial", industrial: "steel" }, "steel"],
+    [{ man_made: "works", industrial: "lng_terminal" }, "lng_terminal"],
+    [{ man_made: "mine" }, "mining"],
+    [{ landuse: "farmland" }, "agricultural_zone"],
+  ])("assigns the %s tagged OSM feature to %s", (tags, expectedCategory) => {
+    const result = nearestIndustrialFacility(20, 77, [{ lat: 20.001, lon: 77.001, tags }]);
+    expect(result.industrialFacilityCategory).toBe(expectedCategory);
+  });
+
+  it("does not infer a facility category from a generic industrial tag", () => {
+    const result = nearestIndustrialFacility(20, 77, [{ lat: 20.001, lon: 77.001, tags: { landuse: "industrial", name: "Industrial Estate" } }]);
+    expect(result).toMatchObject({ industrialFacilityType: "landuse=industrial", industrialFacilityCategory: null });
+  });
+
   it("returns null additive facility fields when no returned feature has usable location and industrial tags", () => {
     expect(nearestIndustrialFacility(20, 77, [
       { tags: { landuse: "industrial", name: "No Location" } },
       { lat: 20.001, lon: 77.001, tags: { amenity: "school" } },
-    ])).toEqual({ industrialFacilityName: null, industrialFacilityType: null, industrialFacilityDistanceM: null, industrialFacilityOsmUrl: null });
+    ])).toEqual({ industrialFacilityName: null, industrialFacilityType: null, industrialFacilityCategory: null, industrialFacilityDistanceM: null, industrialFacilityOsmUrl: null });
   });
 });

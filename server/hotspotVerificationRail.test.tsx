@@ -9,7 +9,7 @@ const selected = { id: "FIRMS-120001", facility: "Current NASA FIRMS hotspot", p
 const result: VerificationRailResult = {
   firmsCurrent: { state: "available", detail: "1 live NASA FIRMS detection." },
   industrial: {
-    state: "available", detail: "2 nearby OSM industrial-context features.", industrialFacilityName: "Example Works", industrialFacilityType: "man_made=works", industrialFacilityDistanceM: 740, industrialFacilityOsmUrl: "https://www.openstreetmap.org/way/123",
+    state: "available", detail: "2 nearby OSM industrial-context features.", industrialFacilityName: "Example Works", industrialFacilityType: "man_made=works", industrialFacilityCategory: "refinery", industrialFacilityDistanceM: 740, industrialFacilityOsmUrl: "https://www.openstreetmap.org/way/123",
   },
   firmsHistory: { state: "available", detail: "3 seven-day FIRMS detections." },
   landCover: { landCoverClass: "built_up", source: "public land-cover source" },
@@ -33,7 +33,7 @@ describe("HotspotVerificationRail", () => {
 
     rerender(<HotspotVerificationRail selected={selected} state="complete" result={result} onVerify={onVerify} />);
     expect(screen.getByText(/2 nearby OSM industrial-context features/i)).toBeTruthy();
-    expect(screen.getByText(/example works · man_made=works · 740 m/i)).toBeTruthy();
+    expect(screen.getByText(/example works · man_made=works · refinery · 740 m/i)).toBeTruthy();
     expect(screen.getByRole("link", { name: /open in openstreetmap/i }).getAttribute("href")).toBe("https://www.openstreetmap.org/way/123");
     expect(screen.getByText(/example thermal plant · coal · 450.5 mw · 1.25 km/i)).toBeTruthy();
     expect(screen.getByText(/built up · public land-cover source/i)).toBeTruthy();

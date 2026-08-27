@@ -29,6 +29,7 @@ type IndustrialEvidence = BaseEvidence & {
   features: number;
   industrialFacilityName: string | null;
   industrialFacilityType: string | null;
+  industrialFacilityCategory: "refinery" | "power_plant" | "steel" | "lng_terminal" | "mining" | "agricultural_zone" | null;
   industrialFacilityDistanceM: number | null;
   industrialFacilityOsmUrl: string | null;
 };
@@ -90,14 +91,32 @@ type OverpassIndustrialFeature = {
 };
 
 function emptyIndustrialFacility() {
-  return { industrialFacilityName: null, industrialFacilityType: null, industrialFacilityDistanceM: null, industrialFacilityOsmUrl: null };
+  return { industrialFacilityName: null, industrialFacilityType: null, industrialFacilityCategory: null, industrialFacilityDistanceM: null, industrialFacilityOsmUrl: null };
 }
 
 function industrialFacilityType(tags: Record<string, string | undefined>) {
   if (tags.man_made === "works") return "man_made=works";
+  if (tags.man_made === "mine") return "man_made=mine";
   if (tags.power === "plant") return "power=plant";
   if (tags.landuse === "industrial") return "landuse=industrial";
+  if (tags.landuse === "quarry") return "landuse=quarry";
   if (tags.industrial) return `industrial=${tags.industrial}`;
+  if (tags.landuse === "farmland") return "landuse=farmland";
+  return null;
+}
+
+function isExistingIndustrialContext(tags: Record<string, string | undefined>) {
+  return tags.landuse === "industrial" || tags.man_made === "works" || Boolean(tags.industrial) || tags.power === "plant";
+}
+
+function industrialFacilityCategory(tags: Record<string, string | undefined>): IndustrialEvidence["industrialFacilityCategory"] {
+  const searchable = Object.entries(tags).flatMap(([key, value]) => [key, value ?? ""]).join(" ").toLowerCase();
+  if (/\brefiner(?:y|ies)\b|petroleum refinery/.test(searchable)) return "refinery";
+  if (/\blng(?:\b|_)|liquefied natural gas/.test(searchable)) return "lng_terminal";
+  if (/\bsteel\b|iron and steel/.test(searchable)) return "steel";
+  if (tags.man_made === "mine" || tags.landuse === "quarry" || /\bmin(?:e|ing)\b|quarry/.test(searchable)) return "mining";
+  if (tags.landuse === "farmland" || /\bagricultur(?:e|al)\b|crop|farm/.test(searchable)) return "agricultural_zone";
+  if (tags.power === "plant") return "power_plant";
   return null;
 }
 
@@ -112,6 +131,7 @@ export function nearestIndustrialFacility(lat: number, lng: number, elements: Ov
     return [{
       name: tags.name ?? tags["name:en"] ?? null,
       type,
+      category: industrialFacilityCategory(tags),
       distanceM: haversineKm(lat, lng, featureLat, featureLng) * 1000,
       osmUrl: ["node", "way", "relation"].includes(element.type ?? "") && Number.isInteger(element.id)
         ? `https://www.openstreetmap.org/${element.type}/${element.id}`
@@ -119,7 +139,7 @@ export function nearestIndustrialFacility(lat: number, lng: number, elements: Ov
     }];
   }).sort((left, right) => left.distanceM - right.distanceM)[0];
   return nearest
-    ? { industrialFacilityName: nearest.name, industrialFacilityType: nearest.type, industrialFacilityDistanceM: Number(nearest.distanceM.toFixed(1)), industrialFacilityOsmUrl: nearest.osmUrl }
+    ? { industrialFacilityName: nearest.name, industrialFacilityType: nearest.type, industrialFacilityCategory: nearest.category, industrialFacilityDistanceM: Number(nearest.distanceM.toFixed(1)), industrialFacilityOsmUrl: nearest.osmUrl }
     : emptyIndustrialFacility();
 }
 
@@ -127,6 +147,7 @@ function cachedIndustrialFacility(value: Partial<IndustrialEvidence>) {
   return {
     industrialFacilityName: value.industrialFacilityName ?? null,
     industrialFacilityType: value.industrialFacilityType ?? null,
+    industrialFacilityCategory: value.industrialFacilityCategory ?? null,
     industrialFacilityDistanceM: value.industrialFacilityDistanceM ?? null,
     industrialFacilityOsmUrl: value.industrialFacilityOsmUrl ?? null,
   };
@@ -437,7 +458,7 @@ async function fetchIndustrialContext(lat: number, lng: number): Promise<Industr
   const provider = "osm-overpass";
   const key = cacheKey(provider, lat, lng);
   const checkedAt = nowIso();
-  const query = `[out:json][timeout:12];(way(around:5000,${lat},${lng})["landuse"="industrial"];way(around:5000,${lat},${lng})["man_made"="works"];way(around:5000,${lat},${lng})["industrial"];way(around:5000,${lat},${lng})["power"="plant"];node(around:5000,${lat},${lng})["man_made"="works"];node(around:5000,${lat},${lng})["power"="plant"];);out center tags;`;
+  const query = `[out:json][timeout:12];(way(around:5000,${lat},${lng})["landuse"="industrial"];way(around:5000,${lat},${lng})["man_made"="works"];way(around:5000,${lat},${lng})["man_made"="mine"];way(around:5000,${lat},${lng})["landuse"="quarry"];way(around:5000,${lat},${lng})["industrial"];way(around:5000,${lat},${lng})["power"="plant"];node(around:5000,${lat},${lng})["man_made"="works"];node(around:5000,${lat},${lng})["man_made"="mine"];node(around:5000,${lat},${lng})["power"="plant"];node(around:5000,${lat},${lng})["landuse"="farmland"];way(around:5000,${lat},${lng})["landuse"="farmland"];);out center tags;`;
   const hosts = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"];
   try {
     const data = await Promise.any(hosts.map(async host => {
@@ -449,7 +470,9 @@ async function fetchIndustrialContext(lat: number, lng: number): Promise<Industr
       return response.json() as Promise<{ elements?: OverpassIndustrialFeature[] }>;
     }));
     const elements = data.elements ?? [];
-    const features = elements.length;
+    // Preserve the original count for the established industrial query, including
+    // legacy/tag-sparse responses; farmland was added only for additive context.
+    const features = elements.filter(element => !element.tags || isExistingIndustrialContext(element.tags)).length;
     const nearestFacility = nearestIndustrialFacility(lat, lng, elements);
     await writeCached(key, provider, { features, ...nearestFacility }, 7 * 24 * 60 * 60_000);
     return {

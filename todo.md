@@ -120,6 +120,14 @@
 - [x] Expose the nearest in-radius plant only as an additive `corroboration.run` field and add deterministic match, no-match, and load-failure tests.
 - [x] Run and report a direct India-filtered GPPD table count with five stored sample reference rows.
 
+## Additive Multi-Source Facility Reference
+
+- [x] Cancelled after source review: the available CPCB category taxonomy is not a facility name/address register, and no CPCB ingestion, geocoding, or facility-location data will be added.
+- [x] Extend the nearest OSM context with conservative facility-type categories while retaining its existing name, type, distance, and source link fields.
+- [x] Not implemented by approved scope: GPPD remains the existing independent reference; no CPCB row storage or cross-source precedence is required.
+- [x] Not implemented by approved scope: no CPCB batch geocoding will run and no facility location will be inferred from the CPCB sector taxonomy.
+- [x] Add deterministic typed-OSM category, unknown-category, and no-match tests while retaining the existing GPPD reference regressions.
+
 ## India-Wide FIRMS Hotspot Snapshot Refresh
 
 - [x] Assess the supported persistent scheduling mechanism and document a 20–30 minute rate-safe refresh design that reuses the existing country-wide FIRMS request.
