@@ -8,6 +8,7 @@ import { classifyCorroborationEvidence } from "./classification";
 import { getActiveIncidentEvidence, getLongTermPersistence, getSourceEvidenceCache, recordDetectionHistory, saveSourceEvidenceCache, type DetectionHistoryInput, type IndiaHotspotSnapshotInput, type IndiaHotspotSnapshotSource } from "./db";
 import { fetchLandCover, type LandCoverResult } from "./landcover";
 import { lookupNearestGppdPlant, type GppdPlantReference } from "./gppdReference";
+import { assessFacilitySignals, type FacilitySignals } from "./facilityReference";
 import { makeRequest, type PlacesSearchResult } from "./_core/map";
 
 // Some scientific-data hosts are intermittently unreachable over IPv6 from cloud runtimes.
@@ -30,6 +31,8 @@ type IndustrialEvidence = BaseEvidence & {
   industrialFacilityName: string | null;
   industrialFacilityType: string | null;
   industrialFacilityCategory: "refinery" | "power_plant" | "steel" | "lng_terminal" | "mining" | "agricultural_zone" | null;
+  industrialFacilityLatitude: number | null;
+  industrialFacilityLongitude: number | null;
   industrialFacilityDistanceM: number | null;
   industrialFacilityOsmUrl: string | null;
 };
@@ -57,6 +60,7 @@ let detectionHistoryRecorder = recordDetectionHistory;
 let longTermPersistenceReader = getLongTermPersistence;
 let landCoverFetcher = fetchLandCover;
 let gppdReferenceLookup = lookupNearestGppdPlant;
+let facilitySignalLookup = assessFacilitySignals;
 const FIRMS_RELAY_BASE_URL = (process.env.FIRMS_RELAY_BASE_URL ?? "https://fireguard-firms-relay.fireguard-2cddbeab.workers.dev").replace(/\/+$/, "");
 
 function nowIso() {
@@ -91,7 +95,7 @@ type OverpassIndustrialFeature = {
 };
 
 function emptyIndustrialFacility() {
-  return { industrialFacilityName: null, industrialFacilityType: null, industrialFacilityCategory: null, industrialFacilityDistanceM: null, industrialFacilityOsmUrl: null };
+  return { industrialFacilityName: null, industrialFacilityType: null, industrialFacilityCategory: null, industrialFacilityLatitude: null, industrialFacilityLongitude: null, industrialFacilityDistanceM: null, industrialFacilityOsmUrl: null };
 }
 
 function industrialFacilityType(tags: Record<string, string | undefined>) {
@@ -132,6 +136,8 @@ export function nearestIndustrialFacility(lat: number, lng: number, elements: Ov
       name: tags.name ?? tags["name:en"] ?? null,
       type,
       category: industrialFacilityCategory(tags),
+      latitude: featureLat,
+      longitude: featureLng,
       distanceM: haversineKm(lat, lng, featureLat, featureLng) * 1000,
       osmUrl: ["node", "way", "relation"].includes(element.type ?? "") && Number.isInteger(element.id)
         ? `https://www.openstreetmap.org/${element.type}/${element.id}`
@@ -139,7 +145,7 @@ export function nearestIndustrialFacility(lat: number, lng: number, elements: Ov
     }];
   }).sort((left, right) => left.distanceM - right.distanceM)[0];
   return nearest
-    ? { industrialFacilityName: nearest.name, industrialFacilityType: nearest.type, industrialFacilityCategory: nearest.category, industrialFacilityDistanceM: Number(nearest.distanceM.toFixed(1)), industrialFacilityOsmUrl: nearest.osmUrl }
+    ? { industrialFacilityName: nearest.name, industrialFacilityType: nearest.type, industrialFacilityCategory: nearest.category, industrialFacilityLatitude: nearest.latitude, industrialFacilityLongitude: nearest.longitude, industrialFacilityDistanceM: Number(nearest.distanceM.toFixed(1)), industrialFacilityOsmUrl: nearest.osmUrl }
     : emptyIndustrialFacility();
 }
 
@@ -148,6 +154,8 @@ function cachedIndustrialFacility(value: Partial<IndustrialEvidence>) {
     industrialFacilityName: value.industrialFacilityName ?? null,
     industrialFacilityType: value.industrialFacilityType ?? null,
     industrialFacilityCategory: value.industrialFacilityCategory ?? null,
+    industrialFacilityLatitude: value.industrialFacilityLatitude ?? null,
+    industrialFacilityLongitude: value.industrialFacilityLongitude ?? null,
     industrialFacilityDistanceM: value.industrialFacilityDistanceM ?? null,
     industrialFacilityOsmUrl: value.industrialFacilityOsmUrl ?? null,
   };
@@ -588,6 +596,8 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
   void landCoverFetcher(input.lat, input.lng).then(result => { landCover = result; }).catch(() => undefined);
   let gppdReference: GppdPlantReference | undefined;
   void gppdReferenceLookup(input.lat, input.lng).then(result => { gppdReference = result; }).catch(() => undefined);
+  let facilitySignals: FacilitySignals | undefined;
+  const facilitySignalsInput = (industrial: IndustrialEvidence) => ({ lat: input.lat, lng: input.lng, ...industrial, ...(gppdReference ? { gppdReference } : {}) });
   const checks = Promise.all([
     fetchFirms(input.lat, input.lng, 1, "VIIRS_NOAA20_NRT", "NOAA-20"),
     fetchFirms(input.lat, input.lng, 7, "VIIRS_NOAA20_NRT", "NOAA-20"),
@@ -619,6 +629,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     return {
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
       firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
+      flareMatch: false, flareMatchConfidence: "none" as const, miningMatch: false, vnfState: "unavailable" as const, vnfCandidateCount: 0,
       ...(landCover ? { landCover } : {}),
       ...(gppdReference ? { gppdReference } : {}),
       independentCorroboration: { state: "evidence_pending", detail: "The live evidence window closed before all sources responded. The screen remains operational and no industrial-fire conclusion has been issued." },
@@ -626,6 +637,9 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     };
   }
   const [firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather] = await checks;
+  // This optional source must never delay the established corroboration flow.
+  // It can contribute only when the bounded lookup settles during existing work.
+  void facilitySignalLookup(facilitySignalsInput(industrial)).then(result => { facilitySignals = result; }).catch(() => undefined);
   const incidentEvidence = await authorityIncidentEvidence;
   const longTermHistory = await longTermPersistenceReader(input.lat, input.lng);
   const classification = classifyCorroborationEvidence({
@@ -670,6 +684,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
   return {
     detectionId: input.detectionId, checkedAt: nowIso(), sourcesRunInParallel: true,
     firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
+    ...(facilitySignals ?? { flareMatch: false, flareMatchConfidence: "none" as const, miningMatch: false, vnfState: "unavailable" as const, vnfCandidateCount: 0 }),
     ...(landCover ? { landCover } : {}),
     ...(gppdReference ? { gppdReference } : {}),
     independentCorroboration: {
@@ -722,4 +737,9 @@ export function setLandCoverFetcherForTests(fetcher?: typeof fetchLandCover) {
 /** Deterministic test-only hook; production always uses the stored India GPPD reference. */
 export function setGppdReferenceLookupForTests(lookup?: typeof lookupNearestGppdPlant) {
   gppdReferenceLookup = lookup ?? lookupNearestGppdPlant;
+}
+
+/** Deterministic test-only hook; production uses the bounded failure-safe VNF adapter. */
+export function setFacilitySignalLookupForTests(lookup?: typeof assessFacilitySignals) {
+  facilitySignalLookup = lookup ?? assessFacilitySignals;
 }

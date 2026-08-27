@@ -1,6 +1,6 @@
 /** LIVE CORROBORATION — verifies parallel source handling and conservative conclusions with deterministic network mocks. */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clearEvidenceCacheForTests, evaluateCorroboration, fetchIndiaCountryFirmsSnapshot, setAuthorityIncidentEvidenceForTests, setDetectionHistoryRecorderForTests, setEvidenceCachePersistenceForTests, setGppdReferenceLookupForTests, setLandCoverFetcherForTests, setLiveEvidenceWindowForTests, setLongTermPersistenceReaderForTests } from "./corroboration";
+import { clearEvidenceCacheForTests, evaluateCorroboration, fetchIndiaCountryFirmsSnapshot, setAuthorityIncidentEvidenceForTests, setDetectionHistoryRecorderForTests, setEvidenceCachePersistenceForTests, setFacilitySignalLookupForTests, setGppdReferenceLookupForTests, setLandCoverFetcherForTests, setLiveEvidenceWindowForTests, setLongTermPersistenceReaderForTests } from "./corroboration";
 
 const originalFetch = global.fetch;
 const originalKey = process.env.NASA_FIRMS_MAP_KEY;
@@ -20,9 +20,26 @@ afterEach(() => {
   setLongTermPersistenceReaderForTests();
   setLandCoverFetcherForTests();
   setGppdReferenceLookupForTests();
+  setFacilitySignalLookupForTests();
 });
 
 describe("evaluateCorroboration", () => {
+  it("adds flare/mining signals without changing the existing industrial fields or rule classification", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    setFacilitySignalLookupForTests(async () => ({ flareMatch: true, flareMatchConfidence: "high", miningMatch: false, vnfState: "available", vnfCandidateCount: 1, detail: "Fixture only." }));
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("fireguard-firms-relay")) return new Response("latitude,longitude,acq_date\n27.13,73.33,2026-08-25\n", { status: 200 });
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [{ id: 1 }] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "facility-signal" });
+    expect(result).toMatchObject({ flareMatch: true, flareMatchConfidence: "high", miningMatch: false });
+    expect(result.industrial.features).toBe(1);
+    expect(result.classification.classification).toBe("uncertain_other");
+  });
+
   it("adds an in-radius GPPD plant only as optional reference context", async () => {
     process.env.NASA_FIRMS_MAP_KEY = "test-key";
     setGppdReferenceLookupForTests(async () => ({ name: "Reference Power Plant", fuelType: "Coal", capacityMw: 450.5, distanceKm: 0.71, source: "WRI Global Power Plant Database v1.3.0 (CC BY 4.0)" }));

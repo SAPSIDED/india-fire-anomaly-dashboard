@@ -128,6 +128,12 @@
 - [x] Not implemented by approved scope: no CPCB batch geocoding will run and no facility location will be inferred from the CPCB sector taxonomy.
 - [x] Add deterministic typed-OSM category, unknown-category, and no-match tests while retaining the existing GPPD reference regressions.
 
+## Additive VNF Flare and Mining Signals
+
+- [x] Inspect the existing facility-context lookup and add a bounded, failure-safe NOAA VIIRS Nightfire adapter without per-request full-dataset downloads.
+- [x] Add additive high-confidence gas-flare and separate mining flags, cross-referenced only with existing GPPD and typed OSM context, without changing industrial fields or Stage 1 classification.
+- [x] Add deterministic flare-match, mining-match, no-match, and backward-compatibility tests using local fixtures only.
+
 ## India-Wide FIRMS Hotspot Snapshot Refresh
 
 - [x] Assess the supported persistent scheduling mechanism and document a 20–30 minute rate-safe refresh design that reuses the existing country-wide FIRMS request.

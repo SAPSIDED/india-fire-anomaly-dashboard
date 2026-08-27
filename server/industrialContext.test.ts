@@ -44,6 +44,6 @@ describe("nearestIndustrialFacility", () => {
     expect(nearestIndustrialFacility(20, 77, [
       { tags: { landuse: "industrial", name: "No Location" } },
       { lat: 20.001, lon: 77.001, tags: { amenity: "school" } },
-    ])).toEqual({ industrialFacilityName: null, industrialFacilityType: null, industrialFacilityCategory: null, industrialFacilityDistanceM: null, industrialFacilityOsmUrl: null });
+    ])).toEqual({ industrialFacilityName: null, industrialFacilityType: null, industrialFacilityCategory: null, industrialFacilityLatitude: null, industrialFacilityLongitude: null, industrialFacilityDistanceM: null, industrialFacilityOsmUrl: null });
   });
 });
