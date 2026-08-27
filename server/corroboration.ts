@@ -526,6 +526,8 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
       industrialState: industrial.state,
       historyDailyDetections: firmsHistory.dailyDetections,
       historyState: firmsHistory.state,
+      landCoverClass: landCover?.landCoverClass ?? null,
+      longTermHistory: longTermHistory.state === "available" ? { totalDetectionCount: longTermHistory.totalDetectionCount, activeMonths: longTermHistory.activeMonths } : null,
     });
     return {
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
@@ -543,6 +545,8 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     industrialState: industrial.state,
     historyDailyDetections: firmsHistory.dailyDetections,
     historyState: firmsHistory.state,
+    landCoverClass: landCover?.landCoverClass ?? null,
+    longTermHistory: longTermHistory.state === "available" ? { totalDetectionCount: longTermHistory.totalDetectionCount, activeMonths: longTermHistory.activeMonths } : null,
   });
 
   const hasOnlyLiveCore = [firmsCurrent, firmsIndependentCurrent, industrial].every(source => source.state === "available");

@@ -77,6 +77,8 @@
 - [x] Add a pure classification module for industrial thermal source, likely wildfire vegetation, and uncertain other labels using only existing corroboration evidence.
 - [x] Attach the additive classification field to the existing corroboration response without changing source retrieval, database, dependencies, or existing procedure contracts.
 - [x] Add deterministic tests for each classification rule and run the full existing validation suite.
+- [x] Extend the classifier input and decision reasons with already available land-cover and long-term-history evidence, without changing retrieval or persistence code.
+- [x] Add deterministic agreement, disagreement, and unavailable-evidence fallback tests for the enriched classification rules.
 
 ## Database-Backed FIRMS History
 
