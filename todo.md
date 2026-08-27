@@ -112,7 +112,7 @@
 - [x] Return `state: insufficient` and null variance for fewer than four FRP samples; return numeric variance only with `state: adequate` at four or more samples.
 - [x] Add deterministic single-point, adequate same-platform, mixed-platform separation, and unchanged-classification regression tests; validate build and production checkpoint.
 - [x] Add an explicit regression proving the FRP variance reliability contract does not alter the established classification output.
-- [ ] Save and publish the validated FRP variance reliability correction checkpoint.
+- [x] Save and publish the validated FRP variance reliability correction checkpoint.
 
 ## Additive Land-Cover Evidence
 
