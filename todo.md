@@ -106,6 +106,17 @@
 - [x] Prove a hanging land-cover request cannot delay the existing corroboration result.
 - [x] Run and record a production build after the additive land-cover implementation.
 
+## Additive Sentinel-2 Imagery Evidence
+
+- [x] Cancelled at user request; no Sentinel-2 imagery integration, credential, module, retrieval, or test change will be implemented.
+
+## Additive GPPD Power-Plant Reference
+
+- [x] Research and record the authoritative WRI Global Power Plant Database source, schema, license, and India filter used for reference ingestion.
+- [x] Add the `gppd_reference` table and radius-friendly nearest-plant lookup for name, fuel type, capacity, latitude, and longitude.
+- [x] Add a failure-safe India GPPD loader with successful-reference caching and non-blocking cached fallback, without changing existing Stage 1–3 or FIRMS retrieval behavior.
+- [x] Expose the nearest in-radius plant only as an additive `corroboration.run` field and add deterministic match, no-match, and load-failure tests.
+
 ## India-Wide FIRMS Hotspot Snapshot Refresh
 
 - [x] Assess the supported persistent scheduling mechanism and document a 20–30 minute rate-safe refresh design that reuses the existing country-wide FIRMS request.

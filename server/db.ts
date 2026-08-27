@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, isNull, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { detectionHistory, incidentEvidence, indiaHotspotSnapshot, InsertUser, sourceEvidenceCache, users } from "../drizzle/schema";
+import { detectionHistory, gppdReference, incidentEvidence, indiaHotspotSnapshot, InsertUser, sourceEvidenceCache, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { dedupeDetectionHistoryRows, summarizeLongTermPersistence, type LongTermPersistenceSummary } from "./history";
 
@@ -242,4 +242,41 @@ export async function getIndiaHotspotSnapshot() {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(indiaHotspotSnapshot).orderBy(desc(indiaHotspotSnapshot.acquiredDate), desc(indiaHotspotSnapshot.acquiredTime), desc(indiaHotspotSnapshot.id));
+}
+
+export type GppdReferenceInput = {
+  gppdId: string;
+  country: "IND";
+  name: string;
+  primaryFuel: string | null;
+  capacityMw: string | null;
+  latitude: string;
+  longitude: string;
+  sourceUrl: string;
+};
+
+/** Atomically replaces the India GPPD reference copy after a successful upstream load. */
+export async function replaceGppdReference(rows: GppdReferenceInput[]) {
+  const db = await getDb();
+  if (!db) throw new Error("The GPPD reference database is unavailable.");
+  const loadedAt = new Date();
+  await db.transaction(async tx => {
+    await tx.delete(gppdReference);
+    if (rows.length > 0) await tx.insert(gppdReference).values(rows.map(row => ({ ...row, loadedAt })));
+  });
+  return { loadedAt, rowCount: rows.length };
+}
+
+/** Reads a radius-bounded candidate set using the latitude/longitude index; final distance is calculated by the caller. */
+export async function getGppdReferenceCandidates(lat: number, lng: number, radiusKm: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const latitudeDelta = radiusKm / 111;
+  const longitudeDelta = radiusKm / Math.max(1, 111 * Math.cos(lat * Math.PI / 180));
+  return db.select().from(gppdReference).where(and(
+    gte(gppdReference.latitude, (lat - latitudeDelta).toFixed(6)),
+    lte(gppdReference.latitude, (lat + latitudeDelta).toFixed(6)),
+    gte(gppdReference.longitude, (lng - longitudeDelta).toFixed(6)),
+    lte(gppdReference.longitude, (lng + longitudeDelta).toFixed(6)),
+  ));
 }

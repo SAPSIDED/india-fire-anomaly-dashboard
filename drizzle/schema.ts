@@ -1,4 +1,4 @@
-import { date, decimal, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
+import { date, decimal, index, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -96,3 +96,25 @@ export const indiaHotspotSnapshot = mysqlTable("india_hotspot_snapshot", {
 });
 
 export type IndiaHotspotSnapshot = typeof indiaHotspotSnapshot.$inferSelect;
+
+/**
+ * India-only reference copy of WRI's Global Power Plant Database. This is
+ * facility context, not incident evidence or a fire classification input.
+ */
+export const gppdReference = mysqlTable("gppd_reference", {
+  id: int("id").autoincrement().primaryKey(),
+  gppdId: varchar("gppdId", { length: 64 }).notNull(),
+  country: varchar("country", { length: 3 }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  primaryFuel: varchar("primaryFuel", { length: 64 }),
+  capacityMw: decimal("capacityMw", { precision: 12, scale: 3 }),
+  latitude: decimal("latitude", { precision: 9, scale: 6 }).notNull(),
+  longitude: decimal("longitude", { precision: 9, scale: 6 }).notNull(),
+  sourceUrl: varchar("sourceUrl", { length: 1024 }).notNull(),
+  loadedAt: timestamp("loadedAt").notNull(),
+}, table => [
+  uniqueIndex("gppdReference_gppdId_unique").on(table.gppdId),
+  index("gppdReference_latitude_longitude_idx").on(table.latitude, table.longitude),
+]);
+
+export type GppdReference = typeof gppdReference.$inferSelect;

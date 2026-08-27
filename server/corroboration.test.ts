@@ -1,6 +1,6 @@
 /** LIVE CORROBORATION — verifies parallel source handling and conservative conclusions with deterministic network mocks. */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clearEvidenceCacheForTests, evaluateCorroboration, fetchIndiaCountryFirmsSnapshot, setAuthorityIncidentEvidenceForTests, setDetectionHistoryRecorderForTests, setEvidenceCachePersistenceForTests, setLandCoverFetcherForTests, setLiveEvidenceWindowForTests, setLongTermPersistenceReaderForTests } from "./corroboration";
+import { clearEvidenceCacheForTests, evaluateCorroboration, fetchIndiaCountryFirmsSnapshot, setAuthorityIncidentEvidenceForTests, setDetectionHistoryRecorderForTests, setEvidenceCachePersistenceForTests, setGppdReferenceLookupForTests, setLandCoverFetcherForTests, setLiveEvidenceWindowForTests, setLongTermPersistenceReaderForTests } from "./corroboration";
 
 const originalFetch = global.fetch;
 const originalKey = process.env.NASA_FIRMS_MAP_KEY;
@@ -19,9 +19,24 @@ afterEach(() => {
   setDetectionHistoryRecorderForTests();
   setLongTermPersistenceReaderForTests();
   setLandCoverFetcherForTests();
+  setGppdReferenceLookupForTests();
 });
 
 describe("evaluateCorroboration", () => {
+  it("adds an in-radius GPPD plant only as optional reference context", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    setGppdReferenceLookupForTests(async () => ({ name: "Reference Power Plant", fuelType: "Coal", capacityMw: 450.5, distanceKm: 0.71, source: "WRI Global Power Plant Database v1.3.0 (CC BY 4.0)" }));
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("fireguard-firms-relay")) return new Response("latitude,longitude,acq_date\n27.13,73.33,2026-08-25\n", { status: 200 });
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "gppd-reference" });
+    expect(result.gppdReference).toMatchObject({ name: "Reference Power Plant", fuelType: "Coal", capacityMw: 450.5, distanceKm: 0.71 });
+  });
+
   it("keeps the country query preferred and normalizes the approved India-wide WFS fallback into snapshot rows", async () => {
     process.env.NASA_FIRMS_MAP_KEY = "test-key";
     global.fetch = vi.fn(async (input: RequestInfo | URL) => {
