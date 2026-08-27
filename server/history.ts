@@ -2,6 +2,9 @@ export type StoredDetectionHistoryPoint = {
   detectionDate: string | Date;
   dayNight?: string | null;
   frp?: string | number | null;
+  latitude?: string | number;
+  longitude?: string | number;
+  platform?: string | null;
 };
 
 export type LongTermPersistenceSummary = {
@@ -29,27 +32,55 @@ export type StoredHistoryStatistics = {
   dayToNightRatio: number | null;
   dayNightSampleCount: number;
   frpSampleCount: number;
-  frpVariance: number | null;
+  frpVarianceGroups: FrpVarianceGroup[];
 };
+
+export type FrpVarianceGroup = {
+  latitude: string;
+  longitude: string;
+  platform: "MODIS" | "VIIRS" | "unattributed";
+  sampleCount: number;
+  state: "adequate" | "insufficient";
+  varianceMw2: number | null;
+};
+
+/** Keeps FRP samples from different exact coordinates and platforms separate. A variance under four samples is intentionally withheld. */
+export function summarizeFrpVarianceGroups(rows: StoredDetectionHistoryPoint[]): FrpVarianceGroup[] {
+  const grouped = new Map<string, { latitude: string; longitude: string; platform: FrpVarianceGroup["platform"]; values: number[] }>();
+  for (const row of rows) {
+    if (row.frp === null || row.frp === undefined || `${row.frp}`.trim() === "") continue;
+    const value = Number(row.frp);
+    const latitude = Number(row.latitude);
+    const longitude = Number(row.longitude);
+    if (!Number.isFinite(value) || !Number.isFinite(latitude) || !Number.isFinite(longitude)) continue;
+    const normalizedLatitude = latitude.toFixed(6);
+    const normalizedLongitude = longitude.toFixed(6);
+    const platform = row.platform === "MODIS" || row.platform === "VIIRS" ? row.platform : "unattributed";
+    const key = `${normalizedLatitude}:${normalizedLongitude}:${platform}`;
+    const group = grouped.get(key) ?? { latitude: normalizedLatitude, longitude: normalizedLongitude, platform, values: [] };
+    group.values.push(value);
+    grouped.set(key, group);
+  }
+  return Array.from(grouped.values()).map(group => {
+    if (group.values.length < 4) return { latitude: group.latitude, longitude: group.longitude, platform: group.platform, sampleCount: group.values.length, state: "insufficient" as const, varianceMw2: null };
+    const mean = group.values.reduce((sum, value) => sum + value, 0) / group.values.length;
+    const variance = group.values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / group.values.length;
+    return { latitude: group.latitude, longitude: group.longitude, platform: group.platform, sampleCount: group.values.length, state: "adequate" as const, varianceMw2: Number(variance.toFixed(4)) };
+  }).sort((left, right) => left.latitude.localeCompare(right.latitude) || left.longitude.localeCompare(right.longitude) || left.platform.localeCompare(right.platform));
+}
 
 /** Pure descriptive statistics over valid values already stored from FIRMS. FRP variance is population variance in MW². */
 export function summarizeStoredHistoryStatistics(rows: StoredDetectionHistoryPoint[]): StoredHistoryStatistics {
   const dayDetections = rows.filter(row => row.dayNight?.trim().toUpperCase() === "D").length;
   const nightDetections = rows.filter(row => row.dayNight?.trim().toUpperCase() === "N").length;
-  const frpValues = rows.flatMap(row => {
-    if (row.frp === null || row.frp === undefined || `${row.frp}`.trim() === "") return [];
-    const value = Number(row.frp);
-    return Number.isFinite(value) ? [value] : [];
-  });
-  const mean = frpValues.length ? frpValues.reduce((sum, value) => sum + value, 0) / frpValues.length : null;
-  const frpVariance = mean === null ? null : frpValues.reduce((sum, value) => sum + (value - mean) ** 2, 0) / frpValues.length;
+  const frpVarianceGroups = summarizeFrpVarianceGroups(rows);
   return {
     dayDetections,
     nightDetections,
     dayToNightRatio: nightDetections > 0 ? Number((dayDetections / nightDetections).toFixed(4)) : null,
     dayNightSampleCount: dayDetections + nightDetections,
-    frpSampleCount: frpValues.length,
-    frpVariance: frpVariance === null ? null : Number(frpVariance.toFixed(4)),
+    frpSampleCount: frpVarianceGroups.reduce((total, group) => total + group.sampleCount, 0),
+    frpVarianceGroups,
   };
 }
 

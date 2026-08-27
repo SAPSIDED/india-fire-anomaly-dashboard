@@ -25,17 +25,42 @@ describe("detection history helpers", () => {
     expect(summarizeLongTermPersistence([])).toEqual({ totalDetectionCount: 0, firstSeen: null, lastSeen: null, activeMonths: 0 });
   });
 
-  it("calculates day/night ratio and population FRP variance from stored valid FIRMS fields", () => {
+  it("keeps day/night statistics and withholds variance for fewer than four FRP samples", () => {
     expect(summarizeStoredHistoryStatistics([
-      { detectionDate: "2026-10-20", dayNight: "D", frp: "10" },
-      { detectionDate: "2026-10-21", dayNight: "N", frp: "20" },
-      { detectionDate: "2026-10-22", dayNight: "D", frp: "30" },
-      { detectionDate: "2026-10-23", dayNight: null, frp: null },
-    ])).toEqual({ dayDetections: 2, nightDetections: 1, dayToNightRatio: 2, dayNightSampleCount: 3, frpSampleCount: 3, frpVariance: 66.6667 });
+      { detectionDate: "2026-10-20", dayNight: "D", frp: "10", latitude: "27.13", longitude: "73.33", platform: "VIIRS" },
+      { detectionDate: "2026-10-21", dayNight: "N", frp: "20", latitude: "27.13", longitude: "73.33", platform: "VIIRS" },
+      { detectionDate: "2026-10-22", dayNight: "D", frp: "30", latitude: "27.13", longitude: "73.33", platform: "VIIRS" },
+      { detectionDate: "2026-10-23", dayNight: null, frp: null, latitude: "27.13", longitude: "73.33", platform: "VIIRS" },
+    ])).toEqual({ dayDetections: 2, nightDetections: 1, dayToNightRatio: 2, dayNightSampleCount: 3, frpSampleCount: 3, frpVarianceGroups: [{ latitude: "27.130000", longitude: "73.330000", platform: "VIIRS", sampleCount: 3, state: "insufficient", varianceMw2: null }] });
+  });
+
+  it("returns a numeric population variance only for four or more same-platform samples", () => {
+    expect(summarizeStoredHistoryStatistics([
+      { detectionDate: "2026-10-20", frp: "10", latitude: "27.13", longitude: "73.33", platform: "VIIRS" },
+      { detectionDate: "2026-10-21", frp: "20", latitude: "27.13", longitude: "73.33", platform: "VIIRS" },
+      { detectionDate: "2026-10-22", frp: "30", latitude: "27.13", longitude: "73.33", platform: "VIIRS" },
+      { detectionDate: "2026-10-23", frp: "40", latitude: "27.13", longitude: "73.33", platform: "VIIRS" },
+    ]).frpVarianceGroups).toEqual([{ latitude: "27.130000", longitude: "73.330000", platform: "VIIRS", sampleCount: 4, state: "adequate", varianceMw2: 125 }]);
+  });
+
+  it("computes mixed MODIS and VIIRS samples at one location as independent platform groups", () => {
+    expect(summarizeStoredHistoryStatistics([
+      { detectionDate: "2026-10-20", frp: "1", latitude: "27.13", longitude: "73.33", platform: "MODIS" },
+      { detectionDate: "2026-10-21", frp: "3", latitude: "27.13", longitude: "73.33", platform: "MODIS" },
+      { detectionDate: "2026-10-22", frp: "5", latitude: "27.13", longitude: "73.33", platform: "MODIS" },
+      { detectionDate: "2026-10-23", frp: "7", latitude: "27.13", longitude: "73.33", platform: "MODIS" },
+      { detectionDate: "2026-10-20", frp: "10", latitude: "27.13", longitude: "73.33", platform: "VIIRS" },
+      { detectionDate: "2026-10-21", frp: "20", latitude: "27.13", longitude: "73.33", platform: "VIIRS" },
+      { detectionDate: "2026-10-22", frp: "30", latitude: "27.13", longitude: "73.33", platform: "VIIRS" },
+      { detectionDate: "2026-10-23", frp: "40", latitude: "27.13", longitude: "73.33", platform: "VIIRS" },
+    ]).frpVarianceGroups).toEqual([
+      { latitude: "27.130000", longitude: "73.330000", platform: "MODIS", sampleCount: 4, state: "adequate", varianceMw2: 5 },
+      { latitude: "27.130000", longitude: "73.330000", platform: "VIIRS", sampleCount: 4, state: "adequate", varianceMw2: 125 },
+    ]);
   });
 
   it("returns explicit empty descriptive statistics when stored rows have no valid day/night or FRP values", () => {
     expect(summarizeStoredHistoryStatistics([{ detectionDate: "2026-10-20", dayNight: null, frp: null }]))
-      .toEqual({ dayDetections: 0, nightDetections: 0, dayToNightRatio: null, dayNightSampleCount: 0, frpSampleCount: 0, frpVariance: null });
+      .toEqual({ dayDetections: 0, nightDetections: 0, dayToNightRatio: null, dayNightSampleCount: 0, frpSampleCount: 0, frpVarianceGroups: [] });
   });
 });

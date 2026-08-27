@@ -215,13 +215,13 @@ export type DetectionHistoryStatistics = StoredHistoryStatistics & { state: "ava
 
 /** Database-only descriptive statistics for valid day/night and FRP values in the established 8 km local screening area. */
 export async function getDetectionHistoryStatistics(lat: number, lng: number): Promise<DetectionHistoryStatistics> {
-  const unavailable: DetectionHistoryStatistics = { state: "unavailable", dayDetections: 0, nightDetections: 0, dayToNightRatio: null, dayNightSampleCount: 0, frpSampleCount: 0, frpVariance: null };
+  const unavailable: DetectionHistoryStatistics = { state: "unavailable", dayDetections: 0, nightDetections: 0, dayToNightRatio: null, dayNightSampleCount: 0, frpSampleCount: 0, frpVarianceGroups: [] };
   const db = await getDb();
   if (!db) return unavailable;
   try {
     const latitudeDelta = 8 / 111;
     const longitudeDelta = 8 / Math.max(1, 111 * Math.cos(lat * Math.PI / 180));
-    const rows = await db.select({ detectionDate: detectionHistory.detectionDate, dayNight: detectionHistory.dayNight, frp: detectionHistory.frp }).from(detectionHistory).where(and(
+    const rows = await db.select({ detectionDate: detectionHistory.detectionDate, dayNight: detectionHistory.dayNight, frp: detectionHistory.frp, latitude: detectionHistory.latitude, longitude: detectionHistory.longitude, platform: detectionHistory.platform }).from(detectionHistory).where(and(
       gte(detectionHistory.latitude, (lat - latitudeDelta).toFixed(6)),
       lte(detectionHistory.latitude, (lat + latitudeDelta).toFixed(6)),
       gte(detectionHistory.longitude, (lng - longitudeDelta).toFixed(6)),

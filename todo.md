@@ -107,6 +107,12 @@
 - [x] Trace the detection-history parser and duplicate-safe insertion path to identify why historical rows retained null FRP values.
 - [x] Correct forward-only FRP parsing/storage and add a nullable sensor/platform field without altering existing history rows, Stage 1–3 behavior, or retrieval decisions.
 - [x] Add deterministic valid and missing/malformed FRP/platform parsing and storage tests, then validate five real newly ingested rows where available.
+- [x] Run a read-only per-location and per-platform variance/sufficiency diagnostic limited to the new complete FRP/platform cohort; do not change code or data.
+- [x] Change the additive FRP variance aggregation to return independent exact-location, per-platform groups without pooling mixed sensors or neighbouring locations.
+- [x] Return `state: insufficient` and null variance for fewer than four FRP samples; return numeric variance only with `state: adequate` at four or more samples.
+- [x] Add deterministic single-point, adequate same-platform, mixed-platform separation, and unchanged-classification regression tests; validate build and production checkpoint.
+- [x] Add an explicit regression proving the FRP variance reliability contract does not alter the established classification output.
+- [ ] Save and publish the validated FRP variance reliability correction checkpoint.
 
 ## Additive Land-Cover Evidence
 

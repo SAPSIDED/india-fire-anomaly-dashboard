@@ -7,7 +7,7 @@ const originalKey = process.env.NASA_FIRMS_MAP_KEY;
 
 beforeEach(() => {
   setEvidenceCachePersistenceForTests(false);
-  setDetectionHistoryStatisticsReaderForTests(async () => ({ state: "unavailable", dayDetections: 0, nightDetections: 0, dayToNightRatio: null, dayNightSampleCount: 0, frpSampleCount: 0, frpVariance: null }));
+  setDetectionHistoryStatisticsReaderForTests(async () => ({ state: "unavailable", dayDetections: 0, nightDetections: 0, dayToNightRatio: null, dayNightSampleCount: 0, frpSampleCount: 0, frpVarianceGroups: [] }));
   setSeasonalAgriculturalBurningReaderForTests(async (_lat, _lng, month) => ({ state: "unavailable", geographicState: null, month, calendarState: "unavailable", season: null, contextLevel: null, source: "Fixture", detail: "Fixture only." }));
 });
 
@@ -219,7 +219,7 @@ describe("evaluateCorroboration", () => {
 
   it("exposes populated stored day/night, FRP, and seasonal context as additive evidence without changing Stage 1", async () => {
     process.env.NASA_FIRMS_MAP_KEY = "test-key";
-    setDetectionHistoryStatisticsReaderForTests(async () => ({ state: "available", dayDetections: 4, nightDetections: 2, dayToNightRatio: 2, dayNightSampleCount: 6, frpSampleCount: 3, frpVariance: 12.5 }));
+    setDetectionHistoryStatisticsReaderForTests(async () => ({ state: "available", dayDetections: 4, nightDetections: 2, dayToNightRatio: 2, dayNightSampleCount: 6, frpSampleCount: 3, frpVarianceGroups: [{ latitude: "27.130000", longitude: "73.330000", platform: "VIIRS", sampleCount: 3, state: "insufficient", varianceMw2: null }] }));
     setSeasonalAgriculturalBurningReaderForTests(async () => ({ state: "available", geographicState: "Punjab", month: 10, calendarState: "in_season", season: "post-rice harvest", contextLevel: "high", source: "Fixture calendar", detail: "Context only." }));
     global.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
@@ -231,14 +231,14 @@ describe("evaluateCorroboration", () => {
     const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "history-stats-zone" });
 
     expect(result.dayNightDetectionRatio).toEqual({ state: "available", dayDetections: 4, nightDetections: 2, ratio: 2, sampleCount: 6 });
-    expect(result.frpVariance).toEqual({ state: "available", sampleCount: 3, varianceMw2: 12.5 });
+    expect(result.frpVariance).toEqual({ state: "insufficient", sampleCount: 3, groups: [{ latitude: "27.130000", longitude: "73.330000", platform: "VIIRS", sampleCount: 3, state: "insufficient", varianceMw2: null }] });
     expect(result.seasonalAgriculturalBurning).toMatchObject({ calendarState: "in_season", geographicState: "Punjab" });
     expect(result.classification.classification).toBe("uncertain_other");
   });
 
   it("exposes explicit empty stored statistics while retaining available history context", async () => {
     process.env.NASA_FIRMS_MAP_KEY = "test-key";
-    setDetectionHistoryStatisticsReaderForTests(async () => ({ state: "available", dayDetections: 0, nightDetections: 0, dayToNightRatio: null, dayNightSampleCount: 0, frpSampleCount: 0, frpVariance: null }));
+    setDetectionHistoryStatisticsReaderForTests(async () => ({ state: "available", dayDetections: 0, nightDetections: 0, dayToNightRatio: null, dayNightSampleCount: 0, frpSampleCount: 0, frpVarianceGroups: [] }));
     global.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.includes("fireguard-firms-relay")) return new Response("latitude,longitude,acq_date\n27.13,73.33,2026-08-25\n", { status: 200 });
@@ -249,7 +249,32 @@ describe("evaluateCorroboration", () => {
     const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "history-stats-empty" });
 
     expect(result.dayNightDetectionRatio).toEqual({ state: "available", dayDetections: 0, nightDetections: 0, ratio: null, sampleCount: 0 });
-    expect(result.frpVariance).toEqual({ state: "available", sampleCount: 0, varianceMw2: null });
+    expect(result.frpVariance).toEqual({ state: "insufficient", sampleCount: 0, groups: [] });
+  });
+
+  it("does not alter the established classification when FRP variance is insufficient", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    setDetectionHistoryStatisticsReaderForTests(async () => ({
+      state: "available",
+      dayDetections: 0,
+      nightDetections: 0,
+      dayToNightRatio: null,
+      dayNightSampleCount: 0,
+      frpSampleCount: 1,
+      frpVarianceGroups: [{ latitude: "27.130000", longitude: "73.330000", platform: "VIIRS", sampleCount: 1, state: "insufficient", varianceMw2: null }],
+    }));
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("fireguard-firms-relay")) return new Response("latitude,longitude,acq_date\n27.13,73.33,2026-08-25\n", { status: 200 });
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [{ id: 1 }] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "frp-variance-classification-compatibility" });
+
+    expect(result.frpVariance).toMatchObject({ state: "insufficient", sampleCount: 1 });
+    expect(result.classification.classification).toBe("uncertain_other");
+    expect(result.classification.confidence).toBe("high");
   });
 
   it("exposes explicit unavailable stored statistics and seasonal context without changing a withheld conclusion", async () => {
@@ -264,7 +289,7 @@ describe("evaluateCorroboration", () => {
     const result = await evaluateCorroboration({ lat: 31.41, lng: 75.99, detectionId: "history-stats-unavailable" });
 
     expect(result.dayNightDetectionRatio).toMatchObject({ state: "unavailable", ratio: null, sampleCount: 0 });
-    expect(result.frpVariance).toMatchObject({ state: "unavailable", varianceMw2: null, sampleCount: 0 });
+    expect(result.frpVariance).toMatchObject({ state: "unavailable", groups: [], sampleCount: 0 });
     expect(result.seasonalAgriculturalBurning).toMatchObject({ state: "unavailable", calendarState: "unavailable" });
     expect(result.conclusion.level).toBe("evidence_pending");
   });

@@ -5,7 +5,7 @@
  */
 import { setDefaultResultOrder } from "node:dns";
 import { classifyCorroborationEvidence } from "./classification";
-import { getActiveIncidentEvidence, getDetectionHistoryStatistics, getLongTermPersistence, getSourceEvidenceCache, recordDetectionHistory, saveSourceEvidenceCache, type DetectionHistoryInput, type IndiaHotspotSnapshotInput, type IndiaHotspotSnapshotSource } from "./db";
+import { getActiveIncidentEvidence, getDetectionHistoryStatistics, getLongTermPersistence, getSourceEvidenceCache, recordDetectionHistory, saveSourceEvidenceCache, type DetectionHistoryInput, type DetectionHistoryStatistics, type IndiaHotspotSnapshotInput, type IndiaHotspotSnapshotSource } from "./db";
 import { fetchLandCover, type LandCoverResult } from "./landcover";
 import { lookupNearestGppdPlant, type GppdPlantReference } from "./gppdReference";
 import { assessFacilitySignals, type FacilitySignals } from "./facilityReference";
@@ -69,6 +69,15 @@ const FIRMS_RELAY_BASE_URL = (process.env.FIRMS_RELAY_BASE_URL ?? "https://fireg
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function frpVarianceEvidence(statistics: DetectionHistoryStatistics) {
+  const state = statistics.state === "unavailable"
+    ? "unavailable" as const
+    : statistics.frpVarianceGroups.some(group => group.state === "adequate")
+      ? "adequate" as const
+      : "insufficient" as const;
+  return { state, sampleCount: statistics.frpSampleCount, groups: statistics.frpVarianceGroups };
 }
 
 function bboxFor(lat: number, lng: number, delta = 0.055) {
@@ -664,7 +673,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
       firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
       dayNightDetectionRatio: { state: detectionHistoryStatistics.state, dayDetections: detectionHistoryStatistics.dayDetections, nightDetections: detectionHistoryStatistics.nightDetections, ratio: detectionHistoryStatistics.dayToNightRatio, sampleCount: detectionHistoryStatistics.dayNightSampleCount },
-      frpVariance: { state: detectionHistoryStatistics.state, sampleCount: detectionHistoryStatistics.frpSampleCount, varianceMw2: detectionHistoryStatistics.frpVariance },
+      frpVariance: frpVarianceEvidence(detectionHistoryStatistics),
       seasonalAgriculturalBurning,
       flareMatch: false, flareMatchConfidence: "none" as const, miningMatch: false, vnfState: "unavailable" as const, vnfCandidateCount: 0,
       flareReferenceState: "unavailable" as const, flareReferenceCandidateCount: 0, flareReferenceDataYear: null,
@@ -731,7 +740,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     detectionId: input.detectionId, checkedAt: nowIso(), sourcesRunInParallel: true,
     firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
     dayNightDetectionRatio: { state: detectionHistoryStatistics.state, dayDetections: detectionHistoryStatistics.dayDetections, nightDetections: detectionHistoryStatistics.nightDetections, ratio: detectionHistoryStatistics.dayToNightRatio, sampleCount: detectionHistoryStatistics.dayNightSampleCount },
-    frpVariance: { state: detectionHistoryStatistics.state, sampleCount: detectionHistoryStatistics.frpSampleCount, varianceMw2: detectionHistoryStatistics.frpVariance },
+    frpVariance: frpVarianceEvidence(detectionHistoryStatistics),
     seasonalAgriculturalBurning,
     ...(facilitySignals ?? {
       flareMatch: false, flareMatchConfidence: "none" as const, miningMatch: false, vnfState: "unavailable" as const, vnfCandidateCount: 0,
