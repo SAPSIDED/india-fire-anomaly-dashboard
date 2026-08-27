@@ -5,12 +5,13 @@ describe("nearestIndustrialFacility", () => {
   it("returns the closest named OSM industrial feature with tag type and distance", () => {
     const result = nearestIndustrialFacility(20, 77, [
       { center: { lat: 20.009, lon: 77.009 }, tags: { landuse: "industrial", name: "Further Industrial Estate" } },
-      { lat: 20.001, lon: 77.001, tags: { man_made: "works", "name:en": "Nearest Works" } },
+      { type: "way", id: 123, lat: 20.001, lon: 77.001, tags: { man_made: "works", "name:en": "Nearest Works" } },
     ]);
 
     expect(result).toMatchObject({ industrialFacilityName: "Nearest Works", industrialFacilityType: "man_made=works" });
     expect(result.industrialFacilityDistanceM).toBeGreaterThan(0);
     expect(result.industrialFacilityDistanceM).toBeLessThan(200);
+    expect(result.industrialFacilityOsmUrl).toBe("https://www.openstreetmap.org/way/123");
   });
 
   it("returns the matched OSM tag type and distance even when the nearest feature has no name", () => {
@@ -26,6 +27,6 @@ describe("nearestIndustrialFacility", () => {
     expect(nearestIndustrialFacility(20, 77, [
       { tags: { landuse: "industrial", name: "No Location" } },
       { lat: 20.001, lon: 77.001, tags: { amenity: "school" } },
-    ])).toEqual({ industrialFacilityName: null, industrialFacilityType: null, industrialFacilityDistanceM: null });
+    ])).toEqual({ industrialFacilityName: null, industrialFacilityType: null, industrialFacilityDistanceM: null, industrialFacilityOsmUrl: null });
   });
 });

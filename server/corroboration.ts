@@ -30,6 +30,7 @@ type IndustrialEvidence = BaseEvidence & {
   industrialFacilityName: string | null;
   industrialFacilityType: string | null;
   industrialFacilityDistanceM: number | null;
+  industrialFacilityOsmUrl: string | null;
 };
 type WeatherEvidence = BaseEvidence;
 export type AuthorityIncidentSummary = {
@@ -80,6 +81,8 @@ function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number) {
 }
 
 type OverpassIndustrialFeature = {
+  type?: "node" | "way" | "relation" | string;
+  id?: number;
   lat?: number;
   lon?: number;
   center?: { lat?: number; lon?: number };
@@ -87,7 +90,7 @@ type OverpassIndustrialFeature = {
 };
 
 function emptyIndustrialFacility() {
-  return { industrialFacilityName: null, industrialFacilityType: null, industrialFacilityDistanceM: null };
+  return { industrialFacilityName: null, industrialFacilityType: null, industrialFacilityDistanceM: null, industrialFacilityOsmUrl: null };
 }
 
 function industrialFacilityType(tags: Record<string, string | undefined>) {
@@ -110,10 +113,13 @@ export function nearestIndustrialFacility(lat: number, lng: number, elements: Ov
       name: tags.name ?? tags["name:en"] ?? null,
       type,
       distanceM: haversineKm(lat, lng, featureLat, featureLng) * 1000,
+      osmUrl: ["node", "way", "relation"].includes(element.type ?? "") && Number.isInteger(element.id)
+        ? `https://www.openstreetmap.org/${element.type}/${element.id}`
+        : null,
     }];
   }).sort((left, right) => left.distanceM - right.distanceM)[0];
   return nearest
-    ? { industrialFacilityName: nearest.name, industrialFacilityType: nearest.type, industrialFacilityDistanceM: Number(nearest.distanceM.toFixed(1)) }
+    ? { industrialFacilityName: nearest.name, industrialFacilityType: nearest.type, industrialFacilityDistanceM: Number(nearest.distanceM.toFixed(1)), industrialFacilityOsmUrl: nearest.osmUrl }
     : emptyIndustrialFacility();
 }
 
@@ -122,6 +128,7 @@ function cachedIndustrialFacility(value: Partial<IndustrialEvidence>) {
     industrialFacilityName: value.industrialFacilityName ?? null,
     industrialFacilityType: value.industrialFacilityType ?? null,
     industrialFacilityDistanceM: value.industrialFacilityDistanceM ?? null,
+    industrialFacilityOsmUrl: value.industrialFacilityOsmUrl ?? null,
   };
 }
 

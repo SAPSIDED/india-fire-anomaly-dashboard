@@ -163,3 +163,7 @@
 - [x] Ensure marker selection displays an immediate, persistent in-panel loading indicator before the existing verification request settles.
 - [x] Add regression coverage for a delayed successful response so the active marker remains visibly loading and then renders the returned evidence/classification.
 - [x] Publish the validated frontend response-rendering and immediate-loading fix to the live FireGuard production site.
+- [x] Render nearest OSM facility name, tag type, and distance in Step 02 as clearly labelled contextual evidence.
+- [x] Add a safe source-attributed OpenStreetMap link for the selected facility context.
+- [x] Render optional nearby GPPD plant name, fuel, capacity, distance, and attribution beside OSM evidence without implying causation.
+- [x] Add rendered desktop/mobile regression coverage for facility-context display, map link, optional GPPD context, and unavailable fallback states.

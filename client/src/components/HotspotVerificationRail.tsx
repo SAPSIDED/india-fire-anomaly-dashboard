@@ -18,10 +18,16 @@ type SourceEvidence = { state: "available" | "cached" | "unavailable"; detail: s
 
 export type VerificationRailResult = {
   firmsCurrent: SourceEvidence;
-  industrial: SourceEvidence;
+  industrial: SourceEvidence & {
+    industrialFacilityName?: string | null;
+    industrialFacilityType?: string | null;
+    industrialFacilityDistanceM?: number | null;
+    industrialFacilityOsmUrl?: string | null;
+  };
   firmsHistory: SourceEvidence;
   landCover?: { landCoverClass: string; source: string };
   longTermHistory?: { totalDetectionCount: number; activeMonths: number };
+  gppdReference?: { name: string; fuelType: string | null; capacityMw: number | null; distanceKm: number; source: string };
   classification: { classification: string; confidence: string; reason: string };
 };
 
@@ -33,6 +39,8 @@ type Props = {
 };
 
 const formatClassification = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, letter => letter.toUpperCase());
+const formatDistance = (metres: number) => metres >= 1_000 ? `${(metres / 1_000).toFixed(2)} km` : `${Math.round(metres)} m`;
+const formatCapacity = (capacityMw: number | null) => capacityMw === null ? "capacity not listed" : `${capacityMw.toLocaleString()} MW`;
 
 export function HotspotVerificationRail({ selected, state, result, onVerify }: Props) {
   const loading = state === "loading";
@@ -56,7 +64,21 @@ export function HotspotVerificationRail({ selected, state, result, onVerify }: P
       <div className={`screening-ladder ${loading ? "is-loading" : complete ? "is-complete" : failed ? "is-error" : ""}`}>
         <p>INVESTIGATION PATH <small>{loading ? "LIVE CHECK IN PROGRESS" : complete ? "LIVE RESULTS" : failed ? "RETRY AVAILABLE" : "READY"}</small></p>
         <div><b>01</b><span>Thermal observation<small>{loading ? "Checking current NOAA-20 evidence…" : failed ? "The current FIRMS check did not complete. The selected marker is retained for retry." : complete ? result.firmsCurrent.detail : "Select this hotspot to query current FIRMS evidence."}</small></span></div>
-        <div><b>02</b><span>Geographic context<small>{loading ? "Checking nearby industrial OSM context…" : failed ? "Industrial-context results were not issued because this verification did not complete." : complete ? result.industrial.detail : "Industrial proximity not yet queried."}</small></span></div>
+        <div><b>02</b><span>Geographic context<small>{loading ? "Checking nearby industrial OSM context…" : failed ? "Industrial-context results were not issued because this verification did not complete." : complete ? result.industrial.detail : "Industrial proximity not yet queried."}</small>
+          {complete && (result.industrial.industrialFacilityType || result.gppdReference) && <span className="facility-context" aria-label="Nearest facility context">
+            <span className="facility-context-label">CONTEXT ONLY — NOT INCIDENT PROOF</span>
+            {result.industrial.industrialFacilityType && <span className="facility-context-item">
+              <b>Nearest OSM feature</b>
+              <span>{result.industrial.industrialFacilityName ?? "Unnamed OSM feature"} · {result.industrial.industrialFacilityType}{result.industrial.industrialFacilityDistanceM !== null && result.industrial.industrialFacilityDistanceM !== undefined ? ` · ${formatDistance(result.industrial.industrialFacilityDistanceM)}` : ""}</span>
+              {result.industrial.industrialFacilityOsmUrl && <a href={result.industrial.industrialFacilityOsmUrl} target="_blank" rel="noreferrer">Open in OpenStreetMap ↗</a>}
+            </span>}
+            {result.gppdReference && <span className="facility-context-item">
+              <b>Nearby power-plant reference</b>
+              <span>{result.gppdReference.name} · {result.gppdReference.fuelType ?? "fuel not listed"} · {formatCapacity(result.gppdReference.capacityMw)} · {result.gppdReference.distanceKm.toFixed(2)} km</span>
+              <small>{result.gppdReference.source}</small>
+            </span>}
+          </span>}
+        </span></div>
         <div><b>03</b><span>Historical behaviour<small>{loading ? "Checking seven-day and database persistence…" : failed ? "No new seven-day or long-term history result is shown after a failed verification." : complete ? `${result.firmsHistory.detail} ${persistence}` : "Seven-day and long-term history not yet queried."}</small></span></div>
         <div><b>04</b><span>Independent evidence<small>{loading ? "Checking land-cover and independent satellite context…" : failed ? "Independent evidence was not completed. No classification is issued from this failed request." : complete ? result.landCover ? `${result.landCover.landCoverClass.replaceAll("_", " ")} · ${result.landCover.source}.` : "Land-cover evidence is unavailable; no substitute is shown." : "Land-cover context not yet queried."}</small></span></div>
       </div>
