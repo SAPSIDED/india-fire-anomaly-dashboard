@@ -2,7 +2,7 @@ import { and, desc, eq, gte, isNull, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { detectionHistory, gasFlareReference, gppdReference, incidentEvidence, indiaHotspotSnapshot, InsertUser, sourceEvidenceCache, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
-import { dedupeDetectionHistoryRows, summarizeLongTermPersistence, type LongTermPersistenceSummary } from "./history";
+import { dedupeDetectionHistoryRows, summarizeLongTermPersistence, summarizeStoredHistoryStatistics, type LongTermPersistenceSummary, type StoredHistoryStatistics } from "./history";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -170,6 +170,8 @@ export type DetectionHistoryInput = {
   detectionDate: string;
   brightness: string | null;
   confidence: string | null;
+  dayNight: "D" | "N" | null;
+  frp: string | null;
 };
 
 /** Stores only detections already returned by FIRMS; duplicate date/location rows are ignored. */
@@ -205,6 +207,28 @@ export async function getLongTermPersistence(lat: number, lng: number): Promise<
     return { state: "available", ...summarizeLongTermPersistence(rows) };
   } catch {
     return { state: "unavailable", totalDetectionCount: 0, firstSeen: null, lastSeen: null, activeMonths: 0 };
+  }
+}
+
+export type DetectionHistoryStatistics = StoredHistoryStatistics & { state: "available" | "unavailable" };
+
+/** Database-only descriptive statistics for valid day/night and FRP values in the established 8 km local screening area. */
+export async function getDetectionHistoryStatistics(lat: number, lng: number): Promise<DetectionHistoryStatistics> {
+  const unavailable: DetectionHistoryStatistics = { state: "unavailable", dayDetections: 0, nightDetections: 0, dayToNightRatio: null, dayNightSampleCount: 0, frpSampleCount: 0, frpVariance: null };
+  const db = await getDb();
+  if (!db) return unavailable;
+  try {
+    const latitudeDelta = 8 / 111;
+    const longitudeDelta = 8 / Math.max(1, 111 * Math.cos(lat * Math.PI / 180));
+    const rows = await db.select({ detectionDate: detectionHistory.detectionDate, dayNight: detectionHistory.dayNight, frp: detectionHistory.frp }).from(detectionHistory).where(and(
+      gte(detectionHistory.latitude, (lat - latitudeDelta).toFixed(6)),
+      lte(detectionHistory.latitude, (lat + latitudeDelta).toFixed(6)),
+      gte(detectionHistory.longitude, (lng - longitudeDelta).toFixed(6)),
+      lte(detectionHistory.longitude, (lng + longitudeDelta).toFixed(6)),
+    ));
+    return { state: "available", ...summarizeStoredHistoryStatistics(rows) };
+  } catch {
+    return unavailable;
   }
 }
 

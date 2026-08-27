@@ -5,10 +5,11 @@
  */
 import { setDefaultResultOrder } from "node:dns";
 import { classifyCorroborationEvidence } from "./classification";
-import { getActiveIncidentEvidence, getLongTermPersistence, getSourceEvidenceCache, recordDetectionHistory, saveSourceEvidenceCache, type DetectionHistoryInput, type IndiaHotspotSnapshotInput, type IndiaHotspotSnapshotSource } from "./db";
+import { getActiveIncidentEvidence, getDetectionHistoryStatistics, getLongTermPersistence, getSourceEvidenceCache, recordDetectionHistory, saveSourceEvidenceCache, type DetectionHistoryInput, type IndiaHotspotSnapshotInput, type IndiaHotspotSnapshotSource } from "./db";
 import { fetchLandCover, type LandCoverResult } from "./landcover";
 import { lookupNearestGppdPlant, type GppdPlantReference } from "./gppdReference";
 import { assessFacilitySignals, type FacilitySignals } from "./facilityReference";
+import { lookupSeasonalAgriculturalBurning } from "./seasonalAgriculture";
 import { makeRequest, type PlacesSearchResult } from "./_core/map";
 
 // Some scientific-data hosts are intermittently unreachable over IPv6 from cloud runtimes.
@@ -59,6 +60,8 @@ let persistEvidenceCacheWrites = process.env.VITEST !== "true";
 let authorityEvidenceTestOverride: AuthorityIncidentSummary[] | undefined;
 let detectionHistoryRecorder = recordDetectionHistory;
 let longTermPersistenceReader = getLongTermPersistence;
+let detectionHistoryStatisticsReader = getDetectionHistoryStatistics;
+let seasonalAgriculturalBurningReader = lookupSeasonalAgriculturalBurning;
 let landCoverFetcher = fetchLandCover;
 let gppdReferenceLookup = lookupNearestGppdPlant;
 let facilitySignalLookup = assessFacilitySignals;
@@ -210,6 +213,8 @@ function parseFirmsDetectionHistoryRows(csv: string, lat?: number, lng?: number)
   const dateIndex = header.indexOf("acq_date");
   const brightnessIndex = ["bright_ti4", "brightness", "bright_t31"].map(field => header.indexOf(field)).find(index => index >= 0) ?? -1;
   const confidenceIndex = header.indexOf("confidence");
+  const dayNightIndex = header.indexOf("daynight");
+  const frpIndex = header.indexOf("frp");
   if (latIndex < 0 || lngIndex < 0 || dateIndex < 0) return [];
   return lines.slice(1).flatMap(line => {
     const values = line.split(",");
@@ -221,7 +226,11 @@ function parseFirmsDetectionHistoryRows(csv: string, lat?: number, lng?: number)
     const rawBrightness = brightnessIndex >= 0 ? values[brightnessIndex]?.trim() : undefined;
     const brightness = rawBrightness && Number.isFinite(Number(rawBrightness)) ? rawBrightness : null;
     const confidence = confidenceIndex >= 0 ? values[confidenceIndex]?.trim() || null : null;
-    return [{ latitude: detectionLat.toFixed(6), longitude: detectionLng.toFixed(6), detectionDate, brightness, confidence }];
+    const rawDayNight = dayNightIndex >= 0 ? values[dayNightIndex]?.trim().toUpperCase() : undefined;
+    const dayNight = rawDayNight === "D" || rawDayNight === "N" ? rawDayNight : null;
+    const rawFrp = frpIndex >= 0 ? values[frpIndex]?.trim() : undefined;
+    const frp = rawFrp && Number.isFinite(Number(rawFrp)) ? rawFrp : null;
+    return [{ latitude: detectionLat.toFixed(6), longitude: detectionLng.toFixed(6), detectionDate, brightness, confidence, dayNight, frp }];
   });
 }
 
@@ -597,6 +606,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
   void landCoverFetcher(input.lat, input.lng).then(result => { landCover = result; }).catch(() => undefined);
   let gppdReference: GppdPlantReference | undefined;
   void gppdReferenceLookup(input.lat, input.lng).then(result => { gppdReference = result; }).catch(() => undefined);
+  const evaluatedMonth = new Date().getUTCMonth() + 1;
   const facilitySignalsInput = (industrial: IndustrialEvidence, firmsCurrent: FirmsEvidence, firmsHistory: FirmsEvidence) => ({
     lat: input.lat, lng: input.lng, ...industrial, firmsCurrentState: firmsCurrent.state, firmsCurrentDetections: firmsCurrent.detections,
     firmsHistoryState: firmsHistory.state, firmsHistoryDetections: firmsHistory.detections, ...(gppdReference ? { gppdReference } : {}),
@@ -620,7 +630,11 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     const industrial = pendingIndustrial(checkedAt);
     const weather = pendingWeather(checkedAt);
     const incidentEvidence = await authorityIncidentEvidence;
-    const longTermHistory = await longTermPersistenceReader(input.lat, input.lng);
+    const [longTermHistory, detectionHistoryStatistics, seasonalAgriculturalBurning] = await Promise.all([
+      longTermPersistenceReader(input.lat, input.lng),
+      detectionHistoryStatisticsReader(input.lat, input.lng),
+      seasonalAgriculturalBurningReader(input.lat, input.lng, evaluatedMonth),
+    ]);
     const classification = classifyCorroborationEvidence({
       industrialFeatures: industrial.features,
       industrialState: industrial.state,
@@ -632,6 +646,9 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     return {
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
       firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
+      dayNightDetectionRatio: { state: detectionHistoryStatistics.state, dayDetections: detectionHistoryStatistics.dayDetections, nightDetections: detectionHistoryStatistics.nightDetections, ratio: detectionHistoryStatistics.dayToNightRatio, sampleCount: detectionHistoryStatistics.dayNightSampleCount },
+      frpVariance: { state: detectionHistoryStatistics.state, sampleCount: detectionHistoryStatistics.frpSampleCount, varianceMw2: detectionHistoryStatistics.frpVariance },
+      seasonalAgriculturalBurning,
       flareMatch: false, flareMatchConfidence: "none" as const, miningMatch: false, vnfState: "unavailable" as const, vnfCandidateCount: 0,
       flareReferenceState: "unavailable" as const, flareReferenceCandidateCount: 0, flareReferenceDataYear: null,
       ...(landCover ? { landCover } : {}),
@@ -649,7 +666,11 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     new Promise<undefined>(resolve => setTimeout(() => resolve(undefined), FACILITY_SIGNAL_BUDGET_MS)),
   ]);
   const incidentEvidence = await authorityIncidentEvidence;
-  const longTermHistory = await longTermPersistenceReader(input.lat, input.lng);
+  const [longTermHistory, detectionHistoryStatistics, seasonalAgriculturalBurning] = await Promise.all([
+    longTermPersistenceReader(input.lat, input.lng),
+    detectionHistoryStatisticsReader(input.lat, input.lng),
+    seasonalAgriculturalBurningReader(input.lat, input.lng, evaluatedMonth),
+  ]);
   const classification = classifyCorroborationEvidence({
     industrialFeatures: industrial.features,
     industrialState: industrial.state,
@@ -692,6 +713,9 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
   return {
     detectionId: input.detectionId, checkedAt: nowIso(), sourcesRunInParallel: true,
     firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
+    dayNightDetectionRatio: { state: detectionHistoryStatistics.state, dayDetections: detectionHistoryStatistics.dayDetections, nightDetections: detectionHistoryStatistics.nightDetections, ratio: detectionHistoryStatistics.dayToNightRatio, sampleCount: detectionHistoryStatistics.dayNightSampleCount },
+    frpVariance: { state: detectionHistoryStatistics.state, sampleCount: detectionHistoryStatistics.frpSampleCount, varianceMw2: detectionHistoryStatistics.frpVariance },
+    seasonalAgriculturalBurning,
     ...(facilitySignals ?? {
       flareMatch: false, flareMatchConfidence: "none" as const, miningMatch: false, vnfState: "unavailable" as const, vnfCandidateCount: 0,
       flareReferenceState: "unavailable" as const, flareReferenceCandidateCount: 0, flareReferenceDataYear: null,
@@ -738,6 +762,16 @@ export function setDetectionHistoryRecorderForTests(recorder?: typeof recordDete
 /** Deterministic test-only hook; production always reads the project database summary. */
 export function setLongTermPersistenceReaderForTests(reader?: typeof getLongTermPersistence) {
   longTermPersistenceReader = reader ?? getLongTermPersistence;
+}
+
+/** Deterministic test-only hook; production always reads stored day/night and FRP statistics. */
+export function setDetectionHistoryStatisticsReaderForTests(reader?: typeof getDetectionHistoryStatistics) {
+  detectionHistoryStatisticsReader = reader ?? getDetectionHistoryStatistics;
+}
+
+/** Deterministic test-only hook; production always reads the static local seasonal calendar. */
+export function setSeasonalAgriculturalBurningReaderForTests(reader?: typeof lookupSeasonalAgriculturalBurning) {
+  seasonalAgriculturalBurningReader = reader ?? lookupSeasonalAgriculturalBurning;
 }
 
 /** Deterministic test-only hook; production always calls the public land-cover source. */

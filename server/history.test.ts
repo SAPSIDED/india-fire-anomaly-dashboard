@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dedupeDetectionHistoryRows, summarizeLongTermPersistence } from "./history";
+import { dedupeDetectionHistoryRows, summarizeLongTermPersistence, summarizeStoredHistoryStatistics } from "./history";
 
 describe("detection history helpers", () => {
   it("deduplicates the same FIRMS date and location before database storage", () => {
@@ -23,5 +23,19 @@ describe("detection history helpers", () => {
 
   it("returns an explicit empty persistence summary when no local rows have been stored", () => {
     expect(summarizeLongTermPersistence([])).toEqual({ totalDetectionCount: 0, firstSeen: null, lastSeen: null, activeMonths: 0 });
+  });
+
+  it("calculates day/night ratio and population FRP variance from stored valid FIRMS fields", () => {
+    expect(summarizeStoredHistoryStatistics([
+      { detectionDate: "2026-10-20", dayNight: "D", frp: "10" },
+      { detectionDate: "2026-10-21", dayNight: "N", frp: "20" },
+      { detectionDate: "2026-10-22", dayNight: "D", frp: "30" },
+      { detectionDate: "2026-10-23", dayNight: null, frp: null },
+    ])).toEqual({ dayDetections: 2, nightDetections: 1, dayToNightRatio: 2, dayNightSampleCount: 3, frpSampleCount: 3, frpVariance: 66.6667 });
+  });
+
+  it("returns explicit empty descriptive statistics when stored rows have no valid day/night or FRP values", () => {
+    expect(summarizeStoredHistoryStatistics([{ detectionDate: "2026-10-20", dayNight: null, frp: null }]))
+      .toEqual({ dayDetections: 0, nightDetections: 0, dayToNightRatio: null, dayNightSampleCount: 0, frpSampleCount: 0, frpVariance: null });
   });
 });

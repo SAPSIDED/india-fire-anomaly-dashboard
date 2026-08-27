@@ -57,6 +57,13 @@
       "when": 1787860194620,
       "tag": "0007_military_silvermane",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1787861604704,
+      "tag": "0008_green_terrax",
+      "breakpoints": true
     }
   ]
 }

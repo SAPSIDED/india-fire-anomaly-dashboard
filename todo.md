@@ -98,6 +98,10 @@
 - [x] Add deterministic coverage for the detected-row preference and rerun the real 24-hour FIRMS persistence validation.
 - [x] Make positive local FIRMS detections win without waiting for slower empty, failed, or hanging sibling routes.
 - [x] Add a timing regression test for a fast zero-row route, a positive route, and a hanging sibling route.
+- [x] Extend stored FIRMS history capture and aggregation to calculate additive day/night detection ratio and FRP variance without changing existing persistence fields or Stage 1–3 behavior.
+- [x] Research and add a static, source-documented Indian state/month agricultural-burning calendar reference with a conservative unavailable/out-of-scope result for unmapped coordinates or months.
+- [x] Expose the additive history statistics and seasonal agricultural context in `corroboration.run` without changing established industrial fields, classification, conclusions, or source retrieval.
+- [x] Add deterministic populated, empty, unavailable, and backward-compatibility tests for each new evidence field.
 
 ## Additive Land-Cover Evidence
 

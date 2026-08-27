@@ -1,4 +1,4 @@
-import { date, decimal, index, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
+import { date, decimal, index, int, mediumtext, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -72,12 +72,41 @@ export const detectionHistory = mysqlTable("detectionHistory", {
   detectionDate: date("detectionDate").notNull(),
   brightness: decimal("brightness", { precision: 10, scale: 3 }),
   confidence: varchar("confidence", { length: 32 }),
+  dayNight: varchar("dayNight", { length: 1 }),
+  frp: decimal("frp", { precision: 12, scale: 4 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, table => [
   uniqueIndex("detectionHistory_unique_location_date").on(table.latitude, table.longitude, table.detectionDate),
 ]);
 
 export type DetectionHistory = typeof detectionHistory.$inferSelect;
+
+/**
+ * A narrow, source-documented calendar of seasonal agricultural-burning context.
+ * It is contextual evidence only and never changes classification or conclusions.
+ */
+export const seasonalAgriculturalBurningCalendar = mysqlTable("seasonal_agricultural_burning_calendar", {
+  id: int("id").autoincrement().primaryKey(),
+  state: varchar("state", { length: 96 }).notNull(),
+  month: int("month").notNull(),
+  season: varchar("season", { length: 64 }).notNull(),
+  contextLevel: varchar("contextLevel", { length: 32 }).notNull(),
+  sourceUrl: varchar("sourceUrl", { length: 1024 }).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, table => [
+  uniqueIndex("seasonalAgriculturalBurning_state_month_unique").on(table.state, table.month),
+]);
+
+/** Selected geoBoundaries ADM1 geometries used only to map calendar-covered states. */
+export const seasonalAgriculturalStateGeometry = mysqlTable("seasonal_agricultural_state_geometry", {
+  id: int("id").autoincrement().primaryKey(),
+  state: varchar("state", { length: 96 }).notNull(),
+  geometry: mediumtext("geometry").notNull(),
+  sourceUrl: varchar("sourceUrl", { length: 1024 }).notNull(),
+  loadedAt: timestamp("loadedAt").notNull(),
+}, table => [
+  uniqueIndex("seasonalAgriculturalStateGeometry_state_unique").on(table.state),
+]);
 
 /**
  * The latest successful country-wide FIRMS pull for the map. This is replaced

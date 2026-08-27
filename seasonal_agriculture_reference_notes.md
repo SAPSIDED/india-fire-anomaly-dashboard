@@ -1,0 +1,11 @@
+# Seasonal Agricultural-Burning Context
+
+This static context is additive screening evidence only. It does not classify a thermal detection as agricultural burning, does not alter the Stage 1–3 rules, and does not establish an on-the-ground cause.
+
+NASA Earth Observatory states that, in recent years, post-rice-harvest stubble fires occur across the Indo-Gangetic Plain from October to December, including Punjab, Haryana, Uttar Pradesh, and Madhya Pradesh, and that activity typically intensifies in the final week of October. It also cautions that VIIRS and comparable polar-orbiting sensors can miss some fires as burn timing shifts later in the day. Source: https://science.nasa.gov/earth/earth-observatory/new-timing-for-stubble-burning-in-india/
+
+The peer-reviewed 2023 study *Stubble-burning activities in north-western India in 2021* reports that crop-residue fires in north-western India mainly occur in the post-monsoon period, roughly October–November, and focuses its MODIS active-fire analysis on Punjab and Haryana. Source: https://pmc.ncbi.nlm.nih.gov/articles/PMC10275965/
+
+The initial calendar will therefore include only the directly supported high-context months: Punjab and Haryana in October–November, with Uttar Pradesh and Madhya Pradesh marked as broader October–December post-harvest context. Any state or month outside this narrowly documented calendar must return an explicit out-of-scope or unavailable result rather than a fabricated agricultural match.
+
+State resolution will use the provider-published geoBoundaries `gbOpen` India ADM1 source. The metadata endpoint is `https://www.geoboundaries.org/api/current/gbOpen/IND/ADM1/`; it identifies 36 ADM1 units, cites DataMeet India community and the Election Commission of India as the boundary source, and specifies Creative Commons Attribution 2.5 India. The exact simplified GeoJSON link returned by that metadata is `https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/IND/ADM1/geoBoundaries-IND-ADM1_simplified.geojson`. The reviewed GeoJSON is a 5.1 MB `FeatureCollection` whose individual features have `shapeName`, `shapeISO`, `shapeID`, and `MultiPolygon` geometry. Only the required Punjab, Haryana, Uttar Pradesh, and Madhya Pradesh geometries will be stored as local static context; all other Indian locations will return calendar state `out_of_scope`.

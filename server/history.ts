@@ -1,5 +1,7 @@
 export type StoredDetectionHistoryPoint = {
   detectionDate: string | Date;
+  dayNight?: string | null;
+  frp?: string | number | null;
 };
 
 export type LongTermPersistenceSummary = {
@@ -18,6 +20,36 @@ export function summarizeLongTermPersistence(rows: StoredDetectionHistoryPoint[]
     firstSeen: dates[0] ?? null,
     lastSeen: dates.length > 0 ? dates[dates.length - 1] : null,
     activeMonths: new Set(dates.map(date => date.slice(0, 7))).size,
+  };
+}
+
+export type StoredHistoryStatistics = {
+  dayDetections: number;
+  nightDetections: number;
+  dayToNightRatio: number | null;
+  dayNightSampleCount: number;
+  frpSampleCount: number;
+  frpVariance: number | null;
+};
+
+/** Pure descriptive statistics over valid values already stored from FIRMS. FRP variance is population variance in MW². */
+export function summarizeStoredHistoryStatistics(rows: StoredDetectionHistoryPoint[]): StoredHistoryStatistics {
+  const dayDetections = rows.filter(row => row.dayNight?.trim().toUpperCase() === "D").length;
+  const nightDetections = rows.filter(row => row.dayNight?.trim().toUpperCase() === "N").length;
+  const frpValues = rows.flatMap(row => {
+    if (row.frp === null || row.frp === undefined || `${row.frp}`.trim() === "") return [];
+    const value = Number(row.frp);
+    return Number.isFinite(value) ? [value] : [];
+  });
+  const mean = frpValues.length ? frpValues.reduce((sum, value) => sum + value, 0) / frpValues.length : null;
+  const frpVariance = mean === null ? null : frpValues.reduce((sum, value) => sum + (value - mean) ** 2, 0) / frpValues.length;
+  return {
+    dayDetections,
+    nightDetections,
+    dayToNightRatio: nightDetections > 0 ? Number((dayDetections / nightDetections).toFixed(4)) : null,
+    dayNightSampleCount: dayDetections + nightDetections,
+    frpSampleCount: frpValues.length,
+    frpVariance: frpVariance === null ? null : Number(frpVariance.toFixed(4)),
   };
 }
 

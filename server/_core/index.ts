@@ -10,6 +10,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { handleIndiaHotspotRefresh, startIndiaHotspotSnapshotRefresh } from "../scheduler";
 import { ensureIndiaGasFlareReference } from "../flareReference";
+import { initializeSeasonalAgriculturalContext } from "../seasonalAgriculture";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -67,6 +68,8 @@ async function startServer() {
     // Loads a public annual reference asynchronously. It is never required for
     // server startup or any FIRMS/OSM verification response.
     void ensureIndiaGasFlareReference();
+    // Seeds and caches the static calendar outside user verification requests.
+    void initializeSeasonalAgriculturalContext();
   });
 }
 
