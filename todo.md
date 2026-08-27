@@ -128,3 +128,22 @@
 - [x] Observe a second platform-triggered run of the replacement job and record its scheduled and finished times.
 - [x] Compare the stale timeout history with replacement-job logs and confirm whether any post-replacement errors occurred.
 - [x] Set an explicit 30-minute managed schedule to keep observed dispatch cadence safely within the requested 20–30 minute rate window.
+
+## Hotspot Marker Verification Wiring
+
+- [x] Connect each stored India hotspot marker selection to the existing per-coordinate corroboration query without duplicating backend logic.
+- [x] Render explicit loading, success, withheld, and error states in the selected-hotspot investigation panel.
+- [x] Bind real OSM context, FIRMS history and persistence, land-cover evidence, and Stage 1 classification fields to investigation steps 01–04.
+- [x] Add deterministic frontend coverage for selected-hotspot verification query input and validate marker-click behavior on desktop and mobile.
+- [x] Add an explicit retained-selection error state with retry action to the selected-hotspot investigation rail.
+- [x] Add focused interaction coverage for marker selection, verification request initiation, and returned evidence/classification rendering.
+- [x] Validate and document a mobile marker tap that triggers the existing verification flow and updates the selected-hotspot rail.
+- [x] Add a rendered UI interaction regression covering marker selection, existing request initiation, loading state, and returned evidence/classification presentation.
+- [x] Capture actual mobile-width marker activation with corroboration request and completed selected-rail evidence/classification readback.
+- [x] Confirm responsive selected-hotspot completion through the 375 px live verifier check, the rendered actual map-marker listener regression, and user confirmation that the repaired preview flow works.
+- [x] Trace and fix the frontend state flow so a successful corroboration.run response renders evidence steps 01–04 and the returned classification in the selected-hotspot rail.
+- [x] Add a Home-level regression test that proves a successful marker-triggered corroboration.run response transitions the rendered rail to visible completed evidence and classification output.
+- [x] Trace the production marker-click response handoff and identify why a successful corroboration.run payload can remain invisible in the selected-hotspot UI.
+- [x] Ensure marker selection displays an immediate, persistent in-panel loading indicator before the existing verification request settles.
+- [x] Add regression coverage for a delayed successful response so the active marker remains visibly loading and then renders the returned evidence/classification.
+- [x] Publish the validated frontend response-rendering and immediate-loading fix to the live FireGuard production site.

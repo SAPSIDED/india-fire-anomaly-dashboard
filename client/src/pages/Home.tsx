@@ -2,12 +2,14 @@
  * FireGuard presentation layer. The map, verifier, authentication, and data bindings
  * intentionally remain unchanged; this file only reshapes how that information is presented.
  */
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import React, { useEffect, useRef, useState, type FormEvent } from "react";
 import { MapView } from "@/components/Map";
+import { HotspotVerificationRail, type VerificationRailResult } from "@/components/HotspotVerificationRail";
 import { trpc } from "@/lib/trpc";
+import { beginHotspotVerification, completeHotspotVerification, failHotspotVerification, initialHotspotVerificationPresentation, selectHotspotForVerification, type HotspotVerificationPresentation } from "@/lib/hotspotVerification";
 import { startLogin } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { AlertTriangle, Check, ChevronRight, CircleHelp, Copy, ExternalLink, MapPin, X } from "lucide-react";
+import { AlertTriangle, Check, ChevronRight, CircleHelp, Copy, ExternalLink, X } from "lucide-react";
 
 type Hotspot = {
   id: string;
@@ -182,7 +184,9 @@ export default function Home() {
     details: "",
   });
   const mapMarkers = useRef<Array<google.maps.Marker | google.maps.Circle>>([]);
+  const verificationRequestSequence = useRef(0);
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [verificationPresentation, setVerificationPresentation] = useState<HotspotVerificationPresentation<VerificationRailResult>>(initialHotspotVerificationPresentation);
   const thermalFieldRef = useRef<HTMLDivElement>(null);
   const { user, isAuthenticated } = useAuth();
   const corroboration = trpc.corroboration.run.useMutation();
@@ -213,14 +217,37 @@ export default function Home() {
   }, [snapshotRows, selected.id]);
 
   const runVerifier = (hotspot = selected) => {
-    corroboration.mutate({ detectionId: hotspot.id, lat: hotspot.location.lat, lng: hotspot.location.lng });
+    const { selectedTarget, verificationInput } = selectHotspotForVerification(hotspot);
+    const requestSequence = verificationRequestSequence.current + 1;
+    verificationRequestSequence.current = requestSequence;
+    setSelected(selectedTarget);
+    setVerificationPresentation(beginHotspotVerification(selectedTarget.id, requestSequence));
+    corroboration.reset();
+    corroboration.mutate(verificationInput, {
+      onSuccess: response => {
+        // The selected rail consumes this explicit presentation state instead
+        // of reading a mutable cache field after the request has completed.
+        setVerificationPresentation(current => completeHotspotVerification(current, selectedTarget.id, requestSequence, response));
+      },
+      onError: () => {
+        setVerificationPresentation(current => failHotspotVerification(current, selectedTarget.id, requestSequence));
+      },
+    });
   };
 
   const openVerifier = (hotspot = selected) => {
     setSelected(hotspot);
     setVerifierOpen(true);
+    if (verificationPresentation.targetId !== hotspot.id || verificationPresentation.state !== "complete") runVerifier(hotspot);
+  };
+
+  const selectAndVerify = (hotspot: Hotspot) => {
+    setVerifierOpen(false);
     runVerifier(hotspot);
   };
+
+  const selectedVerification = verificationPresentation.targetId === selected.id ? verificationPresentation.result : undefined;
+  const selectedVerificationState = verificationPresentation.targetId === selected.id ? verificationPresentation.state : "ready";
 
   const submitAuthorityEvidence = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -298,7 +325,7 @@ export default function Home() {
         infoWindow.setContent(`<div style="font-family:Arial,sans-serif;min-width:205px;color:#4f5a5d"><strong>${hotspot.place}</strong><div style="margin-top:6px;font-family:monospace;font-size:11px">${hotspot.coords} · FRP ${hotspot.frp}</div><div style="margin-top:8px;color:#b65f58;font-size:11px">Click the zone to start source verification</div></div>`);
         infoWindow.open({ map, anchor: marker, shouldFocus: false });
       };
-      const verifyZone = () => { infoWindow.close(); openVerifier(hotspot); };
+      const verifyZone = () => { infoWindow.close(); selectAndVerify(hotspot); };
       marker.addListener("mouseover", showSummary); marker.addListener("mouseout", () => infoWindow.close()); marker.addListener("click", verifyZone);
       zone.addListener("mouseover", showSummary); zone.addListener("mouseout", () => infoWindow.close()); zone.addListener("click", verifyZone);
       mapMarkers.current.push(marker, zone);
@@ -329,7 +356,7 @@ export default function Home() {
               <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} /><div className="map-frame-label"><b>THERMAL ANOMALY FIELD</b><span>{snapshotTargets.length > 0 ? `${snapshotTargets.length} stored FIRMS hotspots · click to verify` : "Awaiting scheduled FIRMS snapshot"}</span></div><div className="map-legend"><span><i className="legend-dot critical" /> Critical signal</span><span><i className="legend-dot elevated" /> Elevated signal</span><span><i className="legend-line" /> Investigation radius</span></div><div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
               <div className="layer-row" aria-label="Demonstrative layers">{["Thermal", "OSM context", "Persistence", "Exposure"].map(layer => <button key={layer} onClick={() => setActiveLayer(layer)} className={activeLayer === layer ? "active" : ""}>{layer}</button>)}<span>{activeLayer} layer selected</span></div>
             </div>
-            <aside className="analysis-rail" aria-label="Selected anomaly analysis"><div className="rail-topline"><span>SELECTED TARGET</span><b className={selected.score > 70 ? "critical" : "elevated"}>{selected.score}/100</b></div><h3>{selected.facility}</h3><p className="target-location"><MapPin size={13} /> {selected.place}</p><div className="target-code"><span>{selected.id}</span><span>{selected.coords}</span></div><dl className="instrument-grid"><div><dt>FRP</dt><dd>{selected.frp}</dd></div><div><dt>CONFIDENCE</dt><dd>{selected.confidence}</dd></div><div><dt>RECENCY</dt><dd>{selected.recency.replace("Observed ", "")}</dd></div></dl><div className="screening-ladder"><p>INVESTIGATION PATH</p><div><b>01</b><span>Thermal observation<small>Signal available</small></span></div><div><b>02</b><span>Geographic context<small>Industrial proximity</small></span></div><div><b>03</b><span>Historical behaviour<small>Baseline and recurrence</small></span></div><div><b>04</b><span>Independent evidence<small>Required for conclusion</small></span></div></div><div className="screening-callout"><span>SCREENING STATUS</span><strong>{selected.outcome}</strong><p>A thermal candidate is not a confirmed industrial fire. Review the actual source responses before escalation.</p><button onClick={() => openVerifier()}>Run source verification <ChevronRight size={15} /></button></div></aside>
+            <HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} />
           </div>
         </section>
 
