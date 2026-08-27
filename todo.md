@@ -26,6 +26,8 @@
 - [x] Verify and document the no-cache evidence-pending state in the running verifier UI.
 - [x] Bound the overall live-evidence window so delayed upstream calls cannot leave the verifier loading indefinitely.
 - [x] Prove bounded retry and alternate-Overpass mirror handling with a deterministic test.
+- [x] Extend existing OSM industrial evidence with nearest-facility name, matched tag type, and distance while preserving the industrial feature count and thresholds.
+- [x] Add deterministic named-match, unnamed-match, and no-match coverage for additive nearest-facility metadata.
 
 ## Operational Evidence Recovery Tasks
 
@@ -116,6 +118,7 @@
 - [x] Add the `gppd_reference` table and radius-friendly nearest-plant lookup for name, fuel type, capacity, latitude, and longitude.
 - [x] Add a failure-safe India GPPD loader with successful-reference caching and non-blocking cached fallback, without changing existing Stage 1–3 or FIRMS retrieval behavior.
 - [x] Expose the nearest in-radius plant only as an additive `corroboration.run` field and add deterministic match, no-match, and load-failure tests.
+- [x] Run and report a direct India-filtered GPPD table count with five stored sample reference rows.
 
 ## India-Wide FIRMS Hotspot Snapshot Refresh
 

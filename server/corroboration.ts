@@ -25,7 +25,12 @@ type BaseEvidence = {
 
 type DailyDetection = { date: string; detections: number };
 type FirmsEvidence = BaseEvidence & { detections: number; dailyDetections: DailyDetection[] };
-type IndustrialEvidence = BaseEvidence & { features: number };
+type IndustrialEvidence = BaseEvidence & {
+  features: number;
+  industrialFacilityName: string | null;
+  industrialFacilityType: string | null;
+  industrialFacilityDistanceM: number | null;
+};
 type WeatherEvidence = BaseEvidence;
 export type AuthorityIncidentSummary = {
   id: number;
@@ -72,6 +77,52 @@ function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number) {
   const endLat = radians(bLat);
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(startLat) * Math.cos(endLat) * Math.sin(dLng / 2) ** 2;
   return 6371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}
+
+type OverpassIndustrialFeature = {
+  lat?: number;
+  lon?: number;
+  center?: { lat?: number; lon?: number };
+  tags?: Record<string, string | undefined>;
+};
+
+function emptyIndustrialFacility() {
+  return { industrialFacilityName: null, industrialFacilityType: null, industrialFacilityDistanceM: null };
+}
+
+function industrialFacilityType(tags: Record<string, string | undefined>) {
+  if (tags.man_made === "works") return "man_made=works";
+  if (tags.power === "plant") return "power=plant";
+  if (tags.landuse === "industrial") return "landuse=industrial";
+  if (tags.industrial) return `industrial=${tags.industrial}`;
+  return null;
+}
+
+/** Reads the nearest returned OSM feature centre/node only; it does not change the existing 5 km count. */
+export function nearestIndustrialFacility(lat: number, lng: number, elements: OverpassIndustrialFeature[]) {
+  const nearest = elements.flatMap(element => {
+    const featureLat = Number(element.lat ?? element.center?.lat);
+    const featureLng = Number(element.lon ?? element.center?.lon);
+    const tags = element.tags ?? {};
+    const type = industrialFacilityType(tags);
+    if (!Number.isFinite(featureLat) || !Number.isFinite(featureLng) || !type) return [];
+    return [{
+      name: tags.name ?? tags["name:en"] ?? null,
+      type,
+      distanceM: haversineKm(lat, lng, featureLat, featureLng) * 1000,
+    }];
+  }).sort((left, right) => left.distanceM - right.distanceM)[0];
+  return nearest
+    ? { industrialFacilityName: nearest.name, industrialFacilityType: nearest.type, industrialFacilityDistanceM: Number(nearest.distanceM.toFixed(1)) }
+    : emptyIndustrialFacility();
+}
+
+function cachedIndustrialFacility(value: Partial<IndustrialEvidence>) {
+  return {
+    industrialFacilityName: value.industrialFacilityName ?? null,
+    industrialFacilityType: value.industrialFacilityType ?? null,
+    industrialFacilityDistanceM: value.industrialFacilityDistanceM ?? null,
+  };
 }
 
 function parseFirmsRows(csv: string, lat?: number, lng?: number) {
@@ -379,7 +430,7 @@ async function fetchIndustrialContext(lat: number, lng: number): Promise<Industr
   const provider = "osm-overpass";
   const key = cacheKey(provider, lat, lng);
   const checkedAt = nowIso();
-  const query = `[out:json][timeout:12];(way(around:5000,${lat},${lng})["landuse"="industrial"];way(around:5000,${lat},${lng})["man_made"="works"];way(around:5000,${lat},${lng})["industrial"];node(around:5000,${lat},${lng})["man_made"="works"];);out tags;`;
+  const query = `[out:json][timeout:12];(way(around:5000,${lat},${lng})["landuse"="industrial"];way(around:5000,${lat},${lng})["man_made"="works"];way(around:5000,${lat},${lng})["industrial"];way(around:5000,${lat},${lng})["power"="plant"];node(around:5000,${lat},${lng})["man_made"="works"];node(around:5000,${lat},${lng})["power"="plant"];);out center tags;`;
   const hosts = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"];
   try {
     const data = await Promise.any(hosts.map(async host => {
@@ -388,12 +439,14 @@ async function fetchIndustrialContext(lat: number, lng: number): Promise<Industr
         headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
         body: new URLSearchParams({ data: query }),
       });
-      return response.json() as Promise<{ elements?: unknown[] }>;
+      return response.json() as Promise<{ elements?: OverpassIndustrialFeature[] }>;
     }));
-    const features = data.elements?.length ?? 0;
-    await writeCached(key, provider, { features }, 7 * 24 * 60 * 60_000);
+    const elements = data.elements ?? [];
+    const features = elements.length;
+    const nearestFacility = nearestIndustrialFacility(lat, lng, elements);
+    await writeCached(key, provider, { features, ...nearestFacility }, 7 * 24 * 60 * 60_000);
     return {
-      state: "available", features, provider, checkedAt,
+      state: "available", features, provider, checkedAt, ...nearestFacility,
       detail: features > 0 ? `${features} live nearby OSM industrial-context features found within 5 km.` : "No live nearby OSM industrial-context feature was returned within 5 km.",
     };
   } catch {
@@ -405,31 +458,31 @@ async function fetchIndustrialContext(lat: number, lng: number): Promise<Industr
         keyword: "industrial factory manufacturing",
       });
       const features = places.results?.filter(place => place.business_status !== "CLOSED_PERMANENTLY").length ?? 0;
-      await writeCached(placesKey, "google-places-industrial", { features }, 24 * 60 * 60_000);
+      await writeCached(placesKey, "google-places-industrial", { features, ...emptyIndustrialFacility() }, 24 * 60 * 60_000);
       return {
-        state: "available", features, provider: "google-places-industrial", checkedAt,
+        state: "available", features, provider: "google-places-industrial", checkedAt, ...emptyIndustrialFacility(),
         detail: features > 0
           ? `${features} live Google Places industrial/factory context records found within 5 km after OSM mirrors were unavailable.`
           : "Google Places returned no operational industrial/factory context record within 5 km after OSM mirrors were unavailable.",
       };
     } catch {
-      const googleCached = await readCached<{ features: number }>(placesKey);
+      const googleCached = await readCached<Partial<IndustrialEvidence> & { features: number }>(placesKey);
       if (googleCached) {
         return {
-          state: "cached", features: googleCached.value.features, provider: "google-places-industrial", checkedAt,
+          state: "cached", features: googleCached.value.features, provider: "google-places-industrial", checkedAt, ...cachedIndustrialFacility(googleCached.value),
           detail: `${googleCached.value.features} previously verified Google Places industrial/factory context records are shown while OSM mirrors are delayed.${cacheSuffix(googleCached)}`,
         };
       }
     }
-    const cached = await readCached<{ features: number }>(key);
+    const cached = await readCached<Partial<IndustrialEvidence> & { features: number }>(key);
     if (cached) {
       return {
-        state: "cached", features: cached.value.features, provider, checkedAt,
+        state: "cached", features: cached.value.features, provider, checkedAt, ...cachedIndustrialFacility(cached.value),
         detail: `${cached.value.features} previously verified OSM industrial-context features are shown while all live mirrors are delayed.${cacheSuffix(cached)}`,
       };
     }
     return {
-      state: "unavailable", features: 0, provider, checkedAt,
+      state: "unavailable", features: 0, provider, checkedAt, ...emptyIndustrialFacility(),
         detail: "OSM industrial context did not respond after bounded retries across three Overpass mirrors, and the independent Google Places facility fallback was unavailable. No verified cached context is available.",
     };
   }
@@ -492,7 +545,7 @@ function pendingFirms(provider: string, checkedAt: string): FirmsEvidence {
 }
 
 function pendingIndustrial(checkedAt: string): IndustrialEvidence {
-  return { state: "unavailable", features: 0, provider: "osm-overpass", checkedAt, detail: "The industrial-context source did not return within the live evidence window. It has been marked pending." };
+  return { state: "unavailable", features: 0, provider: "osm-overpass", checkedAt, ...emptyIndustrialFacility(), detail: "The industrial-context source did not return within the live evidence window. It has been marked pending." };
 }
 
 function pendingWeather(checkedAt: string): WeatherEvidence {
