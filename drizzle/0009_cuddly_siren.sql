@@ -1,0 +1,1 @@
+ALTER TABLE `detectionHistory` ADD `platform` varchar(16);

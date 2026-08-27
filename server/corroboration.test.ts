@@ -190,9 +190,31 @@ describe("evaluateCorroboration", () => {
     const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "history-capture-zone" });
 
     expect(captured.flat()).toEqual(expect.arrayContaining([
-      expect.objectContaining({ latitude: "27.130000", longitude: "73.330000", detectionDate: "2026-08-25", brightness: "332.5", confidence: "h", dayNight: "D", frp: "10" }),
+      expect.objectContaining({ latitude: "27.130000", longitude: "73.330000", detectionDate: "2026-08-25", brightness: "332.5", confidence: "h", dayNight: "D", frp: "10", platform: "VIIRS" }),
     ]));
     expect(result.longTermHistory).toEqual({ state: "available", totalDetectionCount: 3, firstSeen: "2026-06-20", lastSeen: "2026-08-25", activeMonths: 3 });
+  });
+
+  it("captures source FRP and platform fields while storing malformed or missing FRP as null", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    const captured: unknown[][] = [];
+    setDetectionHistoryRecorderForTests(async rows => { captured.push(rows); });
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("fireguard-firms-relay")) {
+        return new Response("latitude,longitude,acq_date,bright_ti4,confidence,daynight,frp,satellite,instrument\n27.13,73.33,2026-08-25,332.5,h,D,4.28,N20,VIIRS\n27.131,73.331,2026-08-25,330.1,n,N,not-a-number,T,MODIS\n27.132,73.332,2026-08-25,329.4,n,D,,A,MODIS\n", { status: 200 });
+      }
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [{ id: 1 }] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+
+    await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "frp-platform-capture" });
+
+    expect(captured.flat()).toEqual(expect.arrayContaining([
+      expect.objectContaining({ latitude: "27.130000", frp: "4.28", platform: "VIIRS" }),
+      expect.objectContaining({ latitude: "27.131000", frp: null, platform: "MODIS" }),
+      expect.objectContaining({ latitude: "27.132000", frp: null, platform: "MODIS" }),
+    ]));
   });
 
   it("exposes populated stored day/night, FRP, and seasonal context as additive evidence without changing Stage 1", async () => {

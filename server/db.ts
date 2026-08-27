@@ -172,6 +172,7 @@ export type DetectionHistoryInput = {
   confidence: string | null;
   dayNight: "D" | "N" | null;
   frp: string | null;
+  platform: "MODIS" | "VIIRS" | null;
 };
 
 /** Stores only detections already returned by FIRMS; duplicate date/location rows are ignored. */

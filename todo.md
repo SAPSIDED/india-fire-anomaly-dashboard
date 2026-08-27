@@ -102,6 +102,11 @@
 - [x] Research and add a static, source-documented Indian state/month agricultural-burning calendar reference with a conservative unavailable/out-of-scope result for unmapped coordinates or months.
 - [x] Expose the additive history statistics and seasonal agricultural context in `corroboration.run` without changing established industrial fields, classification, conclusions, or source retrieval.
 - [x] Add deterministic populated, empty, unavailable, and backward-compatibility tests for each new evidence field.
+- [x] Run a read-only diagnostic of stored FRP values and variance patterns, sample sufficiency, and MODIS/VIIRS provenance consistency; do not modify data or implementation.
+- [x] Inspect raw recent official FIRMS VIIRS and, when available, MODIS responses to identify exact FRP and platform field names.
+- [x] Trace the detection-history parser and duplicate-safe insertion path to identify why historical rows retained null FRP values.
+- [x] Correct forward-only FRP parsing/storage and add a nullable sensor/platform field without altering existing history rows, Stage 1–3 behavior, or retrieval decisions.
+- [x] Add deterministic valid and missing/malformed FRP/platform parsing and storage tests, then validate five real newly ingested rows where available.
 
 ## Additive Land-Cover Evidence
 

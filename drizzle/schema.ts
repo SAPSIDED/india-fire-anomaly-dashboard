@@ -74,6 +74,7 @@ export const detectionHistory = mysqlTable("detectionHistory", {
   confidence: varchar("confidence", { length: 32 }),
   dayNight: varchar("dayNight", { length: 1 }),
   frp: decimal("frp", { precision: 12, scale: 4 }),
+  platform: varchar("platform", { length: 16 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, table => [
   uniqueIndex("detectionHistory_unique_location_date").on(table.latitude, table.longitude, table.detectionDate),

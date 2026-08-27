@@ -203,8 +203,19 @@ function parseFirmsDailyDetections(csv: string, lat?: number, lng?: number): Dai
   return Array.from(buckets, ([date, detections]) => ({ date, detections })).sort((a, b) => a.date.localeCompare(b.date));
 }
 
+type FirmsPlatform = "MODIS" | "VIIRS";
+
+function platformFromFirmsFields(instrument: string | undefined, satellite: string | undefined): FirmsPlatform | null {
+  const normalizedInstrument = instrument?.trim().toUpperCase();
+  if (normalizedInstrument === "MODIS" || normalizedInstrument === "VIIRS") return normalizedInstrument;
+  const normalizedSatellite = satellite?.trim().toUpperCase();
+  if (normalizedSatellite === "A" || normalizedSatellite === "T") return "MODIS";
+  if (normalizedSatellite === "N" || normalizedSatellite === "N20" || normalizedSatellite === "N21") return "VIIRS";
+  return null;
+}
+
 /** Extracts only returned FIRMS row fields needed for additive local history storage. */
-function parseFirmsDetectionHistoryRows(csv: string, lat?: number, lng?: number): DetectionHistoryInput[] {
+function parseFirmsDetectionHistoryRows(csv: string, lat?: number, lng?: number, platformHint?: FirmsPlatform): DetectionHistoryInput[] {
   const lines = csv.trim().split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return [];
   const header = lines[0].split(",").map(value => value.trim().toLowerCase());
@@ -215,6 +226,8 @@ function parseFirmsDetectionHistoryRows(csv: string, lat?: number, lng?: number)
   const confidenceIndex = header.indexOf("confidence");
   const dayNightIndex = header.indexOf("daynight");
   const frpIndex = header.indexOf("frp");
+  const instrumentIndex = header.indexOf("instrument");
+  const satelliteIndex = header.indexOf("satellite");
   if (latIndex < 0 || lngIndex < 0 || dateIndex < 0) return [];
   return lines.slice(1).flatMap(line => {
     const values = line.split(",");
@@ -230,7 +243,11 @@ function parseFirmsDetectionHistoryRows(csv: string, lat?: number, lng?: number)
     const dayNight = rawDayNight === "D" || rawDayNight === "N" ? rawDayNight : null;
     const rawFrp = frpIndex >= 0 ? values[frpIndex]?.trim() : undefined;
     const frp = rawFrp && Number.isFinite(Number(rawFrp)) ? rawFrp : null;
-    return [{ latitude: detectionLat.toFixed(6), longitude: detectionLng.toFixed(6), detectionDate, brightness, confidence, dayNight, frp }];
+    const platform = platformFromFirmsFields(
+      instrumentIndex >= 0 ? values[instrumentIndex] : undefined,
+      satelliteIndex >= 0 ? values[satelliteIndex] : undefined,
+    ) ?? platformHint ?? null;
+    return [{ latitude: detectionLat.toFixed(6), longitude: detectionLng.toFixed(6), detectionDate, brightness, confidence, dayNight, frp, platform }];
   });
 }
 
@@ -432,17 +449,17 @@ async function fetchFirms(lat: number, lng: number, days: number, sensor: FirmsS
       requestWithRetry(areaUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } }).then(async response => {
         const csv = await response.text();
         if (/invalid\s+map[_ ]key|error/i.test(csv)) throw new Error("FIRMS area route rejected the request.");
-        return { detections: parseFirmsRows(csv), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv) : [], historyRows: parseFirmsDetectionHistoryRows(csv) };
+        return { detections: parseFirmsRows(csv), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv) : [], historyRows: parseFirmsDetectionHistoryRows(csv, undefined, undefined, "VIIRS") };
       }),
       requestWithRetry(countryUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } }).then(async response => {
         const csv = await response.text();
         if (/invalid\s+map[_ ]key|error/i.test(csv)) throw new Error("FIRMS country route rejected the request.");
-        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [], historyRows: parseFirmsDetectionHistoryRows(csv, lat, lng) };
+        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [], historyRows: parseFirmsDetectionHistoryRows(csv, lat, lng, "VIIRS") };
       }),
       requestWithRetry(wfsUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } }).then(async response => {
         const csv = await response.text();
         if (/invalid\s+map[_ ]key|serviceexception|error/i.test(csv)) throw new Error("FIRMS WFS route rejected the request.");
-        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [], historyRows: parseFirmsDetectionHistoryRows(csv, lat, lng) };
+        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [], historyRows: parseFirmsDetectionHistoryRows(csv, lat, lng, "VIIRS") };
       }),
     ]);
     try {
