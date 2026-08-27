@@ -7,3 +7,13 @@ The implemented path will use a clean bounded-candidate adapter that accepts onl
 ## Source
 
 - [Earth Observation Group, VIIRS Nightfire portal](https://eogdata.mines.edu/products/vnf/)
+
+## Official V4.0 listing inspection
+
+The user-supplied EOG V4.0 listing at `https://eogdata.mines.edu/pages/download_viirs_fire_iframe_ncor_v40.html` was inspected on 27 August 2026. It reports a last update of 30 April 2026 and expands dated **NPP CSV** and KMZ entries. The latest listed CSV examples are actual provider links such as `https://eogdata.mines.edu/wwwdata/viirs_products/vnf/v40//VNF_npp_d20260427_eog_v40.csv`; no URL pattern was inferred. Opening the exposed CSV redirected to the EOG account sign-in service, so this account-gated source remains an optional disabled adapter rather than a tracker dependency.
+
+## NASA FIRMS gas-flare reference direction
+
+NASA FIRMS publicly documents a **Gas Flares** map layer containing more than 145,640 inventoried flare locations for 2012–2023, with an identifier, type, inventory year, size/volume, and coordinates. FIRMS states that the layer provides reference context for thermal detections that may not be vegetation fires and should be used with caution. Its stated upstream source is the World Bank in partnership with NOAA and the Colorado School of Mines. The documented FIRMS `area` service provides active-fire hotspot CSV retrieval, but is not documented as a gas-flare classification service. A compliant conservative path may therefore use nearby FIRMS gas-flare inventory context with the existing fixed-location persistence and typed facility evidence; it must not represent a thermal detection alone as proof of gas flaring.
+
+The public FIRMS Global Fire Map and its Layers panel were also inspected. The map identifies active detections as thermal anomalies with limited accuracy and says they may arise from fire, hot smoke, agriculture, or other sources. The standard visible Layers panel did not document a separate public request endpoint for extracting the Gas Flares layer. Implementation will therefore use only a discoverable official data service or a documented public reference file, rather than reverse-engineering the map client.

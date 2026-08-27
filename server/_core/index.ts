@@ -9,6 +9,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { handleIndiaHotspotRefresh, startIndiaHotspotSnapshotRefresh } from "../scheduler";
+import { ensureIndiaGasFlareReference } from "../flareReference";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -63,6 +64,9 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
     startIndiaHotspotSnapshotRefresh();
+    // Loads a public annual reference asynchronously. It is never required for
+    // server startup or any FIRMS/OSM verification response.
+    void ensureIndiaGasFlareReference();
   });
 }
 

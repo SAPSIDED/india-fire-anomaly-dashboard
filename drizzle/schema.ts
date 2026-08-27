@@ -118,3 +118,29 @@ export const gppdReference = mysqlTable("gppd_reference", {
 ]);
 
 export type GppdReference = typeof gppdReference.$inferSelect;
+
+/**
+ * India-only coordinate reference extracted from the public World Bank GFMR
+ * individual-flare-location workbook that underpins NASA FIRMS Gas Flares
+ * context. It is reference context, not a live thermal-detection feed.
+ */
+export const gasFlareReference = mysqlTable("gas_flare_reference", {
+  id: int("id").autoincrement().primaryKey(),
+  flareId: varchar("flareId", { length: 64 }).notNull(),
+  country: varchar("country", { length: 64 }).notNull(),
+  latitude: decimal("latitude", { precision: 9, scale: 6 }).notNull(),
+  longitude: decimal("longitude", { precision: 9, scale: 6 }).notNull(),
+  location: varchar("location", { length: 32 }),
+  fieldType: varchar("fieldType", { length: 64 }),
+  fieldName: varchar("fieldName", { length: 255 }),
+  operator: varchar("operator", { length: 255 }),
+  latestAnnualVolumeMcm: decimal("latestAnnualVolumeMcm", { precision: 18, scale: 9 }),
+  sourceDataYear: int("sourceDataYear").notNull(),
+  sourceUrl: varchar("sourceUrl", { length: 1024 }).notNull(),
+  loadedAt: timestamp("loadedAt").notNull(),
+}, table => [
+  uniqueIndex("gasFlareReference_flareId_unique").on(table.flareId),
+  index("gasFlareReference_latitude_longitude_idx").on(table.latitude, table.longitude),
+]);
+
+export type GasFlareReference = typeof gasFlareReference.$inferSelect;

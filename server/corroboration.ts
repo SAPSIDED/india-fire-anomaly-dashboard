@@ -52,6 +52,7 @@ type CacheRecord<T> = { value: T; fetchedAt: Date; expiresAt: Date };
 const REQUEST_TIMEOUT_MS = 12_000;
 const RETRY_DELAYS_MS = [0, 300];
 const FIRMS_DETECTION_PREFERENCE_MS = 6_000;
+const FACILITY_SIGNAL_BUDGET_MS = 750;
 let liveEvidenceWindowMs = 27_000;
 const memoryCache = new Map<string, CacheRecord<unknown>>();
 let persistEvidenceCacheWrites = process.env.VITEST !== "true";
@@ -596,8 +597,10 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
   void landCoverFetcher(input.lat, input.lng).then(result => { landCover = result; }).catch(() => undefined);
   let gppdReference: GppdPlantReference | undefined;
   void gppdReferenceLookup(input.lat, input.lng).then(result => { gppdReference = result; }).catch(() => undefined);
-  let facilitySignals: FacilitySignals | undefined;
-  const facilitySignalsInput = (industrial: IndustrialEvidence) => ({ lat: input.lat, lng: input.lng, ...industrial, ...(gppdReference ? { gppdReference } : {}) });
+  const facilitySignalsInput = (industrial: IndustrialEvidence, firmsCurrent: FirmsEvidence, firmsHistory: FirmsEvidence) => ({
+    lat: input.lat, lng: input.lng, ...industrial, firmsCurrentState: firmsCurrent.state, firmsCurrentDetections: firmsCurrent.detections,
+    firmsHistoryState: firmsHistory.state, firmsHistoryDetections: firmsHistory.detections, ...(gppdReference ? { gppdReference } : {}),
+  });
   const checks = Promise.all([
     fetchFirms(input.lat, input.lng, 1, "VIIRS_NOAA20_NRT", "NOAA-20"),
     fetchFirms(input.lat, input.lng, 7, "VIIRS_NOAA20_NRT", "NOAA-20"),
@@ -630,6 +633,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
       firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
       flareMatch: false, flareMatchConfidence: "none" as const, miningMatch: false, vnfState: "unavailable" as const, vnfCandidateCount: 0,
+      flareReferenceState: "unavailable" as const, flareReferenceCandidateCount: 0, flareReferenceDataYear: null,
       ...(landCover ? { landCover } : {}),
       ...(gppdReference ? { gppdReference } : {}),
       independentCorroboration: { state: "evidence_pending", detail: "The live evidence window closed before all sources responded. The screen remains operational and no industrial-fire conclusion has been issued." },
@@ -637,9 +641,13 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     };
   }
   const [firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather] = await checks;
-  // This optional source must never delay the established corroboration flow.
-  // It can contribute only when the bounded lookup settles during existing work.
-  void facilitySignalLookup(facilitySignalsInput(industrial)).then(result => { facilitySignals = result; }).catch(() => undefined);
+  // This local indexed lookup never calls an external source. Permit a small,
+  // strict budget so its result reaches the response when storage is healthy,
+  // yet never meaningfully delays the established corroboration flow.
+  const facilitySignals = await Promise.race([
+    facilitySignalLookup(facilitySignalsInput(industrial, firmsCurrent, firmsHistory)).catch(() => undefined),
+    new Promise<undefined>(resolve => setTimeout(() => resolve(undefined), FACILITY_SIGNAL_BUDGET_MS)),
+  ]);
   const incidentEvidence = await authorityIncidentEvidence;
   const longTermHistory = await longTermPersistenceReader(input.lat, input.lng);
   const classification = classifyCorroborationEvidence({
@@ -684,7 +692,10 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
   return {
     detectionId: input.detectionId, checkedAt: nowIso(), sourcesRunInParallel: true,
     firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
-    ...(facilitySignals ?? { flareMatch: false, flareMatchConfidence: "none" as const, miningMatch: false, vnfState: "unavailable" as const, vnfCandidateCount: 0 }),
+    ...(facilitySignals ?? {
+      flareMatch: false, flareMatchConfidence: "none" as const, miningMatch: false, vnfState: "unavailable" as const, vnfCandidateCount: 0,
+      flareReferenceState: "unavailable" as const, flareReferenceCandidateCount: 0, flareReferenceDataYear: null,
+    }),
     ...(landCover ? { landCover } : {}),
     ...(gppdReference ? { gppdReference } : {}),
     independentCorroboration: {

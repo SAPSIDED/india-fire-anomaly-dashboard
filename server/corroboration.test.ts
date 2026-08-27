@@ -26,7 +26,7 @@ afterEach(() => {
 describe("evaluateCorroboration", () => {
   it("adds flare/mining signals without changing the existing industrial fields or rule classification", async () => {
     process.env.NASA_FIRMS_MAP_KEY = "test-key";
-    setFacilitySignalLookupForTests(async () => ({ flareMatch: true, flareMatchConfidence: "high", miningMatch: false, vnfState: "available", vnfCandidateCount: 1, detail: "Fixture only." }));
+    setFacilitySignalLookupForTests(async () => ({ flareMatch: true, flareMatchConfidence: "high", miningMatch: false, vnfState: "unavailable", vnfCandidateCount: 0, flareReferenceState: "available", flareReferenceCandidateCount: 1, flareReferenceDataYear: 2025, detail: "Fixture only." }));
     global.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.includes("fireguard-firms-relay")) return new Response("latitude,longitude,acq_date\n27.13,73.33,2026-08-25\n", { status: 200 });
@@ -36,6 +36,26 @@ describe("evaluateCorroboration", () => {
 
     const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "facility-signal" });
     expect(result).toMatchObject({ flareMatch: true, flareMatchConfidence: "high", miningMatch: false });
+    expect(result.industrial.features).toBe(1);
+    expect(result.classification.classification).toBe("uncertain_other");
+  });
+
+  it("uses a local facility signal that settles within the strict budget, without changing core industrial evidence", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    setFacilitySignalLookupForTests(async () => {
+      await new Promise(resolve => setTimeout(resolve, 20));
+      return { flareMatch: false, flareMatchConfidence: "none" as const, miningMatch: true, vnfState: "unavailable" as const, vnfCandidateCount: 0, flareReferenceState: "available" as const, flareReferenceCandidateCount: 0, flareReferenceDataYear: 2025, detail: "Fixture only." };
+    });
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("fireguard-firms-relay")) return new Response("latitude,longitude,acq_date\n27.13,73.33,2026-08-25\n", { status: 200 });
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [{ id: 1 }] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "local-facility-signal" });
+
+    expect(result).toMatchObject({ miningMatch: true, flareReferenceState: "available" });
     expect(result.industrial.features).toBe(1);
     expect(result.classification.classification).toBe("uncertain_other");
   });

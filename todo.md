@@ -133,6 +133,11 @@
 - [x] Inspect the existing facility-context lookup and add a bounded, failure-safe NOAA VIIRS Nightfire adapter without per-request full-dataset downloads.
 - [x] Add additive high-confidence gas-flare and separate mining flags, cross-referenced only with existing GPPD and typed OSM context, without changing industrial fields or Stage 1 classification.
 - [x] Add deterministic flare-match, mining-match, no-match, and backward-compatibility tests using local fixtures only.
+- [x] Inspect the supplied official EOG V4.0 repository (`https://eogdata.mines.edu/pages/download_viirs_fire_iframe_ncor_v40.html`): the listing exposes dated NPP CSV entries, but a real CSV link redirects to EOG licensed-account sign-in.
+- [x] Supersede the planned required EOG importer because the user has no authorized EOG account; retain the bounded VNF adapter only as an optional unavailable integration and do not make any tracker function depend on it.
+- [x] Inspect official accessible NASA FIRMS gas-flare data interfaces and document the exact supported request or overlay source, fields, and access constraints without guessing endpoints.
+- [x] Add conservative, additive NASA FIRMS gas-flare context using the existing official FIRMS data path and existing fixed-location persistence evidence, preserving the current flare/mining logic, industrial fields, and Stage 1 classification.
+- [x] Add deterministic local-fixture coverage for NASA FIRMS flare context, unavailable sources, independent mining matching, and backward compatibility.
 
 ## India-Wide FIRMS Hotspot Snapshot Refresh
 

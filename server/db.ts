@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, isNull, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { detectionHistory, gppdReference, incidentEvidence, indiaHotspotSnapshot, InsertUser, sourceEvidenceCache, users } from "../drizzle/schema";
+import { detectionHistory, gasFlareReference, gppdReference, incidentEvidence, indiaHotspotSnapshot, InsertUser, sourceEvidenceCache, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { dedupeDetectionHistoryRows, summarizeLongTermPersistence, type LongTermPersistenceSummary } from "./history";
 
@@ -278,5 +278,45 @@ export async function getGppdReferenceCandidates(lat: number, lng: number, radiu
     lte(gppdReference.latitude, (lat + latitudeDelta).toFixed(6)),
     gte(gppdReference.longitude, (lng - longitudeDelta).toFixed(6)),
     lte(gppdReference.longitude, (lng + longitudeDelta).toFixed(6)),
+  ));
+}
+
+export type GasFlareReferenceInput = {
+  flareId: string;
+  country: "India";
+  latitude: string;
+  longitude: string;
+  location: string | null;
+  fieldType: string | null;
+  fieldName: string | null;
+  operator: string | null;
+  latestAnnualVolumeMcm: string | null;
+  sourceDataYear: number;
+  sourceUrl: string;
+};
+
+/** Atomically replaces only the public India gas-flare reference after a complete source load. */
+export async function replaceGasFlareReference(rows: GasFlareReferenceInput[]) {
+  const db = await getDb();
+  if (!db) throw new Error("The gas-flare reference database is unavailable.");
+  const loadedAt = new Date();
+  await db.transaction(async tx => {
+    await tx.delete(gasFlareReference);
+    if (rows.length > 0) await tx.insert(gasFlareReference).values(rows.map(row => ({ ...row, loadedAt })));
+  });
+  return { loadedAt, rowCount: rows.length };
+}
+
+/** Uses the indexed latitude/longitude bounding box; callers apply exact Haversine distance. */
+export async function getGasFlareReferenceCandidates(lat: number, lng: number, radiusKm: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const latitudeDelta = radiusKm / 111;
+  const longitudeDelta = radiusKm / Math.max(1, 111 * Math.cos(lat * Math.PI / 180));
+  return db.select().from(gasFlareReference).where(and(
+    gte(gasFlareReference.latitude, (lat - latitudeDelta).toFixed(6)),
+    lte(gasFlareReference.latitude, (lat + latitudeDelta).toFixed(6)),
+    gte(gasFlareReference.longitude, (lng - longitudeDelta).toFixed(6)),
+    lte(gasFlareReference.longitude, (lng + longitudeDelta).toFixed(6)),
   ));
 }

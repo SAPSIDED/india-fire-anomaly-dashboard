@@ -50,6 +50,13 @@
       "when": 1787845973966,
       "tag": "0006_nice_shriek",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1787860194620,
+      "tag": "0007_military_silvermane",
+      "breakpoints": true
     }
   ]
 }
