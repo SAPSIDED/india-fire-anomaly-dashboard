@@ -220,4 +220,4 @@
 - [ ] Prepare FireGuard for Vercel deployment from the connected GitHub repository: audit the current build/runtime split, configure frontend/API routing and environment requirements, validate production display and live API behavior, and preserve server-side secrets.
 
 No Vercel compatibility implementation has been applied yet; this item records the proposed next job.
-- [ ] Confirm current Manus hosting for the Express/tRPC backend, database, FIRMS relay, and scheduled refresh; prepare an independent-redeployment handoff covering source location, migrations, environment-variable names, and exact runtime commands without exposing secret values.
+- [x] Confirm current Manus hosting for the Express/tRPC backend, database, FIRMS relay, and scheduled refresh; prepare an independent-redeployment handoff covering source location, migrations, environment-variable names, and exact runtime commands without exposing secret values.
