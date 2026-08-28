@@ -84,7 +84,7 @@
 - [x] Extend only `ClassificationInput` with existing GPPD, named OSM facility/category, and flare-match evidence.
 - [x] Add named industrial facility, gas-flare, mining, and agricultural-zone supporting rules with explicit reason evidence and Stage 5 fallback preservation.
 - [x] Add deterministic GPPD, named refinery, flare, mining, agricultural-zone, and unchanged Stage 5 classifier regression tests; validate full test suite and production build.
-- [ ] Save and publish the validated named-facility and gas-flare classifier enhancement.
+- [x] Save and publish the validated named-facility and gas-flare classifier enhancement.
 
 ## Database-Backed FIRMS History
 
