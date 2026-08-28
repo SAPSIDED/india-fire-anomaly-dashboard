@@ -88,6 +88,10 @@
 - [x] Define deterministic existing-evidence selectors for industrial facility, mining, wildfire, and agricultural-burning training labels, explicitly excluding gas-flare and persistent-industrial classes.
 - [x] Add a read-only `server/buildTrainingDataset.ts` generator that writes feature/label JSON and excludes every class below 30 real examples.
 - [x] Run the generator against current stored evidence, report per-class eligible/output counts without padding, and add deterministic generator tests.
+- [x] Run a read-only diagnostic of wildfire/agricultural label filters and all persisted land-cover evidence coverage; do not change the generator or data.
+- [x] Add a manual-only `server/backfillLandCover.ts` script that reads stored FIRMS locations without cached land cover and calls the existing fetcher with a conservative inter-request delay.
+- [x] Ensure individual coordinate failures are logged and skipped, report attempted/succeeded/failed/already-cached counts, and never modify existing retrieval, classification, or scheduled behavior.
+- [x] Add deterministic backfill selection, rate-limit, cache-skip, and partial-failure tests; run the one-time backfill and verify expanded persisted land-cover coverage.
 
 ## Database-Backed FIRMS History
 
