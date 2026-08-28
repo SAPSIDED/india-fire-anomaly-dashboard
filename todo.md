@@ -221,3 +221,8 @@
 
 No Vercel compatibility implementation has been applied yet; this item records the proposed next job.
 - [x] Confirm current Manus hosting for the Express/tRPC backend, database, FIRMS relay, and scheduled refresh; prepare an independent-redeployment handoff covering source location, migrations, environment-variable names, and exact runtime commands without exposing secret values.
+- [ ] Deploy FireGuard to the user's Vercel account from the connected GitHub repository, including safe frontend/backend routing, environment configuration, and live smoke testing.
+- [x] Correct Vercel’s production output so `/` serves the compiled React application rather than `dist/index.js` as JavaScript source.
+- [x] Proxy same-origin `/api/*` requests from the Vercel frontend to the existing HTTPS FireGuard backend while keeping private credentials server-side.
+- [x] Add deterministic tests for the Vercel build/output/rewrite contract, then run the full test, type-check, and production-build validation.
+- [ ] Push the validated configuration to `main`, redeploy Vercel, and verify the production homepage, hotspot query, and marker-verification flow.
