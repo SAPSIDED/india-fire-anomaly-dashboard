@@ -92,6 +92,8 @@
 - [x] Add a manual-only `server/backfillLandCover.ts` script that reads stored FIRMS locations without cached land cover and calls the existing fetcher with a conservative inter-request delay.
 - [x] Ensure individual coordinate failures are logged and skipped, report attempted/succeeded/failed/already-cached counts, and never modify existing retrieval, classification, or scheduled behavior.
 - [x] Add deterministic backfill selection, rate-limit, cache-skip, and partial-failure tests; run the one-time backfill and verify expanded persisted land-cover coverage.
+- [x] Rerun the existing training dataset generator unchanged after land-cover backfill and report exact class counts, included rows, output fields, representative rows, exclusions, skipped backfill locations, and XGBoost readiness without training a model.
+- [x] Deliver the read-only post-backfill dataset-readiness report with exact counts, output fields, representative rows, exclusions, skipped locations, and explicit XGBoost readiness; do not train a model.
 
 ## Database-Backed FIRMS History
 

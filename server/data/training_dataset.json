@@ -7,7 +7,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -22,7 +22,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -52,7 +52,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -67,7 +67,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -82,7 +82,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -97,7 +97,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -112,7 +112,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -127,7 +127,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -142,7 +142,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -157,7 +157,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -172,7 +172,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -187,7 +187,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -202,7 +202,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -232,7 +232,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -247,7 +247,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -262,7 +262,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -277,7 +277,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -292,7 +292,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -307,7 +307,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -322,7 +322,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -337,7 +337,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -352,7 +352,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -367,7 +367,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -382,7 +382,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -397,7 +397,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -412,7 +412,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -427,7 +427,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -442,7 +442,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -472,7 +472,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -487,7 +487,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -502,7 +502,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -517,7 +517,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -532,7 +532,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -547,7 +547,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -562,7 +562,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -577,7 +577,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -592,7 +592,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -607,7 +607,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -622,7 +622,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -637,7 +637,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -652,7 +652,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -667,7 +667,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -682,7 +682,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -697,7 +697,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -712,7 +712,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -727,7 +727,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -742,7 +742,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -757,7 +757,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -772,7 +772,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -787,7 +787,7 @@
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1,
-      "landCoverClass": null,
+      "landCoverClass": "built_up",
       "gppdMatch": true,
       "namedFacilityMatch": false,
       "namedFacilityCategory": null
@@ -823,5 +823,620 @@
       "namedFacilityCategory": "refinery"
     },
     "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 20.79344,
+      "longitude": 85.25465,
+      "frpMw": 11.97,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "built_up",
+      "gppdMatch": false,
+      "namedFacilityMatch": true,
+      "namedFacilityCategory": "steel"
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.39248,
+      "longitude": 81.64462,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 23.69046,
+      "longitude": 87.1196,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 23.66717,
+      "longitude": 87.15483,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 32.88705,
+      "longitude": 71.61514,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 32.8867,
+      "longitude": 71.61327,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 32.88909,
+      "longitude": 71.61375,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 32.88736,
+      "longitude": 71.61475,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 32.89101,
+      "longitude": 71.61274,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 22.42014,
+      "longitude": 69.04203,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 14.86755,
+      "longitude": 79.73705,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 17.95897,
+      "longitude": 80.78802,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 17.95949,
+      "longitude": 80.79189,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 17.95747,
+      "longitude": 80.7872,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 17.95628,
+      "longitude": 80.79455,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 21.74298,
+      "longitude": 83.84299,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 21.74881,
+      "longitude": 83.84253,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 21.74921,
+      "longitude": 83.84696,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 21.75503,
+      "longitude": 83.8465,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 21.75515,
+      "longitude": 83.8454,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 21.74762,
+      "longitude": 83.84057,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 21.74682,
+      "longitude": 83.84542,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 20.98991,
+      "longitude": 85.12567,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 20.96951,
+      "longitude": 85.17609,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 22.35975,
+      "longitude": 82.30282,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 22.35542,
+      "longitude": 82.30332,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 32.88595,
+      "longitude": 71.61364,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 20.79809,
+      "longitude": 85.25024,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "forest_vegetation",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 32.57768,
+      "longitude": 72.56239,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 32.57618,
+      "longitude": 72.56014,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 32.57686,
+      "longitude": 72.56309,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 28.49947,
+      "longitude": 97.02498,
+      "frpMw": 4.28,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "forest_vegetation",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 28.51055,
+      "longitude": 97.02303,
+      "frpMw": 5.7,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "forest_vegetation",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 15.13766,
+      "longitude": 76.71173,
+      "frpMw": 0.52,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 15.13799,
+      "longitude": 76.7103,
+      "frpMw": 0.82,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 29.45728,
+      "longitude": 76.87041,
+      "frpMw": 1.12,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "forest_vegetation",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 13.82722,
+      "longitude": 79.25863,
+      "frpMw": 1.24,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 13.84566,
+      "longitude": 79.25454,
+      "frpMw": 1.01,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 13.84619,
+      "longitude": 79.25174,
+      "frpMw": 1.27,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "grassland_rangeland",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 9.03975,
+      "longitude": 80.67662,
+      "frpMw": 7.94,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "forest_vegetation",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
+  },
+  {
+    "features": {
+      "latitude": 9.00394,
+      "longitude": 80.68155,
+      "frpMw": 7.59,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "forest_vegetation",
+      "gppdMatch": false,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "wildfire"
   }
 ]
