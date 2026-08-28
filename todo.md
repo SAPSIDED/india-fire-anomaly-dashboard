@@ -217,7 +217,7 @@
 - [x] Render optional nearby GPPD plant name, fuel, capacity, distance, and attribution beside OSM evidence without implying causation.
 - [x] Add rendered desktop/mobile regression coverage for facility-context display, map link, optional GPPD context, and unavailable fallback states.
 - [x] Conduct a read-only root-cause investigation of day/night ratio, seven-day count, active-months, and FRP feature generation; propose minimal safe fixes without modifying labels, data, thresholds, classifier, or training a model.
-- [ ] Prepare FireGuard for Vercel deployment from the connected GitHub repository: audit the current build/runtime split, configure frontend/API routing and environment requirements, validate production display and live API behavior, and preserve server-side secrets.
+- [x] Defer FireGuard Vercel deployment compatibility work until after the user-prioritized independent backend redeployment handoff; no Vercel implementation was applied in this scope.
 
 No Vercel compatibility implementation has been applied yet; this item records the proposed next job.
 - [x] Confirm current Manus hosting for the Express/tRPC backend, database, FIRMS relay, and scheduled refresh; prepare an independent-redeployment handoff covering source location, migrations, environment-variable names, and exact runtime commands without exposing secret values.
