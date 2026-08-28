@@ -85,6 +85,9 @@
 - [x] Add named industrial facility, gas-flare, mining, and agricultural-zone supporting rules with explicit reason evidence and Stage 5 fallback preservation.
 - [x] Add deterministic GPPD, named refinery, flare, mining, agricultural-zone, and unchanged Stage 5 classifier regression tests; validate full test suite and production build.
 - [x] Save and publish the validated named-facility and gas-flare classifier enhancement.
+- [x] Define deterministic existing-evidence selectors for industrial facility, mining, wildfire, and agricultural-burning training labels, explicitly excluding gas-flare and persistent-industrial classes.
+- [x] Add a read-only `server/buildTrainingDataset.ts` generator that writes feature/label JSON and excludes every class below 30 real examples.
+- [x] Run the generator against current stored evidence, report per-class eligible/output counts without padding, and add deterministic generator tests.
 
 ## Database-Backed FIRMS History
 

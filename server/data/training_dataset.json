@@ -1,0 +1,827 @@
+[
+  {
+    "features": {
+      "latitude": 21.10612,
+      "longitude": 72.647,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.10283,
+      "longitude": 72.64758,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.1065,
+      "longitude": 72.64651,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "built_up",
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.10633,
+      "longitude": 72.64521,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.10424,
+      "longitude": 72.64529,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.10601,
+      "longitude": 72.64454,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.10658,
+      "longitude": 72.64876,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.1025,
+      "longitude": 72.64508,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.10608,
+      "longitude": 72.64758,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.10659,
+      "longitude": 72.64334,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.10742,
+      "longitude": 72.64774,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.10818,
+      "longitude": 72.64432,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.10536,
+      "longitude": 72.64783,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 21.10566,
+      "longitude": 72.6433,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 20.91049,
+      "longitude": 71.45941,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "built_up",
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 20.9112,
+      "longitude": 71.45757,
+      "frpMw": 0,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17745,
+      "longitude": 76.65191,
+      "frpMw": 1.92,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17965,
+      "longitude": 76.67181,
+      "frpMw": 3.57,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.18025,
+      "longitude": 76.66698,
+      "frpMw": 2.13,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17225,
+      "longitude": 76.6562,
+      "frpMw": 1.92,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17625,
+      "longitude": 76.66158,
+      "frpMw": 2.16,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17685,
+      "longitude": 76.65675,
+      "frpMw": 1.92,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17506,
+      "longitude": 76.65867,
+      "frpMw": 4.09,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17785,
+      "longitude": 76.67822,
+      "frpMw": 4.7,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17477,
+      "longitude": 76.65479,
+      "frpMw": 1.55,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17336,
+      "longitude": 76.66246,
+      "frpMw": 1.14,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.18496,
+      "longitude": 76.66879,
+      "frpMw": 2.38,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.18357,
+      "longitude": 76.67648,
+      "frpMw": 1.65,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17946,
+      "longitude": 76.67565,
+      "frpMw": 1.65,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17886,
+      "longitude": 76.65562,
+      "frpMw": 1.55,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17816,
+      "longitude": 76.65945,
+      "frpMw": 1.55,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "built_up",
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.18351,
+      "longitude": 76.66707,
+      "frpMw": 0.72,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.1829,
+      "longitude": 76.67016,
+      "frpMw": 0.72,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.18032,
+      "longitude": 76.65672,
+      "frpMw": 1.33,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17664,
+      "longitude": 76.67516,
+      "frpMw": 1.09,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17901,
+      "longitude": 76.65769,
+      "frpMw": 2.73,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17567,
+      "longitude": 76.67632,
+      "frpMw": 2.05,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17528,
+      "longitude": 76.65698,
+      "frpMw": 3.34,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.16905,
+      "longitude": 76.6702,
+      "frpMw": 1.59,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17469,
+      "longitude": 76.65448,
+      "frpMw": 1.16,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.1848,
+      "longitude": 76.66843,
+      "frpMw": 1.6,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.18107,
+      "longitude": 76.66773,
+      "frpMw": 2.05,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.18023,
+      "longitude": 76.67239,
+      "frpMw": 2.05,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17984,
+      "longitude": 76.65304,
+      "frpMw": 2.44,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.18397,
+      "longitude": 76.67608,
+      "frpMw": 1.58,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17959,
+      "longitude": 76.6636,
+      "frpMw": 1.44,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17831,
+      "longitude": 76.67545,
+      "frpMw": 1.34,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.18871,
+      "longitude": 76.6569,
+      "frpMw": 2.33,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.18643,
+      "longitude": 76.67658,
+      "frpMw": 2.84,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.18214,
+      "longitude": 76.66415,
+      "frpMw": 3.62,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17784,
+      "longitude": 76.65171,
+      "frpMw": 1.57,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.17738,
+      "longitude": 76.65565,
+      "frpMw": 2.18,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 15.18525,
+      "longitude": 76.66425,
+      "frpMw": 2.67,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": null,
+      "gppdMatch": true,
+      "namedFacilityMatch": false,
+      "namedFacilityCategory": null
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 29.45695,
+      "longitude": 76.86645,
+      "frpMw": 2.18,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "built_up",
+      "gppdMatch": false,
+      "namedFacilityMatch": true,
+      "namedFacilityCategory": "refinery"
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "features": {
+      "latitude": 25.94402,
+      "longitude": 72.18896,
+      "frpMw": 1.26,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1,
+      "landCoverClass": "built_up",
+      "gppdMatch": false,
+      "namedFacilityMatch": true,
+      "namedFacilityCategory": "refinery"
+    },
+    "label": "industrial_facility"
+  }
+]
