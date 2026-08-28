@@ -8,6 +8,10 @@ const baseInput = {
   historyDailyDetections: [],
   landCoverClass: null,
   longTermHistory: null,
+  gppdReference: null,
+  industrialFacilityName: null,
+  industrialFacilityCategory: null,
+  flareMatch: false,
 };
 
 describe("classifyCorroborationEvidence", () => {
@@ -91,5 +95,46 @@ describe("classifyCorroborationEvidence", () => {
     expect(result.reason).toContain("evidence disagrees");
     expect(result.reason).toContain("Land-cover is cropland");
     expect(result.reason).toContain("2 detections across 1 active month");
+  });
+
+  it("uses a nearby named GPPD plant as high-confidence industrial evidence", () => {
+    const result = classifyCorroborationEvidence({
+      ...baseInput,
+      gppdReference: { name: "Kawas Combined Cycle Plant", fuelType: "Gas", distanceKm: 0.55 },
+    });
+    expect(result).toMatchObject({ classification: "industrial_thermal_source", confidence: "high" });
+    expect(result.reason).toContain("GPPD identifies Kawas Combined Cycle Plant, fuel type Gas, 550 m from the hotspot");
+  });
+
+  it("uses a named OSM refinery as high-confidence industrial evidence ahead of generic counts", () => {
+    const result = classifyCorroborationEvidence({
+      ...baseInput,
+      industrialFacilityName: "Jamnagar Refinery",
+      industrialFacilityCategory: "refinery",
+    });
+    expect(result).toMatchObject({ classification: "industrial_thermal_source", confidence: "high" });
+    expect(result.reason).toContain("names Jamnagar Refinery as a refinery");
+  });
+
+  it("uses a gas-flare cross-reference match as high-confidence industrial evidence", () => {
+    const result = classifyCorroborationEvidence({ ...baseInput, flareMatch: true });
+    expect(result).toMatchObject({ classification: "industrial_thermal_source", confidence: "high" });
+    expect(result.reason).toContain("gas-flare cross-reference is matched");
+  });
+
+  it("treats a typed mining facility as industrial even without a named GPPD match", () => {
+    const result = classifyCorroborationEvidence({ ...baseInput, industrialFacilityCategory: "mining" });
+    expect(result).toMatchObject({ classification: "industrial_thermal_source", confidence: "high" });
+    expect(result.reason).toContain("mining facility, an industrial non-wildfire category");
+  });
+
+  it("uses an agricultural-zone category only as supporting evidence for an existing vegetation result", () => {
+    const result = classifyCorroborationEvidence({
+      ...baseInput,
+      industrialFacilityCategory: "agricultural_zone",
+      historyDailyDetections: [{ date: "2026-08-20", detections: 1 }],
+    });
+    expect(result).toMatchObject({ classification: "likely_wildfire_vegetation", confidence: "high" });
+    expect(result.reason).toContain("agricultural zone");
   });
 });

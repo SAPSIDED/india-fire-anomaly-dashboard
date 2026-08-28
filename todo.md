@@ -81,6 +81,10 @@
 - [x] Add deterministic tests for each classification rule and run the full existing validation suite.
 - [x] Extend the classifier input and decision reasons with already available land-cover and long-term-history evidence, without changing retrieval or persistence code.
 - [x] Add deterministic agreement, disagreement, and unavailable-evidence fallback tests for the enriched classification rules.
+- [x] Extend only `ClassificationInput` with existing GPPD, named OSM facility/category, and flare-match evidence.
+- [x] Add named industrial facility, gas-flare, mining, and agricultural-zone supporting rules with explicit reason evidence and Stage 5 fallback preservation.
+- [x] Add deterministic GPPD, named refinery, flare, mining, agricultural-zone, and unchanged Stage 5 classifier regression tests; validate full test suite and production build.
+- [ ] Save and publish the validated named-facility and gas-flare classifier enhancement.
 
 ## Database-Backed FIRMS History
 
@@ -113,6 +117,7 @@
 - [x] Add deterministic single-point, adequate same-platform, mixed-platform separation, and unchanged-classification regression tests; validate build and production checkpoint.
 - [x] Add an explicit regression proving the FRP variance reliability contract does not alter the established classification output.
 - [x] Save and publish the validated FRP variance reliability correction checkpoint.
+- [x] Run a read-only one-line status count of complete FRP rows and adequate versus insufficient location/platform variance groups.
 
 ## Additive Land-Cover Evidence
 

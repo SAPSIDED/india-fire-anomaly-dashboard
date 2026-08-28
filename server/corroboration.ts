@@ -668,6 +668,10 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
       historyState: firmsHistory.state,
       landCoverClass: landCover?.landCoverClass ?? null,
       longTermHistory: longTermHistory.state === "available" ? { totalDetectionCount: longTermHistory.totalDetectionCount, activeMonths: longTermHistory.activeMonths } : null,
+      gppdReference: gppdReference ? { name: gppdReference.name, fuelType: gppdReference.fuelType, distanceKm: gppdReference.distanceKm } : null,
+      industrialFacilityName: industrial.industrialFacilityName,
+      industrialFacilityCategory: industrial.industrialFacilityCategory,
+      flareMatch: false,
     });
     return {
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
@@ -704,6 +708,10 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     historyState: firmsHistory.state,
     landCoverClass: landCover?.landCoverClass ?? null,
     longTermHistory: longTermHistory.state === "available" ? { totalDetectionCount: longTermHistory.totalDetectionCount, activeMonths: longTermHistory.activeMonths } : null,
+    gppdReference: gppdReference ? { name: gppdReference.name, fuelType: gppdReference.fuelType, distanceKm: gppdReference.distanceKm } : null,
+    industrialFacilityName: industrial.industrialFacilityName,
+    industrialFacilityCategory: industrial.industrialFacilityCategory,
+    flareMatch: facilitySignals?.flareMatch ?? false,
   });
 
   const hasOnlyLiveCore = [firmsCurrent, firmsIndependentCurrent, industrial].every(source => source.state === "available");

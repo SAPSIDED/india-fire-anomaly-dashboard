@@ -12,6 +12,7 @@ export type ClassificationResult = {
 };
 
 type EvidenceState = "available" | "cached" | "unavailable";
+type IndustrialFacilityCategory = "refinery" | "power_plant" | "steel" | "lng_terminal" | "mining" | "agricultural_zone";
 
 export type ClassificationInput = {
   industrialFeatures: number;
@@ -20,10 +21,15 @@ export type ClassificationInput = {
   historyState: EvidenceState;
   landCoverClass: string | null;
   longTermHistory: { totalDetectionCount: number; activeMonths: number } | null;
+  gppdReference: { name: string; fuelType: string | null; distanceKm: number } | null;
+  industrialFacilityName: string | null;
+  industrialFacilityCategory: IndustrialFacilityCategory | null;
+  flareMatch: boolean;
 };
 
 const builtUpClasses = new Set(["built_up", "built-up", "built up", "industrial", "urban"]);
 const vegetationClasses = new Set(["cropland", "forest"]);
+const namedIndustrialCategories = new Set<IndustrialFacilityCategory>(["refinery", "power_plant", "steel", "lng_terminal", "mining"]);
 
 function classifyShortTermEvidence(input: ClassificationInput, detectionDays: number): ClassificationLabel {
   if (input.industrialFeatures > 0 && detectionDays >= 4) return "industrial_thermal_source";
@@ -42,6 +48,37 @@ function classifyEnrichedEvidence(input: ClassificationInput): ClassificationLab
 function enrichedEvidenceDetail(input: ClassificationInput) {
   if (!input.landCoverClass || !input.longTermHistory) return "";
   return ` Land-cover is ${input.landCoverClass}; stored long-term history contains ${input.longTermHistory.totalDetectionCount} detection${input.longTermHistory.totalDetectionCount === 1 ? "" : "s"} across ${input.longTermHistory.activeMonths} active month${input.longTermHistory.activeMonths === 1 ? "" : "s"}.`;
+}
+
+function agriculturalZoneSupport(input: ClassificationInput) {
+  return input.industrialFacilityCategory === "agricultural_zone"
+    ? " Typed OSM evidence identifies an agricultural zone and supports, but does not independently determine, the vegetation/wildfire interpretation."
+    : "";
+}
+
+function facilityEvidenceDetail(input: ClassificationInput) {
+  const details: string[] = [];
+  if (input.gppdReference) {
+    const distanceM = Math.round(input.gppdReference.distanceKm * 1000);
+    const fuelType = input.gppdReference.fuelType ? `, fuel type ${input.gppdReference.fuelType}` : "";
+    details.push(`GPPD identifies ${input.gppdReference.name}${fuelType}, ${distanceM} m from the hotspot`);
+  }
+  if (input.industrialFacilityName && input.industrialFacilityCategory && namedIndustrialCategories.has(input.industrialFacilityCategory)) {
+    details.push(`nearby OSM evidence names ${input.industrialFacilityName} as a ${input.industrialFacilityCategory.replaceAll("_", " ")}`);
+  } else if (input.industrialFacilityCategory === "mining") {
+    details.push("typed OSM evidence identifies a mining facility, an industrial non-wildfire category");
+  }
+  if (input.flareMatch) details.push("the gas-flare cross-reference is matched");
+  return details.join("; ");
+}
+
+function hasStrongNamedIndustrialEvidence(input: ClassificationInput) {
+  return Boolean(
+    input.gppdReference
+      || input.flareMatch
+      || input.industrialFacilityCategory === "mining"
+      || (input.industrialFacilityName && input.industrialFacilityCategory && namedIndustrialCategories.has(input.industrialFacilityCategory)),
+  );
 }
 
 /**
@@ -63,6 +100,15 @@ export function classifyCorroborationEvidence(input: ClassificationInput): Class
       classification: "uncertain_other",
       confidence: "low",
       reason: `Nearby industrial context or seven-day FIRMS history is unavailable, so the rule-based layer cannot classify the thermal pattern confidently.${enrichedEvidenceDetail(input)}`,
+    };
+  }
+
+  const namedFacilityEvidence = facilityEvidenceDetail(input);
+  if (hasStrongNamedIndustrialEvidence(input)) {
+    return {
+      classification: "industrial_thermal_source",
+      confidence: "high",
+      reason: `${namedFacilityEvidence} provides named or typed industrial evidence and takes priority over generic nearby-feature counts.${enrichedEvidenceDetail(input)}`,
     };
   }
 
@@ -89,7 +135,7 @@ export function classifyCorroborationEvidence(input: ClassificationInput): Class
       return {
         classification: "likely_wildfire_vegetation",
         confidence,
-        reason: `No nearby industrial context was found and FIRMS detections occurred on ${detectionDays} of the returned seven days, which is more consistent with a short-lived vegetation or wildfire pattern than a recurring industrial source.`,
+        reason: `No nearby industrial context was found and FIRMS detections occurred on ${detectionDays} of the returned seven days, which is more consistent with a short-lived vegetation or wildfire pattern than a recurring industrial source.${agriculturalZoneSupport(input)}`,
       };
     }
     return {
@@ -127,7 +173,7 @@ export function classifyCorroborationEvidence(input: ClassificationInput): Class
     return {
       classification: "likely_wildfire_vegetation",
       confidence: "high",
-      reason: `No nearby industrial context was found, FIRMS detections occurred on ${detectionDays} of the returned seven days, and the enriched rule supports a short-lived vegetation or wildfire pattern.${detail}`,
+      reason: `No nearby industrial context was found, FIRMS detections occurred on ${detectionDays} of the returned seven days, and the enriched rule supports a short-lived vegetation or wildfire pattern.${detail}${agriculturalZoneSupport(input)}`,
     };
   }
 

@@ -28,7 +28,7 @@ afterEach(() => {
 });
 
 describe("evaluateCorroboration", () => {
-  it("adds flare/mining signals without changing the existing industrial fields or rule classification", async () => {
+  it("adds flare/mining signals without changing industrial fields and classifies a flare match as industrial evidence", async () => {
     process.env.NASA_FIRMS_MAP_KEY = "test-key";
     setFacilitySignalLookupForTests(async () => ({ flareMatch: true, flareMatchConfidence: "high", miningMatch: false, vnfState: "unavailable", vnfCandidateCount: 0, flareReferenceState: "available", flareReferenceCandidateCount: 1, flareReferenceDataYear: 2025, detail: "Fixture only." }));
     global.fetch = vi.fn(async (input: RequestInfo | URL) => {
@@ -41,7 +41,8 @@ describe("evaluateCorroboration", () => {
     const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "facility-signal" });
     expect(result).toMatchObject({ flareMatch: true, flareMatchConfidence: "high", miningMatch: false });
     expect(result.industrial.features).toBe(1);
-    expect(result.classification.classification).toBe("uncertain_other");
+    expect(result.classification).toMatchObject({ classification: "industrial_thermal_source", confidence: "high" });
+    expect(result.classification.reason).toContain("gas-flare cross-reference is matched");
   });
 
   it("uses a local facility signal that settles within the strict budget, without changing core industrial evidence", async () => {
