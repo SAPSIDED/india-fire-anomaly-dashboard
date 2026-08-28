@@ -94,6 +94,7 @@
 - [x] Add deterministic backfill selection, rate-limit, cache-skip, and partial-failure tests; run the one-time backfill and verify expanded persisted land-cover coverage.
 - [x] Rerun the existing training dataset generator unchanged after land-cover backfill and report exact class counts, included rows, output fields, representative rows, exclusions, skipped backfill locations, and XGBoost readiness without training a model.
 - [x] Deliver the read-only post-backfill dataset-readiness report with exact counts, output fields, representative rows, exclusions, skipped locations, and explicit XGBoost readiness; do not train a model.
+- [x] Conduct a read-only ML dataset quality and label-leakage audit of the existing generator and 96-row output; report feature provenance, direct label shortcuts, class balance, recommended exclusions, and data needed before training without modifying or training anything.
 
 ## Database-Backed FIRMS History
 
@@ -215,3 +216,8 @@
 - [x] Add a safe source-attributed OpenStreetMap link for the selected facility context.
 - [x] Render optional nearby GPPD plant name, fuel, capacity, distance, and attribution beside OSM evidence without implying causation.
 - [x] Add rendered desktop/mobile regression coverage for facility-context display, map link, optional GPPD context, and unavailable fallback states.
+- [x] Conduct a read-only root-cause investigation of day/night ratio, seven-day count, active-months, and FRP feature generation; propose minimal safe fixes without modifying labels, data, thresholds, classifier, or training a model.
+- [ ] Prepare FireGuard for Vercel deployment from the connected GitHub repository: audit the current build/runtime split, configure frontend/API routing and environment requirements, validate production display and live API behavior, and preserve server-side secrets.
+
+No Vercel compatibility implementation has been applied yet; this item records the proposed next job.
+- [ ] Confirm current Manus hosting for the Express/tRPC backend, database, FIRMS relay, and scheduled refresh; prepare an independent-redeployment handoff covering source location, migrations, environment-variable names, and exact runtime commands without exposing secret values.
