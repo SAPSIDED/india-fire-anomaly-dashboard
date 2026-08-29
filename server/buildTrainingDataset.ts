@@ -6,6 +6,8 @@ import { getDb } from "./db";
 
 export const TRAINING_LABELS = ["industrial_facility", "mining", "wildfire", "agricultural_burning"] as const;
 export type TrainingLabel = (typeof TRAINING_LABELS)[number];
+export const OUTPUT_LABELS = ["industrial_facility", "wildfire"] as const;
+export type OutputTrainingLabel = (typeof OUTPUT_LABELS)[number];
 type FacilityCategory = "refinery" | "power_plant" | "steel" | "lng_terminal" | "mining" | "agricultural_zone";
 
 type StoredDetection = {
@@ -30,19 +32,23 @@ type CachedEvidence = {
 };
 
 export type TrainingFeatures = {
-  latitude: number;
-  longitude: number;
   frpMw: number | null;
   dayNightRatio: number | null;
   sevenDayDetectionCount: number;
   activeMonths: number;
-  landCoverClass: string | null;
-  gppdMatch: boolean;
-  namedFacilityMatch: boolean;
-  namedFacilityCategory: FacilityCategory | null;
 };
 
-export type TrainingDatasetRow = { features: TrainingFeatures; label: TrainingLabel };
+export type TrainingMetadata = {
+  latitude: number;
+  longitude: number;
+  trainingUse: "metadata, not for training";
+};
+
+export type TrainingDatasetRow = {
+  metadata: TrainingMetadata;
+  features: TrainingFeatures;
+  label: OutputTrainingLabel;
+};
 
 export type TrainingDatasetBuildResult = {
   candidateCounts: Record<TrainingLabel, number>;
@@ -90,12 +96,18 @@ function parseJson(payload: string): Record<string, unknown> | undefined {
 }
 
 function categoryFromCache(value: unknown): FacilityCategory | null {
-  return TRAINING_LABELS && typeof value === "string" && ["refinery", "power_plant", "steel", "lng_terminal", "mining", "agricultural_zone"].includes(value)
+  return typeof value === "string" && ["refinery", "power_plant", "steel", "lng_terminal", "mining", "agricultural_zone"].includes(value)
     ? value as FacilityCategory
     : null;
 }
 
 type CachedFacility = { name: string | null; category: FacilityCategory | null; distanceM: number | null };
+type LabelEvidence = {
+  landCoverClass: string | null;
+  gppdMatch: boolean;
+  namedFacilityMatch: boolean;
+  namedFacilityCategory: FacilityCategory | null;
+};
 
 function buildCachedEvidenceIndexes(caches: CachedEvidence[], now: Date) {
   const landCoverByCoordinate = new Map<string, string>();
@@ -131,14 +143,21 @@ function nearestGppdMatch(lat: number, lng: number, plants: StoredGppdReference[
   });
 }
 
-function labelFor(features: TrainingFeatures, facility: CachedFacility | undefined): TrainingLabel | undefined {
+function labelFor(evidence: LabelEvidence, facility: CachedFacility | undefined): TrainingLabel | undefined {
   const miningMatch = facility?.category === "mining" && facility.distanceM !== null && facility.distanceM <= 2_000;
-  const namedIndustrialMatch = features.namedFacilityMatch && features.namedFacilityCategory !== null && NAMED_INDUSTRIAL_CATEGORIES.has(features.namedFacilityCategory);
+  const namedIndustrialMatch = evidence.namedFacilityMatch && evidence.namedFacilityCategory !== null && NAMED_INDUSTRIAL_CATEGORIES.has(evidence.namedFacilityCategory);
   if (miningMatch) return "mining";
-  if (features.gppdMatch || namedIndustrialMatch) return "industrial_facility";
-  if (features.landCoverClass === "cropland") return "agricultural_burning";
-  if (features.landCoverClass && FOREST_OR_GRASSLAND.has(features.landCoverClass)) return "wildfire";
+  if (evidence.gppdMatch || namedIndustrialMatch) return "industrial_facility";
+  if (evidence.landCoverClass === "cropland") return "agricultural_burning";
+  if (evidence.landCoverClass && FOREST_OR_GRASSLAND.has(evidence.landCoverClass)) return "wildfire";
   return undefined;
+}
+
+function parseFrp(value: string | number | null | undefined): number | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "string" && value.trim() === "") return null;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
 }
 
 /**
@@ -177,23 +196,33 @@ export function buildTrainingRowsFromStoredEvidence(input: {
     const dayDetections = group.rows.filter((row: StoredDetection) => row.dayNight?.trim().toUpperCase() === "D").length;
     const nightDetections = group.rows.filter((row: StoredDetection) => row.dayNight?.trim().toUpperCase() === "N").length;
     const sortedByDate = [...group.rows].sort((left: StoredDetection, right: StoredDetection) => dateString(right.detectionDate).localeCompare(dateString(left.detectionDate)));
-    const newestFrp = sortedByDate.map((row: StoredDetection) => Number(row.frp)).find((value: number) => Number.isFinite(value));
+    const newestFrp = sortedByDate.map((row: StoredDetection) => parseFrp(row.frp)).find((value: number | null): value is number => value !== null);
     const landCoverClass = landCoverByCoordinate.get(cacheCoordinateKey("landcover-esri", group.latitude, group.longitude, 5)) ?? null;
     const facility = facilityByCoordinate.get(cacheCoordinateKey("osm-overpass", group.latitude, group.longitude, 3));
-    const features: TrainingFeatures = {
-      latitude: Number(group.latitude.toFixed(6)),
-      longitude: Number(group.longitude.toFixed(6)),
-      frpMw: newestFrp === undefined ? null : newestFrp,
-      dayNightRatio: nightDetections > 0 ? Number((dayDetections / nightDetections).toFixed(4)) : null,
-      sevenDayDetectionCount,
-      activeMonths: new Set(dates.map((date: string) => date.slice(0, 7))).size,
+    const labelEvidence: LabelEvidence = {
       landCoverClass,
       gppdMatch: nearestGppdMatch(group.latitude, group.longitude, input.gppdPlants),
       namedFacilityMatch: Boolean(facility?.name),
       namedFacilityCategory: facility?.category ?? null,
     };
-    const label = labelFor(features, facility);
-    if (label) candidateRows[label].push({ features, label });
+    const label = labelFor(labelEvidence, facility);
+    if (!label) continue;
+    const metadata: TrainingMetadata = {
+      latitude: Number(group.latitude.toFixed(6)),
+      longitude: Number(group.longitude.toFixed(6)),
+      trainingUse: "metadata, not for training",
+    };
+    const row: TrainingDatasetRow = {
+      metadata,
+      features: {
+        frpMw: newestFrp ?? null,
+        dayNightRatio: nightDetections > 0 ? Number((dayDetections / nightDetections).toFixed(4)) : null,
+        sevenDayDetectionCount,
+        activeMonths: new Set(dates.map((date: string) => date.slice(0, 7))).size,
+      },
+      label: label as OutputTrainingLabel,
+    };
+    candidateRows[label].push(row);
   }
 
   const candidateCounts = emptyCounts();
@@ -201,12 +230,12 @@ export function buildTrainingRowsFromStoredEvidence(input: {
   const rows: TrainingDatasetRow[] = [];
   for (const label of TRAINING_LABELS) {
     candidateCounts[label] = candidateRows[label].length;
-    if (candidateRows[label].length >= MINIMUM_CLASS_SIZE) {
+    if (OUTPUT_LABELS.includes(label as OutputTrainingLabel) && candidateRows[label].length >= MINIMUM_CLASS_SIZE) {
       rows.push(...candidateRows[label]);
       outputCounts[label] = candidateRows[label].length;
     }
   }
-  return { candidateCounts, outputCounts, excludedClasses: TRAINING_LABELS.filter(label => candidateCounts[label] < MINIMUM_CLASS_SIZE), rows };
+  return { candidateCounts, outputCounts, excludedClasses: TRAINING_LABELS.filter(label => candidateCounts[label] < MINIMUM_CLASS_SIZE || !OUTPUT_LABELS.includes(label as OutputTrainingLabel)), rows };
 }
 
 export async function buildTrainingDataset(outputPath = path.join(path.dirname(fileURLToPath(import.meta.url)), "data", "training_dataset.json")) {
