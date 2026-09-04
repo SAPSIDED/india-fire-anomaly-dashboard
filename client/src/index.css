@@ -146,3 +146,21 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .fireguard-leaflet-marker i { display: block; width: 9px; height: 9px; border: 2px solid #f2eee6; border-radius: 50%; background: var(--marker-color); box-shadow: 0 0 0 5px color-mix(in srgb, var(--marker-color) 24%, transparent); }
 .map-provider-badge { position: absolute; z-index: 1000; top: 13px; right: 13px; padding: 7px 9px; border: 1px solid rgba(20, 23, 25, .16); background: rgba(248, 244, 237, .92); color: #52615f; font: 8px "IBM Plex Mono", monospace; letter-spacing: .05em; }
 .map-loading-label { position: absolute; inset: 0; display: grid; place-items: center; color: #aeb7b4; font: 10px "IBM Plex Mono", monospace; letter-spacing: .06em; background: #1a2022; }
+
+/* Vercel fallback map interactions */
+.fireguard-leaflet-marker, .fireguard-explorer-marker { background: transparent; border: 0; }
+.fireguard-leaflet-marker span { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid var(--marker-color); border-radius: 50%; background: color-mix(in srgb, var(--marker-color) 14%, transparent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--marker-color) 9%, transparent); }
+.fireguard-leaflet-marker i { width: 10px; height: 10px; border: 2px solid #f7f2e9; border-radius: 50%; background: var(--marker-color); }
+.fireguard-explorer-puppet { position: relative; display: block; width: 34px; height: 44px; border: 2px solid #2a3435; border-radius: 13px 13px 10px 10px; background: #dfa365; box-shadow: 0 4px 0 rgba(20,23,25,.28), 0 7px 14px rgba(20,23,25,.22); animation: fireguard-explorer-bob 1.7s ease-in-out infinite; }
+.fireguard-explorer-head { position: absolute; top: -13px; left: 7px; width: 17px; height: 17px; border: 2px solid #2a3435; border-radius: 50%; background: #f1c39a; }
+.fireguard-explorer-body { position: absolute; left: 11px; top: 17px; width: 9px; height: 15px; border-radius: 7px; background: #5b7778; }
+.fireguard-explorer-arm { position: absolute; top: 19px; width: 13px; height: 4px; border-radius: 4px; background: #2a3435; }
+.fireguard-explorer-arm-left { left: -8px; transform: rotate(24deg); }.fireguard-explorer-arm-right { right: -8px; transform: rotate(-24deg); }
+.fireguard-explorer-popup, .fireguard-hotspot-popup { min-width: 190px; color: #273133; font-family: "IBM Plex Mono", monospace; font-size: 10px; }
+.fireguard-explorer-popup strong, .fireguard-hotspot-popup strong { display: block; margin-bottom: 6px; font-family: var(--display-face); font-size: 14px; letter-spacing: -.02em; }
+.fireguard-explorer-popup span, .fireguard-hotspot-popup small { display: block; color: #69736f; line-height: 1.45; }.fireguard-explorer-popup code, .fireguard-hotspot-popup code { display: block; margin: 8px 0; color: #687571; font-size: 9px; }
+.fireguard-popup-kicker { display: block; margin-bottom: 7px; color: #b86751; font-size: 8px; letter-spacing: .08em; }
+.fireguard-explorer-popup button, .fireguard-hotspot-popup button { display: inline-block; margin-top: 10px; padding: 7px 9px; color: #fff8ec; border: 0; border-radius: 2px; background: #b86751; font: 600 9px "IBM Plex Mono", monospace; cursor: pointer; }
+.fireguard-explorer-popup button:hover, .fireguard-hotspot-popup button:hover { background: #8e4c43; }
+@keyframes fireguard-explorer-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .fireguard-explorer-puppet { animation: none; } }

@@ -232,3 +232,4 @@ No Vercel compatibility implementation has been applied yet; this item records t
 - [x] Validate and deliver the real evaluation report and SQL dump, including exact errors or limitations if any.
 - [x] Make the connected Vercel deployment render and operate the FireGuard live map like the Manus version; validate the map, hotspot data, and marker verification after redeployment.
 - [ ] Restore the richer Vercel map experience: Google-style satellite imagery, map/satellite controls, supported street-view/Pegman interaction, live marker popups, and button-driven overlay-state changes, without changing FIRMS or classification backend behavior.
+- [ ] Improve the Vercel map fallback to provide richer satellite/map controls, hotspot/place popups, an animated draggable location character where feasible, and visible button-driven UI state changes while preserving live verification callbacks.
