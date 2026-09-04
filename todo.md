@@ -230,4 +230,4 @@ No Vercel compatibility implementation has been applied yet; this item records t
 - [x] Create and run a real group-aware XGBoost training/evaluation script using only the approved four predictive features, without wiring inference into the live app.
 - [x] Export all current database tables, schema, and data to a downloadable SQL dump without modifying database contents.
 - [x] Validate and deliver the real evaluation report and SQL dump, including exact errors or limitations if any.
-- [ ] Make the connected Vercel deployment render and operate the FireGuard live map like the Manus version; validate the map, hotspot data, and marker verification after redeployment.
+- [x] Make the connected Vercel deployment render and operate the FireGuard live map like the Manus version; validate the map, hotspot data, and marker verification after redeployment.
