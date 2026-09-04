@@ -1,82 +1,9 @@
-/**
- * GOOGLE MAPS FRONTEND INTEGRATION - ESSENTIAL GUIDE
- *
- * USAGE FROM PARENT COMPONENT:
- * ======
- *
- * const mapRef = useRef<google.maps.Map | null>(null);
- *
- * <MapView
- *   initialCenter={{ lat: 40.7128, lng: -74.0060 }}
- *   initialZoom={15}
- *   onMapReady={(map) => {
- *     mapRef.current = map; // Store to control map from parent anytime, google map itself is in charge of the re-rendering, not react state.
- * </MapView>
- *
- * ======
- * Available Libraries and Core Features:
- * -------------------------------
- * 📍 MARKER (from `marker` library)
- * - Attaches to map using { map, position }
- * new google.maps.marker.AdvancedMarkerElement({
- *   map,
- *   position: { lat: 37.7749, lng: -122.4194 },
- *   title: "San Francisco",
- * });
- *
- * -------------------------------
- * 🏢 PLACES (from `places` library)
- * - Does not attach directly to map; use data with your map manually.
- * const place = new google.maps.places.Place({ id: PLACE_ID });
- * await place.fetchFields({ fields: ["displayName", "location"] });
- * map.setCenter(place.location);
- * new google.maps.marker.AdvancedMarkerElement({ map, position: place.location });
- *
- * -------------------------------
- * 🧭 GEOCODER (from `geocoding` library)
- * - Standalone service; manually apply results to map.
- * const geocoder = new google.maps.Geocoder();
- * geocoder.geocode({ address: "New York" }, (results, status) => {
- *   if (status === "OK" && results[0]) {
- *     map.setCenter(results[0].geometry.location);
- *     new google.maps.marker.AdvancedMarkerElement({
- *       map,
- *       position: results[0].geometry.location,
- *     });
- *   }
- * });
- *
- * -------------------------------
- * 📐 GEOMETRY (from `geometry` library)
- * - Pure utility functions; not attached to map.
- * const dist = google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
- *
- * -------------------------------
- * 🛣️ ROUTES (from `routes` library)
- * - Combines DirectionsService (standalone) + DirectionsRenderer (map-attached)
- * const directionsService = new google.maps.DirectionsService();
- * const directionsRenderer = new google.maps.DirectionsRenderer({ map });
- * directionsService.route(
- *   { origin, destination, travelMode: "DRIVING" },
- *   (res, status) => status === "OK" && directionsRenderer.setDirections(res)
- * );
- *
- * -------------------------------
- * 🌦️ MAP LAYERS (attach directly to map)
- * - new google.maps.TrafficLayer().setMap(map);
- * - new google.maps.TransitLayer().setMap(map);
- * - new google.maps.BicyclingLayer().setMap(map);
- *
- * -------------------------------
- * ✅ SUMMARY
- * - “map-attached” → AdvancedMarkerElement, DirectionsRenderer, Layers.
- * - “standalone” → Geocoder, DirectionsService, DistanceMatrixService, ElevationService.
- * - “data-only” → Place, Geometry utilities.
- */
-
 /// <reference types="@types/google.maps" />
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { Circle as LeafletCircle, MapContainer as LeafletMapContainer, Marker as LeafletMarker, TileLayer as LeafletTileLayer, Tooltip as LeafletTooltip } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { usePersistFn } from "@/hooks/usePersistFn";
 import { cn } from "@/lib/utils";
 
@@ -87,9 +14,7 @@ declare global {
 }
 
 const API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
-const FORGE_BASE_URL =
-  import.meta.env.VITE_FRONTEND_FORGE_API_URL ||
-  "https://forge.butterfly-effect.dev";
+const FORGE_BASE_URL = import.meta.env.VITE_FRONTEND_FORGE_API_URL || "https://forge.butterfly-effect.dev";
 const MAPS_PROXY_URL = `${FORGE_BASE_URL}/v1/maps/proxy`;
 
 let mapsScriptPromise: Promise<void> | null = null;
@@ -103,13 +28,8 @@ function loadMapScript() {
     script.src = `${MAPS_PROXY_URL}/maps/api/js?key=${API_KEY}&v=weekly&libraries=marker,places,geocoding,geometry`;
     script.async = true;
     script.crossOrigin = "anonymous";
-    script.onload = () => {
-      if (window.google?.maps) resolve();
-      else reject(new Error("Google Maps loaded without an initialized API."));
-    };
-    script.onerror = () => {
-      reject(new Error("Failed to load Google Maps script."));
-    };
+    script.onload = () => window.google?.maps ? resolve() : reject(new Error("Google Maps loaded without an initialized API."));
+    script.onerror = () => reject(new Error("Failed to load Google Maps script."));
     document.head.appendChild(script);
   }).catch(error => {
     mapsScriptPromise = null;
@@ -119,33 +39,69 @@ function loadMapScript() {
   return mapsScriptPromise;
 }
 
+export type FallbackMapHotspot = {
+  id: string;
+  location: { lat: number; lng: number };
+  title: string;
+  color: string;
+  radiusM: number;
+  onClick: () => void;
+};
+
 interface MapViewProps {
   className?: string;
   initialCenter?: google.maps.LatLngLiteral;
   initialZoom?: number;
   onMapReady?: (map: google.maps.Map) => void;
+  fallbackHotspots?: FallbackMapHotspot[];
 }
 
-export function MapView({
-  className,
-  initialCenter = { lat: 37.7749, lng: -122.4194 },
-  initialZoom = 12,
-  onMapReady,
-}: MapViewProps) {
+function hotspotIcon(color: string) {
+  return L.divIcon({
+    className: "fireguard-leaflet-marker",
+    html: `<span style="--marker-color:${color}"><i></i></span>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+  });
+}
+
+function LeafletFallback({ center, zoom, hotspots, className }: { center: google.maps.LatLngLiteral; zoom: number; hotspots: FallbackMapHotspot[]; className?: string }) {
+  return (
+    <LeafletMapContainer center={[center.lat, center.lng]} zoom={zoom} className={cn("h-full w-full", className)} scrollWheelZoom zoomControl>
+      <LeafletTileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      {hotspots.map(hotspot => (
+        <Fragment key={hotspot.id}>
+          <LeafletCircle
+            center={[hotspot.location.lat, hotspot.location.lng]}
+            radius={hotspot.radiusM}
+            pathOptions={{ color: hotspot.color, weight: 1, opacity: 0.72, fillColor: hotspot.color, fillOpacity: 0.08 }}
+            eventHandlers={{ click: hotspot.onClick }}
+          />
+          <LeafletMarker position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(hotspot.color)} eventHandlers={{ click: hotspot.onClick }}>
+            <LeafletTooltip direction="top" offset={[0, -12]}>{hotspot.title}</LeafletTooltip>
+          </LeafletMarker>
+        </Fragment>
+      ))}
+    </LeafletMapContainer>
+  );
+}
+
+export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4194 }, initialZoom = 12, onMapReady, fallbackHotspots = [] }: MapViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<google.maps.Map | null>(null);
   const initializing = useRef(false);
   const retryCount = useRef(0);
-  const [loadError, setLoadError] = useState(false);
+  const [useLeaflet, setUseLeaflet] = useState(false);
 
   const init = usePersistFn(async () => {
-    if (map.current || initializing.current) return;
+    if (map.current || initializing.current || useLeaflet) return;
     initializing.current = true;
     try {
       await loadMapScript();
-      if (!mapContainer.current || !window.google?.maps) {
-        throw new Error("Map container or Google Maps API is unavailable.");
-      }
+      if (!mapContainer.current || !window.google?.maps) throw new Error("Map container or Google Maps API is unavailable.");
       map.current = new window.google.maps.Map(mapContainer.current, {
         zoom: initialZoom,
         center: initialCenter,
@@ -155,11 +111,8 @@ export function MapView({
         streetViewControl: true,
         mapId: "DEMO_MAP_ID",
       });
-      setLoadError(false);
       retryCount.current = 0;
-      if (onMapReady) {
-        onMapReady(map.current);
-      }
+      onMapReady?.(map.current);
     } catch (error) {
       initializing.current = false;
       if (retryCount.current < 2) {
@@ -167,8 +120,8 @@ export function MapView({
         window.setTimeout(() => void init(), 900 * retryCount.current);
         return;
       }
-      console.error("Google Maps could not be loaded after bounded retries.", error);
-      setLoadError(true);
+      console.warn("Google Maps proxy unavailable; using the Vercel-safe OpenStreetMap fallback.", error);
+      setUseLeaflet(true);
       return;
     }
     initializing.current = false;
@@ -178,5 +131,9 @@ export function MapView({
     init();
   }, [init]);
 
-  return <div ref={mapContainer} className={cn("w-full h-[500px]", className)}>{loadError && <div className="grid h-full place-items-center px-8 text-center text-xs text-[#b9cdc6]">Map tiles are temporarily unavailable. The verifier and source-backed checks remain available; refresh to retry the map.</div>}</div>;
+  if (useLeaflet) {
+    return <div className={cn("relative w-full h-[500px] overflow-hidden", className)}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots} /><div className="map-provider-badge">OpenStreetMap fallback · live FireGuard markers</div></div>;
+  }
+
+  return <div ref={mapContainer} className={cn("relative w-full h-[500px]", className)}><div className="map-loading-label">Loading base map…</div></div>;
 }

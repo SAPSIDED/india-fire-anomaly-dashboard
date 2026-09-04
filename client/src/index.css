@@ -140,3 +140,9 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .screening-ladder.is-error > div { opacity: .75; }.screening-ladder.is-error > div b { color: #fff8ee; background: #b5584e; }.screening-callout.has-error { border-color: rgba(192,87,75,.72); background: #fff0e9; }.screening-callout.has-error > span, .screening-callout.has-error button { color: #a6463c; }
 @keyframes investigation-pulse { from { transform: scale(.9); opacity: .55; } to { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .screening-ladder.is-loading > div b { animation: none !important; } }
+
+.fireguard-leaflet-marker { background: transparent; border: 0; }
+.fireguard-leaflet-marker span { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid color-mix(in srgb, var(--marker-color) 72%, white); border-radius: 50%; background: color-mix(in srgb, var(--marker-color) 14%, transparent); }
+.fireguard-leaflet-marker i { display: block; width: 9px; height: 9px; border: 2px solid #f2eee6; border-radius: 50%; background: var(--marker-color); box-shadow: 0 0 0 5px color-mix(in srgb, var(--marker-color) 24%, transparent); }
+.map-provider-badge { position: absolute; z-index: 1000; top: 13px; right: 13px; padding: 7px 9px; border: 1px solid rgba(20, 23, 25, .16); background: rgba(248, 244, 237, .92); color: #52615f; font: 8px "IBM Plex Mono", monospace; letter-spacing: .05em; }
+.map-loading-label { position: absolute; inset: 0; display: grid; place-items: center; color: #aeb7b4; font: 10px "IBM Plex Mono", monospace; letter-spacing: .06em; background: #1a2022; }
