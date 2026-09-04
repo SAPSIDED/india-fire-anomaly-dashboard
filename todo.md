@@ -231,3 +231,4 @@ No Vercel compatibility implementation has been applied yet; this item records t
 - [x] Export all current database tables, schema, and data to a downloadable SQL dump without modifying database contents.
 - [x] Validate and deliver the real evaluation report and SQL dump, including exact errors or limitations if any.
 - [x] Make the connected Vercel deployment render and operate the FireGuard live map like the Manus version; validate the map, hotspot data, and marker verification after redeployment.
+- [ ] Restore the richer Vercel map experience: Google-style satellite imagery, map/satellite controls, supported street-view/Pegman interaction, live marker popups, and button-driven overlay-state changes, without changing FIRMS or classification backend behavior.

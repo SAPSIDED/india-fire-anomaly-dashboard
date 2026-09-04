@@ -9,6 +9,10 @@
       "destination": "https://firedash-4ykkjf9a.manus.space/api/:path*"
     },
     {
+      "source": "/maps-proxy/:path*",
+      "destination": "https://forge.butterfly-effect.dev/v1/maps/proxy/:path*"
+    },
+    {
       "source": "/:path*",
       "destination": "/index.html"
     }

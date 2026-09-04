@@ -1,7 +1,7 @@
 /// <reference types="@types/google.maps" />
 
 import { Fragment, useEffect, useRef, useState } from "react";
-import { Circle as LeafletCircle, MapContainer as LeafletMapContainer, Marker as LeafletMarker, TileLayer as LeafletTileLayer, Tooltip as LeafletTooltip } from "react-leaflet";
+import { Circle as LeafletCircle, LayersControl, MapContainer as LeafletMapContainer, Marker as LeafletMarker, TileLayer as LeafletTileLayer, Tooltip as LeafletTooltip } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { usePersistFn } from "@/hooks/usePersistFn";
@@ -15,7 +15,7 @@ declare global {
 
 const API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
 const FORGE_BASE_URL = import.meta.env.VITE_FRONTEND_FORGE_API_URL || "https://forge.butterfly-effect.dev";
-const MAPS_PROXY_URL = `${FORGE_BASE_URL}/v1/maps/proxy`;
+const MAPS_PROXY_URL = window.location.hostname.endsWith("vercel.app") ? "/maps-proxy" : `${FORGE_BASE_URL}/v1/maps/proxy`;
 
 let mapsScriptPromise: Promise<void> | null = null;
 
@@ -54,6 +54,7 @@ interface MapViewProps {
   initialZoom?: number;
   onMapReady?: (map: google.maps.Map) => void;
   fallbackHotspots?: FallbackMapHotspot[];
+  activeLayer?: string;
 }
 
 function hotspotIcon(color: string) {
@@ -65,13 +66,20 @@ function hotspotIcon(color: string) {
   });
 }
 
-function LeafletFallback({ center, zoom, hotspots, className }: { center: google.maps.LatLngLiteral; zoom: number; hotspots: FallbackMapHotspot[]; className?: string }) {
+function LeafletFallback({ center, zoom, hotspots, className, activeLayer }: { center: google.maps.LatLngLiteral; zoom: number; hotspots: FallbackMapHotspot[]; className?: string; activeLayer: string }) {
   return (
-    <LeafletMapContainer center={[center.lat, center.lng]} zoom={zoom} className={cn("h-full w-full", className)} scrollWheelZoom zoomControl>
-      <LeafletTileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <LeafletMapContainer key={activeLayer} center={[center.lat, center.lng]} zoom={zoom} className={cn("h-full w-full", className)} scrollWheelZoom zoomControl>
+      <LayersControl position="topright">
+        <LayersControl.BaseLayer checked={activeLayer !== "Exposure" && activeLayer !== "Persistence"} name="Map">
+          <LeafletTileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        </LayersControl.BaseLayer>
+        <LayersControl.BaseLayer checked={activeLayer === "Exposure"} name="Satellite">
+          <LeafletTileLayer attribution='Tiles &copy; Esri' url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
+        </LayersControl.BaseLayer>
+        <LayersControl.BaseLayer checked={activeLayer === "Persistence"} name="Terrain">
+          <LeafletTileLayer attribution='Map data &copy; OpenStreetMap contributors' url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png" />
+        </LayersControl.BaseLayer>
+      </LayersControl>
       {hotspots.map(hotspot => (
         <Fragment key={hotspot.id}>
           <LeafletCircle
@@ -89,7 +97,7 @@ function LeafletFallback({ center, zoom, hotspots, className }: { center: google
   );
 }
 
-export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4194 }, initialZoom = 12, onMapReady, fallbackHotspots = [] }: MapViewProps) {
+export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4194 }, initialZoom = 12, onMapReady, fallbackHotspots = [], activeLayer = "Thermal" }: MapViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<google.maps.Map | null>(null);
   const initializing = useRef(false);
@@ -132,7 +140,7 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
   }, [init]);
 
   if (useLeaflet) {
-    return <div className={cn("relative w-full h-[500px] overflow-hidden", className)}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots} /><div className="map-provider-badge">OpenStreetMap fallback · live FireGuard markers</div></div>;
+    return <div className={cn("relative w-full h-[500px] overflow-hidden", className)}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots} activeLayer={activeLayer} /><div className="map-provider-badge">OpenStreetMap fallback · live FireGuard markers</div></div>;
   }
 
   return <div ref={mapContainer} className={cn("relative w-full h-[500px]", className)}><div className="map-loading-label">Loading base map…</div></div>;

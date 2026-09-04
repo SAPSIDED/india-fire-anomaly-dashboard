@@ -26,6 +26,10 @@ describe("Vercel deployment contract", () => {
       destination: "https://firedash-4ykkjf9a.manus.space/api/:path*",
     });
     expect(config.rewrites?.[1]).toEqual({
+      source: "/maps-proxy/:path*",
+      destination: "https://forge.butterfly-effect.dev/v1/maps/proxy/:path*",
+    });
+    expect(config.rewrites?.[2]).toEqual({
       source: "/:path*",
       destination: "/index.html",
     });

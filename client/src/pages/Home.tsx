@@ -316,6 +316,12 @@ export default function Home() {
 
   useEffect(() => {
     if (!map) return;
+    const mapTypeId = activeLayer === "Exposure" ? "satellite" : activeLayer === "Persistence" ? "terrain" : "roadmap";
+    if (typeof map.setMapTypeId === "function") map.setMapTypeId(mapTypeId);
+  }, [map, activeLayer]);
+
+  useEffect(() => {
+    if (!map) return;
     mapMarkers.current.forEach(marker => marker.setMap(null));
     mapMarkers.current = [];
     const infoWindow = new google.maps.InfoWindow();
@@ -361,7 +367,7 @@ export default function Home() {
           <div className="workbench-shell">
             <div className="map-workbench">
               <div className="map-topline"><span>OBSERVATION MAP</span><span>INDIA / 68°E–98°E / 8°N–37°N</span><b>BASE MAP + ANALYTIC OVERLAYS</b></div>
-              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} /><div className="map-frame-label"><b>THERMAL ANOMALY FIELD</b><span>{snapshotTargets.length > 0 ? `${snapshotTargets.length} stored FIRMS hotspots · click to verify` : "Awaiting scheduled FIRMS snapshot"}</span></div><div className="map-legend"><span><i className="legend-dot critical" /> Critical signal</span><span><i className="legend-dot elevated" /> Elevated signal</span><span><i className="legend-line" /> Investigation radius</span></div><div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
+              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} /><div className="map-frame-label"><b>THERMAL ANOMALY FIELD</b><span>{snapshotTargets.length > 0 ? `${snapshotTargets.length} stored FIRMS hotspots · click to verify` : "Awaiting scheduled FIRMS snapshot"}</span></div><div className="map-legend"><span><i className="legend-dot critical" /> Critical signal</span><span><i className="legend-dot elevated" /> Elevated signal</span><span><i className="legend-line" /> Investigation radius</span></div><div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
               <div className="layer-row" aria-label="Demonstrative layers">{["Thermal", "OSM context", "Persistence", "Exposure"].map(layer => <button key={layer} onClick={() => setActiveLayer(layer)} className={activeLayer === layer ? "active" : ""}>{layer}</button>)}<span>{activeLayer} layer selected</span></div>
             </div>
             <HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} />
