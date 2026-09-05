@@ -743,48 +743,6 @@
   },
   {
     "metadata": {
-      "latitude": 29.45695,
-      "longitude": 76.86645,
-      "trainingUse": "metadata, not for training"
-    },
-    "features": {
-      "frpMw": 2.18,
-      "dayNightRatio": null,
-      "sevenDayDetectionCount": 1,
-      "activeMonths": 1
-    },
-    "label": "industrial_facility"
-  },
-  {
-    "metadata": {
-      "latitude": 25.94402,
-      "longitude": 72.18896,
-      "trainingUse": "metadata, not for training"
-    },
-    "features": {
-      "frpMw": 1.26,
-      "dayNightRatio": null,
-      "sevenDayDetectionCount": 1,
-      "activeMonths": 1
-    },
-    "label": "industrial_facility"
-  },
-  {
-    "metadata": {
-      "latitude": 20.79344,
-      "longitude": 85.25465,
-      "trainingUse": "metadata, not for training"
-    },
-    "features": {
-      "frpMw": 11.97,
-      "dayNightRatio": null,
-      "sevenDayDetectionCount": 1,
-      "activeMonths": 1
-    },
-    "label": "industrial_facility"
-  },
-  {
-    "metadata": {
       "latitude": 21.1097,
       "longitude": 72.63574,
       "trainingUse": "metadata, not for training"
@@ -875,6 +833,468 @@
     },
     "features": {
       "frpMw": 5.25,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 26.26645,
+      "longitude": 74.18758,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 0.62,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 26.26726,
+      "longitude": 74.18773,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.44,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 26.26939,
+      "longitude": 74.18853,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 0.91,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 24.71521,
+      "longitude": 75.95151,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 0.78,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10691,
+      "longitude": 72.6467,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 9.19,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10363,
+      "longitude": 72.64727,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 9.19,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10502,
+      "longitude": 72.64862,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 5.98,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10674,
+      "longitude": 72.63763,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 2.86,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10559,
+      "longitude": 72.64497,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 5.98,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10831,
+      "longitude": 72.64921,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 2.7,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10291,
+      "longitude": 72.64852,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 9.08,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10505,
+      "longitude": 72.65266,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.48,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10634,
+      "longitude": 72.64722,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.48,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.1091,
+      "longitude": 72.64794,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.64,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.11042,
+      "longitude": 72.64252,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.64,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10428,
+      "longitude": 72.64712,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 9.54,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.1033,
+      "longitude": 72.63883,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 5.36,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10255,
+      "longitude": 72.63916,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 7.44,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10775,
+      "longitude": 72.64704,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.67,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10774,
+      "longitude": 72.64625,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 5.93,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10893,
+      "longitude": 72.63769,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 2.98,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10419,
+      "longitude": 72.64568,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 4.03,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10632,
+      "longitude": 72.64294,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 5.46,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.10572,
+      "longitude": 72.64827,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 5.46,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 20.91111,
+      "longitude": 71.4613,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.05,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 20.91005,
+      "longitude": 71.45995,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.59,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 20.90941,
+      "longitude": 71.46135,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.31,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 20.91001,
+      "longitude": 71.45766,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.23,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 20.90987,
+      "longitude": 71.45919,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.46,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 20.9094,
+      "longitude": 71.45667,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 0.79,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.9245,
+      "longitude": 85.22453,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 2.47,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.98429,
+      "longitude": 83.2333,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 5.54,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "industrial_facility"
+  },
+  {
+    "metadata": {
+      "latitude": 21.98605,
+      "longitude": 83.23032,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.53,
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1
@@ -1449,6 +1869,76 @@
     },
     "features": {
       "frpMw": 1.68,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "wildfire"
+  },
+  {
+    "metadata": {
+      "latitude": 16.09608,
+      "longitude": 79.16954,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 0.87,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "wildfire"
+  },
+  {
+    "metadata": {
+      "latitude": 19.96314,
+      "longitude": 79.33248,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.21,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "wildfire"
+  },
+  {
+    "metadata": {
+      "latitude": 15.06992,
+      "longitude": 76.86325,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.13,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "wildfire"
+  },
+  {
+    "metadata": {
+      "latitude": 23.69442,
+      "longitude": 85.37145,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 1.11,
+      "dayNightRatio": null,
+      "sevenDayDetectionCount": 1,
+      "activeMonths": 1
+    },
+    "label": "wildfire"
+  },
+  {
+    "metadata": {
+      "latitude": 15.55275,
+      "longitude": 79.64386,
+      "trainingUse": "metadata, not for training"
+    },
+    "features": {
+      "frpMw": 8.43,
       "dayNightRatio": null,
       "sevenDayDetectionCount": 1,
       "activeMonths": 1

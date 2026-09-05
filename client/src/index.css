@@ -164,3 +164,8 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .fireguard-explorer-popup button:hover, .fireguard-hotspot-popup button:hover { background: #8e4c43; }
 @keyframes fireguard-explorer-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 @media (prefers-reduced-motion: reduce) { .fireguard-explorer-puppet { animation: none; } }
+
+.fireguard-provider-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 9px 0 7px; padding: 7px; border: 1px solid rgba(39,49,51,.14); background: rgba(239,235,225,.72); }
+.fireguard-provider-grid span { display: grid; gap: 2px; color: #44504e; font-size: 8px; line-height: 1.2; }
+.fireguard-provider-grid b { color: #9b5548; font-size: 7px; letter-spacing: .08em; }
+.fireguard-hotspot-popup small { max-width: 230px; }

@@ -76,6 +76,23 @@ function explorerIcon() {
   });
 }
 
+function HotspotProviderPopup({ hotspot, activeLayer }: { hotspot: FallbackMapHotspot; activeLayer: string }) {
+  const overlayLabel = activeLayer === "Thermal" ? "Thermal signal" : activeLayer === "OSM context" ? "OSM context" : activeLayer === "Persistence" ? "Persistence" : activeLayer === "Exposure" ? "Exposure" : activeLayer;
+  return <div className="fireguard-hotspot-popup">
+    <span className="fireguard-popup-kicker">LIVE EVIDENCE · NASA FIRMS</span>
+    <strong>{hotspot.title.replace(" — click to verify", "")}</strong>
+    <code>{hotspot.location.lat.toFixed(4)}°N · {hotspot.location.lng.toFixed(4)}°E</code>
+    <div className="fireguard-provider-grid" aria-label="Evidence provider summary">
+      <span><b>PROVIDER</b>NASA FIRMS</span>
+      <span><b>VIEW</b>{overlayLabel}</span>
+      <span><b>RADIUS</b>{Math.round(hotspot.radiusM / 1000)} km</span>
+      <span><b>STATUS</b>Awaiting verification</span>
+    </div>
+    <small>Satellite detection context is independent of the final FireGuard conclusion.</small>
+    <button type="button" onClick={hotspot.onClick}>Run source verification</button>
+  </div>;
+}
+
 function LeafletFallback({ center, zoom, hotspots, className, activeLayer }: { center: google.maps.LatLngLiteral; zoom: number; hotspots: FallbackMapHotspot[]; className?: string; activeLayer: string }) {
   const [explorerPosition, setExplorerPosition] = useState<LatLngLiteral>(center);
   const [explorerOpen, setExplorerOpen] = useState(true);
@@ -133,25 +150,13 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer }: { c
             eventHandlers={{ click: hotspot.onClick }}
           >
             <LeafletPopup closeButton>
-              <div className="fireguard-hotspot-popup">
-                <span className="fireguard-popup-kicker">NASA FIRMS · LIVE MARKER</span>
-                <strong>{hotspot.title.replace(" — click to verify", "")}</strong>
-                <code>{hotspot.location.lat.toFixed(4)}°N · {hotspot.location.lng.toFixed(4)}°E</code>
-                <small>Investigation radius · {Math.round(hotspot.radiusM / 1000)} km</small>
-                <button type="button" onClick={hotspot.onClick}>Run source verification</button>
-              </div>
+              <HotspotProviderPopup hotspot={hotspot} activeLayer={activeLayer} />
             </LeafletPopup>
           </LeafletCircle>
           <LeafletMarker position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(hotspot.color)} eventHandlers={{ click: () => undefined }}>
             <LeafletTooltip direction="top" offset={[0, -12]}>{hotspot.title}</LeafletTooltip>
             <LeafletPopup closeButton>
-              <div className="fireguard-hotspot-popup">
-                <span className="fireguard-popup-kicker">NASA FIRMS · LIVE MARKER</span>
-                <strong>{hotspot.title.replace(" — click to verify", "")}</strong>
-                <code>{hotspot.location.lat.toFixed(4)}°N · {hotspot.location.lng.toFixed(4)}°E</code>
-                <small>Source-backed hotspot selection keeps the existing FireGuard verification flow.</small>
-                <button type="button" onClick={hotspot.onClick}>Run source verification</button>
-              </div>
+              <HotspotProviderPopup hotspot={hotspot} activeLayer={activeLayer} />
             </LeafletPopup>
           </LeafletMarker>
         </Fragment>
