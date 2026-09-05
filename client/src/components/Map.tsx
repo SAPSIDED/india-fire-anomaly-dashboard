@@ -66,6 +66,21 @@ function hotspotIcon(color: string) {
   });
 }
 
+function satellitePreviewUrl(location: { lat: number; lng: number }) {
+  const delta = 0.025;
+  const bbox = [location.lng - delta, location.lat - delta, location.lng + delta, location.lat + delta].join(",");
+  return `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${encodeURIComponent(bbox)}&bboxSR=4326&size=260,132&imageSR=4326&format=jpg&f=image`;
+}
+
+function HotspotHoverPreview({ hotspot }: { hotspot: FallbackMapHotspot }) {
+  return <div className="fireguard-hotspot-hover-preview">
+    <img src={satellitePreviewUrl(hotspot.location)} alt="Satellite preview around the current FIRMS location" loading="lazy" />
+    <strong>{hotspot.title.replace(" — click to verify", "")}</strong>
+    <span>Hover preview · public Esri World Imagery</span>
+    <code>{hotspot.location.lat.toFixed(4)}°N · {hotspot.location.lng.toFixed(4)}°E</code>
+  </div>;
+}
+
 function explorerIcon() {
   return L.divIcon({
     className: "fireguard-explorer-marker",
@@ -154,7 +169,9 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer }: { c
             </LeafletPopup>
           </LeafletCircle>
           <LeafletMarker position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(hotspot.color)} eventHandlers={{ click: () => undefined }}>
-            <LeafletTooltip direction="top" offset={[0, -12]}>{hotspot.title}</LeafletTooltip>
+            <LeafletTooltip direction="top" offset={[0, -12]} opacity={1} interactive>
+              <HotspotHoverPreview hotspot={hotspot} />
+            </LeafletTooltip>
             <LeafletPopup closeButton>
               <HotspotProviderPopup hotspot={hotspot} activeLayer={activeLayer} />
             </LeafletPopup>
@@ -166,6 +183,8 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer }: { c
 }
 
 export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4194 }, initialZoom = 12, onMapReady, fallbackHotspots = [], activeLayer = "Thermal" }: MapViewProps) {
+  const mapShell = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<google.maps.Map | null>(null);
   const initializing = useRef(false);
@@ -205,11 +224,25 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
 
   useEffect(() => {
     init();
+    const syncFullscreen = () => setIsFullscreen(document.fullscreenElement === mapShell.current);
+    document.addEventListener("fullscreenchange", syncFullscreen);
+    return () => document.removeEventListener("fullscreenchange", syncFullscreen);
   }, [init]);
 
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen();
+      return;
+    }
+    void mapShell.current?.requestFullscreen().catch(() => undefined);
+  };
+
+  const shellClassName = cn("relative w-full h-[500px] map-shell", isFullscreen && "map-shell-fullscreen", className);
+  const fullscreenButton = <button type="button" className="map-fullscreen-button" onClick={toggleFullscreen} aria-label={isFullscreen ? "Exit full screen map" : "View map full screen"}>{isFullscreen ? "Exit full screen" : "Full screen map"}</button>;
+
   if (useLeaflet) {
-    return <div className={cn("relative w-full h-[500px] overflow-hidden", className)}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots} activeLayer={activeLayer} /><div className="map-provider-badge">OpenStreetMap fallback · live FireGuard markers · drag the explorer</div></div>;
+    return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots} activeLayer={activeLayer} />{fullscreenButton}<div className="map-provider-badge">OpenStreetMap fallback · live FireGuard markers · drag the explorer</div></div>;
   }
 
-  return <div ref={mapContainer} className={cn("relative w-full h-[500px]", className)}><div className="map-loading-label">Loading base map…</div></div>;
+  return <div ref={mapShell} className={shellClassName}><div ref={mapContainer} className="relative w-full h-full"><div className="map-loading-label">Loading base map…</div></div>{fullscreenButton}</div>;
 }

@@ -239,3 +239,4 @@ No Vercel compatibility implementation has been applied yet; this item records t
 - [x] Verify whether the existing Manus Maps proxy can authorize the Vercel origin and assess custom-domain readiness. The proxy remains HTTP 401 for the Vercel origin, and no custom domain is currently configured in project metadata.
 - [x] Add a lightweight evidence/provider popup panel using existing hotspot and corroboration data without adding new backend calls.
 - [x] Validate and publish the follow-up UI only if the proxy/domain checks and popup implementation are safe.
+- [x] Add a Vercel-safe current-location hover/provider popup with an authorized-image fallback and a fullscreen map control, preserving existing marker verification and avoiding new backend calls.

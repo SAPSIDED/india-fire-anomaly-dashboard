@@ -169,3 +169,14 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .fireguard-provider-grid span { display: grid; gap: 2px; color: #44504e; font-size: 8px; line-height: 1.2; }
 .fireguard-provider-grid b { color: #9b5548; font-size: 7px; letter-spacing: .08em; }
 .fireguard-hotspot-popup small { max-width: 230px; }
+
+.map-shell { isolation: isolate; }
+.map-shell-fullscreen { height: 100vh !important; width: 100vw !important; background: #e9efe9; z-index: 2000; }
+.map-fullscreen-button { position: absolute; z-index: 1200; top: 12px; left: 12px; padding: 8px 10px; border: 1px solid rgba(39,49,51,.2); border-radius: 2px; background: rgba(248,244,237,.94); color: #273133; font: 9px "IBM Plex Mono", monospace; letter-spacing: .04em; cursor: pointer; box-shadow: 0 3px 12px rgba(20,23,25,.12); }
+.map-fullscreen-button:hover { background: #fffaf1; color: #9b5548; }
+.fireguard-hotspot-hover-preview { width: 220px; color: #273133; font-family: "IBM Plex Mono", monospace; }
+.fireguard-hotspot-hover-preview img { display: block; width: 220px; height: 100px; margin: -2px 0 7px; object-fit: cover; border-radius: 2px; background: #dbe8e4; }
+.fireguard-hotspot-hover-preview strong { display: block; margin-bottom: 4px; font-family: var(--display-face); font-size: 12px; }
+.fireguard-hotspot-hover-preview span { display: block; color: #69736f; font-size: 8px; line-height: 1.35; }
+.fireguard-hotspot-hover-preview code { display: block; margin-top: 5px; color: #687571; font-size: 8px; }
+@media (max-width: 720px) { .map-fullscreen-button { top: 9px; left: 9px; padding: 7px 8px; font-size: 8px; } .fireguard-hotspot-hover-preview { width: 190px; } .fireguard-hotspot-hover-preview img { width: 190px; height: 88px; } }
