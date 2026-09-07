@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from xgboost import XGBClassifier
+from xgboost import Booster, DMatrix
 import os
 
 app = Flask(__name__)
@@ -27,7 +27,7 @@ CLASS_NAMES = {
     3: "mining"
 }
 
-model = XGBClassifier()
+model = Booster()
 model.load_model(MODEL_PATH)
 
 
@@ -65,8 +65,9 @@ def predict():
         row["sevenDayDetectionCount"]
     ]]
 
-    probabilities = model.predict_proba(features)[0]
-    prediction = int(model.predict(features)[0])
+    dmatrix = DMatrix(features, feature_names=FEATURES)
+    probabilities = model.predict(dmatrix)[0]
+    prediction = int(probabilities.argmax())
 
     return jsonify({
         "prediction": prediction,
