@@ -169,6 +169,7 @@ export type DetectionHistoryInput = {
   longitude: string;
   detectionDate: string;
   brightness: string | null;
+  brightT31: string | null;
   confidence: string | null;
   dayNight: "D" | "N" | null;
   frp: string | null;

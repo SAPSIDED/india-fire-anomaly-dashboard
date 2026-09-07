@@ -1,0 +1,4401 @@
+{
+  "datasetVersion": "four_class_weak_supervision_v2",
+  "description": "India FIRMS thermal anomaly dataset with four proxy classes. Industrial labels use spatial matching against IND.docx. Other classes are proxy labels.",
+  "classes": [
+    "wildfire",
+    "industrial_facility",
+    "agricultural_burning",
+    "mining"
+  ],
+  "featureNames": [
+    "frpMw",
+    "brightness",
+    "brightT31",
+    "confidence",
+    "dayNightRatio",
+    "sevenDayDetectionCount",
+    "activeMonths"
+  ],
+  "trainingNotes": [
+    "Latitude and longitude are metadata only.",
+    "Label evidence is not an ML feature.",
+    "Classes are weak/proxy labels.",
+    "Industrial labels come from IND.docx."
+  ],
+  "records": [
+    {
+      "latitude": 8.59524,
+      "longitude": 77.89958,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 0.29,
+        "brightness": 300.64,
+        "brightT31": 278.2,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.61557,
+      "longitude": 77.95248,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 3.9,
+        "brightness": 309.08,
+        "brightT31": 291.85,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.61649,
+      "longitude": 77.94954,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 2.86,
+        "brightness": 307.5,
+        "brightT31": 290.66,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.61773,
+      "longitude": 77.95042,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 3.56,
+        "brightness": 305.97,
+        "brightT31": 290.57,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.66845,
+      "longitude": 77.99213,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 0.69,
+        "brightness": 309.6,
+        "brightT31": 291.55,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.67061,
+      "longitude": 77.99346,
+      "date": "2026-08-17",
+      "features": {
+        "frpMw": 1.29,
+        "brightness": 308.12,
+        "brightT31": 292.31,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.67144,
+      "longitude": 77.99295,
+      "date": "2026-08-17",
+      "features": {
+        "frpMw": 1.66,
+        "brightness": 313.03,
+        "brightT31": 294.47,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.67153,
+      "longitude": 77.9933,
+      "date": "2026-08-12",
+      "features": {
+        "frpMw": 1.2,
+        "brightness": 304.22,
+        "brightT31": 283.63,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.69899,
+      "longitude": 78.05886,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 1.16,
+        "brightness": 316.48,
+        "brightT31": 293.48,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.73676,
+      "longitude": 77.60059,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 3.34,
+        "brightness": 314.17,
+        "brightT31": 295.12,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.73739,
+      "longitude": 77.58868,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 78.34,
+        "brightness": 329.86,
+        "brightT31": 294.24,
+        "confidence": 1.0,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.73745,
+      "longitude": 77.61146,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 19.65,
+        "brightness": 310.36,
+        "brightT31": 293.35,
+        "confidence": 0.8,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.73753,
+      "longitude": 77.59727,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 7.6,
+        "brightness": 329.03,
+        "brightT31": 289.86,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.73815,
+      "longitude": 77.60192,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 1.11,
+        "brightness": 305.13,
+        "brightT31": 271.98,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.73869,
+      "longitude": 77.59828,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 1.11,
+        "brightness": 315.6,
+        "brightT31": 272.63,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.73874,
+      "longitude": 77.58217,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 26.6,
+        "brightness": 313.39,
+        "brightT31": 293.92,
+        "confidence": 0.85,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.73907,
+      "longitude": 77.60104,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 12.28,
+        "brightness": 308.76,
+        "brightT31": 286.65,
+        "confidence": 0.74,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.73957,
+      "longitude": 77.60084,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 2.37,
+        "brightness": 314.99,
+        "brightT31": 270.0,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.73967,
+      "longitude": 77.60538,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 27.52,
+        "brightness": 317.62,
+        "brightT31": 294.05,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.73991,
+      "longitude": 77.59354,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 14.03,
+        "brightness": 307.15,
+        "brightT31": 293.06,
+        "confidence": 0.49,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.74028,
+      "longitude": 77.60776,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 103.17,
+        "brightness": 335.78,
+        "brightT31": 294.44,
+        "confidence": 1.0,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.74035,
+      "longitude": 77.6012,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 27.52,
+        "brightness": 344.45,
+        "brightT31": 305.11,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.74044,
+      "longitude": 77.60186,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 0.68,
+        "brightness": 310.06,
+        "brightT31": 281.68,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.74051,
+      "longitude": 77.59778,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 0.78,
+        "brightness": 296.69,
+        "brightT31": 268.68,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.74099,
+      "longitude": 77.59838,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 0.82,
+        "brightness": 309.44,
+        "brightT31": 280.22,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.74104,
+      "longitude": 77.59702,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 17.22,
+        "brightness": 330.52,
+        "brightT31": 295.83,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.74148,
+      "longitude": 77.59866,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 2.36,
+        "brightness": 313.01,
+        "brightT31": 287.05,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.74152,
+      "longitude": 77.60243,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 1.11,
+        "brightness": 299.08,
+        "brightT31": 268.76,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.74163,
+      "longitude": 77.60539,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 9.46,
+        "brightness": 307.47,
+        "brightT31": 289.76,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.74207,
+      "longitude": 77.59879,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 1.11,
+        "brightness": 303.05,
+        "brightT31": 270.13,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.7423,
+      "longitude": 77.60185,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 9.46,
+        "brightness": 355.88,
+        "brightT31": 292.11,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.7441,
+      "longitude": 77.60194,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 3.12,
+        "brightness": 322.96,
+        "brightT31": 286.54,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.74455,
+      "longitude": 77.59845,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 3.12,
+        "brightness": 334.36,
+        "brightT31": 285.6,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.74962,
+      "longitude": 77.61304,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 17.17,
+        "brightness": 308.57,
+        "brightT31": 292.88,
+        "confidence": 0.75,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.75209,
+      "longitude": 77.59518,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 14.7,
+        "brightness": 306.91,
+        "brightT31": 292.88,
+        "confidence": 0.68,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.84948,
+      "longitude": 78.13552,
+      "date": "2026-08-15",
+      "features": {
+        "frpMw": 0.4,
+        "brightness": 301.57,
+        "brightT31": 278.13,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.86704,
+      "longitude": 78.12225,
+      "date": "2026-08-05",
+      "features": {
+        "frpMw": 2.03,
+        "brightness": 306.96,
+        "brightT31": 290.65,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.94327,
+      "longitude": 78.07706,
+      "date": "2026-08-04",
+      "features": {
+        "frpMw": 0.46,
+        "brightness": 331.27,
+        "brightT31": 292.88,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.99168,
+      "longitude": 77.85832,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 0.67,
+        "brightness": 335.44,
+        "brightT31": 301.12,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.08152,
+      "longitude": 78.16898,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 0.54,
+        "brightness": 337.52,
+        "brightT31": 299.57,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.11096,
+      "longitude": 78.39349,
+      "date": "2026-08-16",
+      "features": {
+        "frpMw": 4.95,
+        "brightness": 314.8,
+        "brightT31": 291.48,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.11447,
+      "longitude": 78.39108,
+      "date": "2026-08-16",
+      "features": {
+        "frpMw": 5.24,
+        "brightness": 315.86,
+        "brightT31": 291.54,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.20653,
+      "longitude": 77.49845,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 1.56,
+        "brightness": 310.68,
+        "brightT31": 293.23,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.20862,
+      "longitude": 77.45641,
+      "date": "2026-08-17",
+      "features": {
+        "frpMw": 0.61,
+        "brightness": 307.69,
+        "brightT31": 294.48,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.24611,
+      "longitude": 77.32486,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 2.05,
+        "brightness": 312.59,
+        "brightT31": 283.36,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.24785,
+      "longitude": 77.32679,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 0.4,
+        "brightness": 304.23,
+        "brightT31": 264.54,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.25068,
+      "longitude": 77.32387,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 2.05,
+        "brightness": 328.2,
+        "brightT31": 282.69,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.27709,
+      "longitude": 78.06376,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 0.86,
+        "brightness": 305.94,
+        "brightT31": 276.75,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.27866,
+      "longitude": 77.32851,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 4.29,
+        "brightness": 304.5,
+        "brightT31": 290.8,
+        "confidence": 0.41,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.28053,
+      "longitude": 77.3913,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 0.93,
+        "brightness": 310.02,
+        "brightT31": 289.07,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.28078,
+      "longitude": 77.39169,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 2.94,
+        "brightness": 329.87,
+        "brightT31": 291.78,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.29199,
+      "longitude": 77.49243,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 1.1,
+        "brightness": 307.91,
+        "brightT31": 288.83,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.30709,
+      "longitude": 77.43063,
+      "date": "2026-08-13",
+      "features": {
+        "frpMw": 0.82,
+        "brightness": 301.39,
+        "brightT31": 277.06,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 9.30736,
+      "longitude": 77.42999,
+      "date": "2026-08-13",
+      "features": {
+        "frpMw": 2.33,
+        "brightness": 306.93,
+        "brightT31": 285.54,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "wildfire",
+      "labelEvidence": {
+        "labelMethod": "remaining_confident_thermal_proxy",
+        "industrialMatch": false,
+        "wildfireProxy": true
+      }
+    },
+    {
+      "latitude": 8.75627,
+      "longitude": 78.18294,
+      "date": "2026-08-07",
+      "features": {
+        "frpMw": 5.28,
+        "brightness": 351.99,
+        "brightT31": 275.14,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 1.162,
+        "industrialFacility": "TUTICORIN"
+      }
+    },
+    {
+      "latitude": 8.75746,
+      "longitude": 78.18224,
+      "date": "2026-08-07",
+      "features": {
+        "frpMw": 11.02,
+        "brightness": 345.81,
+        "brightT31": 292.94,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 1.016,
+        "industrialFacility": "TUTICORIN"
+      }
+    },
+    {
+      "latitude": 8.76012,
+      "longitude": 78.18311,
+      "date": "2026-08-07",
+      "features": {
+        "frpMw": 20.04,
+        "brightness": 346.37,
+        "brightT31": 293.28,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.937,
+        "industrialFacility": "TUTICORIN"
+      }
+    },
+    {
+      "latitude": 8.76117,
+      "longitude": 78.18171,
+      "date": "2026-08-07",
+      "features": {
+        "frpMw": 11.02,
+        "brightness": 339.41,
+        "brightT31": 292.86,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.751,
+        "industrialFacility": "TUTICORIN"
+      }
+    },
+    {
+      "latitude": 8.76202,
+      "longitude": 78.18221,
+      "date": "2026-08-07",
+      "features": {
+        "frpMw": 5.28,
+        "brightness": 335.65,
+        "brightT31": 274.04,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.777,
+        "industrialFacility": "TUTICORIN"
+      }
+    },
+    {
+      "latitude": 9.07037,
+      "longitude": 77.43026,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 3.09,
+        "brightness": 333.84,
+        "brightT31": 292.22,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 4.959,
+        "industrialFacility": "NuPower Tirunelveli Wind Farm"
+      }
+    },
+    {
+      "latitude": 9.08676,
+      "longitude": 77.46812,
+      "date": "2026-08-16",
+      "features": {
+        "frpMw": 1.83,
+        "brightness": 336.03,
+        "brightT31": 298.85,
+        "confidence": 0.25,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 1.652,
+        "industrialFacility": "NuPower Tirunelveli Wind Farm"
+      }
+    },
+    {
+      "latitude": 9.82755,
+      "longitude": 78.48745,
+      "date": "2026-08-13",
+      "features": {
+        "frpMw": 2.22,
+        "brightness": 335.85,
+        "brightT31": 304.35,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 4.971,
+        "industrialFacility": "Sivaganga Solar Power Plant"
+      }
+    },
+    {
+      "latitude": 9.83649,
+      "longitude": 78.466,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 3.48,
+        "brightness": 336.28,
+        "brightT31": 302.95,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 4.05,
+        "industrialFacility": "Sivaganga Solar Power Plant"
+      }
+    },
+    {
+      "latitude": 9.96622,
+      "longitude": 78.06999,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 2.89,
+        "brightness": 334.38,
+        "brightT31": 302.78,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.961,
+        "industrialFacility": "SAMAYANALLUR DG"
+      }
+    },
+    {
+      "latitude": 9.96719,
+      "longitude": 78.07066,
+      "date": "2026-08-11",
+      "features": {
+        "frpMw": 15.53,
+        "brightness": 367.0,
+        "brightT31": 290.87,
+        "confidence": 1.0,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.997,
+        "industrialFacility": "SAMAYANALLUR DG"
+      }
+    },
+    {
+      "latitude": 9.98151,
+      "longitude": 78.05077,
+      "date": "2026-08-05",
+      "features": {
+        "frpMw": 1.59,
+        "brightness": 330.56,
+        "brightT31": 291.89,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.99,
+        "industrialFacility": "SAMAYANALLUR DG"
+      }
+    },
+    {
+      "latitude": 9.99415,
+      "longitude": 78.07372,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 5.2,
+        "brightness": 339.1,
+        "brightT31": 307.49,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 3.838,
+        "industrialFacility": "SAMAYANALLUR DG"
+      }
+    },
+    {
+      "latitude": 10.00389,
+      "longitude": 78.03165,
+      "date": "2026-08-08",
+      "features": {
+        "frpMw": 0.85,
+        "brightness": 310.65,
+        "brightT31": 282.05,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 3.497,
+        "industrialFacility": "SAMAYANALLUR DG"
+      }
+    },
+    {
+      "latitude": 10.00575,
+      "longitude": 78.03493,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 5.99,
+        "brightness": 346.98,
+        "brightT31": 296.12,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 3.566,
+        "industrialFacility": "SAMAYANALLUR DG"
+      }
+    },
+    {
+      "latitude": 10.00594,
+      "longitude": 78.04284,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 1.0,
+        "brightness": 331.05,
+        "brightT31": 295.84,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 3.434,
+        "industrialFacility": "SAMAYANALLUR DG"
+      }
+    },
+    {
+      "latitude": 10.007,
+      "longitude": 78.03323,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 19.23,
+        "brightness": 355.73,
+        "brightT31": 303.39,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 3.756,
+        "industrialFacility": "SAMAYANALLUR DG"
+      }
+    },
+    {
+      "latitude": 10.00979,
+      "longitude": 78.03833,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 3.88,
+        "brightness": 335.25,
+        "brightT31": 303.46,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 3.916,
+        "industrialFacility": "SAMAYANALLUR DG"
+      }
+    },
+    {
+      "latitude": 10.01453,
+      "longitude": 77.60332,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 3.89,
+        "brightness": 335.04,
+        "brightT31": 296.38,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 4.277,
+        "industrialFacility": "Powerica Theni Wind Farm"
+      }
+    },
+    {
+      "latitude": 10.01859,
+      "longitude": 77.58141,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 17.06,
+        "brightness": 343.03,
+        "brightT31": 296.89,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 3.702,
+        "industrialFacility": "Powerica Theni Wind Farm"
+      }
+    },
+    {
+      "latitude": 10.50352,
+      "longitude": 79.42883,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 4.35,
+        "brightness": 337.6,
+        "brightT31": 302.37,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 4.853,
+        "industrialFacility": "KOVILKALAPPAL"
+      }
+    },
+    {
+      "latitude": 10.56157,
+      "longitude": 79.44977,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 9.6,
+        "brightness": 336.39,
+        "brightT31": 303.88,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.234,
+        "industrialFacility": "KOVILKALAPPAL"
+      }
+    },
+    {
+      "latitude": 10.56221,
+      "longitude": 79.45248,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 5.73,
+        "brightness": 342.0,
+        "brightT31": 296.58,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.311,
+        "industrialFacility": "KOVILKALAPPAL"
+      }
+    },
+    {
+      "latitude": 10.56489,
+      "longitude": 79.45138,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 4.4,
+        "brightness": 339.99,
+        "brightT31": 296.58,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.602,
+        "industrialFacility": "KOVILKALAPPAL"
+      }
+    },
+    {
+      "latitude": 10.92198,
+      "longitude": 77.06261,
+      "date": "2026-08-17",
+      "features": {
+        "frpMw": 0.57,
+        "brightness": 304.11,
+        "brightT31": 291.46,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 3.345,
+        "industrialFacility": "KS Oils Chinnakuyili Wind Farm"
+      }
+    },
+    {
+      "latitude": 10.92371,
+      "longitude": 77.06046,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 0.32,
+        "brightness": 303.12,
+        "brightT31": 292.05,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 3.505,
+        "industrialFacility": "KS Oils Chinnakuyili Wind Farm"
+      }
+    },
+    {
+      "latitude": 10.92703,
+      "longitude": 77.06378,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 0.53,
+        "brightness": 300.75,
+        "brightT31": 289.03,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 3.062,
+        "industrialFacility": "KS Oils Chinnakuyili Wind Farm"
+      }
+    },
+    {
+      "latitude": 10.92917,
+      "longitude": 77.06458,
+      "date": "2026-08-15",
+      "features": {
+        "frpMw": 0.54,
+        "brightness": 302.5,
+        "brightT31": 277.82,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.934,
+        "industrialFacility": "KS Oils Chinnakuyili Wind Farm"
+      }
+    },
+    {
+      "latitude": 10.92976,
+      "longitude": 77.06505,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 0.81,
+        "brightness": 307.27,
+        "brightT31": 291.69,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.875,
+        "industrialFacility": "KS Oils Chinnakuyili Wind Farm"
+      }
+    },
+    {
+      "latitude": 10.92998,
+      "longitude": 77.0639,
+      "date": "2026-08-12",
+      "features": {
+        "frpMw": 0.97,
+        "brightness": 306.78,
+        "brightT31": 281.66,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.997,
+        "industrialFacility": "KS Oils Chinnakuyili Wind Farm"
+      }
+    },
+    {
+      "latitude": 10.93034,
+      "longitude": 77.06337,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 0.63,
+        "brightness": 300.84,
+        "brightT31": 281.61,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 3.051,
+        "industrialFacility": "KS Oils Chinnakuyili Wind Farm"
+      }
+    },
+    {
+      "latitude": 10.93105,
+      "longitude": 77.06483,
+      "date": "2026-08-11",
+      "features": {
+        "frpMw": 1.31,
+        "brightness": 305.29,
+        "brightT31": 281.43,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.886,
+        "industrialFacility": "KS Oils Chinnakuyili Wind Farm"
+      }
+    },
+    {
+      "latitude": 10.93126,
+      "longitude": 77.0644,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 0.62,
+        "brightness": 306.28,
+        "brightT31": 289.45,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.931,
+        "industrialFacility": "KS Oils Chinnakuyili Wind Farm"
+      }
+    },
+    {
+      "latitude": 10.93194,
+      "longitude": 77.06419,
+      "date": "2026-08-17",
+      "features": {
+        "frpMw": 1.06,
+        "brightness": 307.67,
+        "brightT31": 291.45,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.95,
+        "industrialFacility": "KS Oils Chinnakuyili Wind Farm"
+      }
+    },
+    {
+      "latitude": 12.71801,
+      "longitude": 77.46906,
+      "date": "2026-08-09",
+      "features": {
+        "frpMw": 8.87,
+        "brightness": 339.87,
+        "brightT31": 298.49,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 1.849,
+        "industrialFacility": "RAMANAGARAM MILL"
+      }
+    },
+    {
+      "latitude": 12.98322,
+      "longitude": 74.85109,
+      "date": "2026-08-08",
+      "features": {
+        "frpMw": 0.98,
+        "brightness": 307.8,
+        "brightT31": 287.71,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.204,
+        "industrialFacility": "MANGALORE REFINERY"
+      }
+    },
+    {
+      "latitude": 12.98436,
+      "longitude": 74.85372,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 0.45,
+        "brightness": 300.05,
+        "brightT31": 286.35,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.512,
+        "industrialFacility": "MANGALORE REFINERY"
+      }
+    },
+    {
+      "latitude": 12.98518,
+      "longitude": 74.85353,
+      "date": "2026-08-13",
+      "features": {
+        "frpMw": 0.59,
+        "brightness": 303.49,
+        "brightT31": 271.73,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.546,
+        "industrialFacility": "MANGALORE REFINERY"
+      }
+    },
+    {
+      "latitude": 15.16292,
+      "longitude": 76.37949,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 1.52,
+        "brightness": 322.52,
+        "brightT31": 287.29,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.905,
+        "industrialFacility": "DANAPUR BMM"
+      }
+    },
+    {
+      "latitude": 15.16369,
+      "longitude": 76.38303,
+      "date": "2026-08-14",
+      "features": {
+        "frpMw": 3.96,
+        "brightness": 334.16,
+        "brightT31": 294.54,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 1.013,
+        "industrialFacility": "DANAPUR BMM"
+      }
+    },
+    {
+      "latitude": 15.16424,
+      "longitude": 76.3814,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 5.53,
+        "brightness": 338.7,
+        "brightT31": 298.01,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.86,
+        "industrialFacility": "DANAPUR BMM"
+      }
+    },
+    {
+      "latitude": 15.16628,
+      "longitude": 76.67182,
+      "date": "2026-08-05",
+      "features": {
+        "frpMw": 0.73,
+        "brightness": 301.27,
+        "brightT31": 282.77,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.215,
+        "industrialFacility": "TORANGALLU EXT"
+      }
+    },
+    {
+      "latitude": 15.16656,
+      "longitude": 76.67412,
+      "date": "2026-08-16",
+      "features": {
+        "frpMw": 0.52,
+        "brightness": 295.92,
+        "brightT31": 271.83,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.314,
+        "industrialFacility": "TORANGALLU EXT"
+      }
+    },
+    {
+      "latitude": 15.16689,
+      "longitude": 76.67173,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 1.09,
+        "brightness": 305.06,
+        "brightT31": 290.88,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.15,
+        "industrialFacility": "TORANGALLU EXT"
+      }
+    },
+    {
+      "latitude": 15.16701,
+      "longitude": 76.67386,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 1.71,
+        "brightness": 317.3,
+        "brightT31": 291.08,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.257,
+        "industrialFacility": "TORANGALLU EXT"
+      }
+    },
+    {
+      "latitude": 15.1676,
+      "longitude": 76.38084,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 5.97,
+        "brightness": 330.62,
+        "brightT31": 299.2,
+        "confidence": 0.25,
+        "dayNightRatio": 0.6666666666666666,
+        "sevenDayDetectionCount": 3,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.537,
+        "industrialFacility": "DANAPUR BMM"
+      }
+    },
+    {
+      "latitude": 15.16771,
+      "longitude": 76.37908,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 0.87,
+        "brightness": 300.81,
+        "brightT31": 289.77,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.4,
+        "industrialFacility": "DANAPUR BMM"
+      }
+    },
+    {
+      "latitude": 15.16786,
+      "longitude": 76.38057,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 1.52,
+        "brightness": 309.06,
+        "brightT31": 288.35,
+        "confidence": 0.5,
+        "dayNightRatio": 0.6666666666666666,
+        "sevenDayDetectionCount": 3,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.497,
+        "industrialFacility": "DANAPUR BMM"
+      }
+    },
+    {
+      "latitude": 15.168,
+      "longitude": 76.37878,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 2.12,
+        "brightness": 310.47,
+        "brightT31": 289.63,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.356,
+        "industrialFacility": "DANAPUR BMM"
+      }
+    },
+    {
+      "latitude": 15.16805,
+      "longitude": 76.37964,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 1.51,
+        "brightness": 302.05,
+        "brightT31": 276.49,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.409,
+        "industrialFacility": "DANAPUR BMM"
+      }
+    },
+    {
+      "latitude": 15.16817,
+      "longitude": 76.38058,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 1.14,
+        "brightness": 304.25,
+        "brightT31": 290.12,
+        "confidence": 0.5,
+        "dayNightRatio": 0.6666666666666666,
+        "sevenDayDetectionCount": 3,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 0.476,
+        "industrialFacility": "DANAPUR BMM"
+      }
+    },
+    {
+      "latitude": 15.16881,
+      "longitude": 76.67149,
+      "date": "2026-08-14",
+      "features": {
+        "frpMw": 1.76,
+        "brightness": 313.67,
+        "brightT31": 290.93,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 1.952,
+        "industrialFacility": "TORANGALLU EXT"
+      }
+    },
+    {
+      "latitude": 15.16889,
+      "longitude": 76.67329,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 0.89,
+        "brightness": 306.37,
+        "brightT31": 290.86,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 2.05,
+        "industrialFacility": "TORANGALLU EXT"
+      }
+    },
+    {
+      "latitude": 15.16905,
+      "longitude": 76.6702,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 1.59,
+        "brightness": 304.24,
+        "brightT31": 290.75,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "industrial_facility",
+      "labelEvidence": {
+        "labelMethod": "IND_docx_spatial_match",
+        "industrialMatch": true,
+        "industrialDistanceKm": 1.861,
+        "industrialFacility": "TORANGALLU EXT"
+      }
+    },
+    {
+      "latitude": 8.17326,
+      "longitude": 77.54286,
+      "date": "2026-08-12",
+      "features": {
+        "frpMw": 5.32,
+        "brightness": 313.69,
+        "brightT31": 296.71,
+        "confidence": 0.59,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.38548,
+      "longitude": 77.54631,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 5.8,
+        "brightness": 332.37,
+        "brightT31": 294.62,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.42499,
+      "longitude": 77.62149,
+      "date": "2026-08-23",
+      "features": {
+        "frpMw": 8.42,
+        "brightness": 336.79,
+        "brightT31": 307.22,
+        "confidence": 0.25,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.44259,
+      "longitude": 77.65411,
+      "date": "2026-08-23",
+      "features": {
+        "frpMw": 2.73,
+        "brightness": 340.55,
+        "brightT31": 301.35,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.44418,
+      "longitude": 77.65283,
+      "date": "2026-08-23",
+      "features": {
+        "frpMw": 6.03,
+        "brightness": 338.54,
+        "brightT31": 309.99,
+        "confidence": 0.25,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.50197,
+      "longitude": 77.86375,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 14.87,
+        "brightness": 339.94,
+        "brightT31": 311.27,
+        "confidence": 0.25,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.53019,
+      "longitude": 78.08766,
+      "date": "2026-08-13",
+      "features": {
+        "frpMw": 4.93,
+        "brightness": 337.3,
+        "brightT31": 303.26,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.57461,
+      "longitude": 78.00533,
+      "date": "2026-08-07",
+      "features": {
+        "frpMw": 6.19,
+        "brightness": 337.4,
+        "brightT31": 298.03,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.57914,
+      "longitude": 77.95925,
+      "date": "2026-08-07",
+      "features": {
+        "frpMw": 2.48,
+        "brightness": 335.98,
+        "brightT31": 287.21,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.58266,
+      "longitude": 77.97887,
+      "date": "2026-08-07",
+      "features": {
+        "frpMw": 6.73,
+        "brightness": 367.0,
+        "brightT31": 290.02,
+        "confidence": 1.0,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.58488,
+      "longitude": 77.95021,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 2.49,
+        "brightness": 335.12,
+        "brightT31": 298.77,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.58918,
+      "longitude": 77.91875,
+      "date": "2026-08-12",
+      "features": {
+        "frpMw": 48.72,
+        "brightness": 343.59,
+        "brightT31": 304.03,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.60119,
+      "longitude": 77.89647,
+      "date": "2026-08-23",
+      "features": {
+        "frpMw": 3.94,
+        "brightness": 336.19,
+        "brightT31": 297.6,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.60867,
+      "longitude": 77.97512,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 4.86,
+        "brightness": 338.07,
+        "brightT31": 301.3,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.61775,
+      "longitude": 77.96022,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 1.25,
+        "brightness": 334.7,
+        "brightT31": 300.56,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.62125,
+      "longitude": 77.95941,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 3.37,
+        "brightness": 334.1,
+        "brightT31": 307.95,
+        "confidence": 0.25,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.63544,
+      "longitude": 78.02991,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 3.21,
+        "brightness": 333.63,
+        "brightT31": 299.02,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.63941,
+      "longitude": 77.90063,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 6.62,
+        "brightness": 339.32,
+        "brightT31": 294.71,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.63992,
+      "longitude": 77.90443,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 6.22,
+        "brightness": 337.42,
+        "brightT31": 293.8,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.64255,
+      "longitude": 77.83568,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 4.54,
+        "brightness": 333.36,
+        "brightT31": 296.06,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.64296,
+      "longitude": 77.89849,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 8.57,
+        "brightness": 349.3,
+        "brightT31": 303.38,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.64316,
+      "longitude": 77.89857,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 3.76,
+        "brightness": 330.82,
+        "brightT31": 293.39,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.64359,
+      "longitude": 77.90287,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 12.23,
+        "brightness": 342.47,
+        "brightT31": 303.55,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.64364,
+      "longitude": 77.90237,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 4.95,
+        "brightness": 344.29,
+        "brightT31": 293.68,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.64393,
+      "longitude": 77.83443,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 3.67,
+        "brightness": 332.19,
+        "brightT31": 296.37,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.64668,
+      "longitude": 77.894,
+      "date": "2026-08-18",
+      "features": {
+        "frpMw": 5.49,
+        "brightness": 318.34,
+        "brightT31": 302.94,
+        "confidence": 0.32,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.64996,
+      "longitude": 77.84708,
+      "date": "2026-08-04",
+      "features": {
+        "frpMw": 1.28,
+        "brightness": 331.15,
+        "brightT31": 292.41,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.66256,
+      "longitude": 77.86464,
+      "date": "2026-08-13",
+      "features": {
+        "frpMw": 1.94,
+        "brightness": 335.69,
+        "brightT31": 304.07,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.66362,
+      "longitude": 77.87156,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 3.14,
+        "brightness": 336.94,
+        "brightT31": 302.95,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.66383,
+      "longitude": 77.87165,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 5.11,
+        "brightness": 338.08,
+        "brightT31": 303.43,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.66499,
+      "longitude": 77.87334,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 6.53,
+        "brightness": 340.85,
+        "brightT31": 301.71,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.6787,
+      "longitude": 78.06282,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 2.79,
+        "brightness": 340.22,
+        "brightT31": 305.0,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.68674,
+      "longitude": 78.0777,
+      "date": "2026-08-17",
+      "features": {
+        "frpMw": 23.26,
+        "brightness": 326.51,
+        "brightT31": 273.49,
+        "confidence": 0.83,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.68807,
+      "longitude": 78.08659,
+      "date": "2026-08-17",
+      "features": {
+        "frpMw": 13.16,
+        "brightness": 316.71,
+        "brightT31": 271.34,
+        "confidence": 0.73,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.69729,
+      "longitude": 77.84816,
+      "date": "2026-08-14",
+      "features": {
+        "frpMw": 1.51,
+        "brightness": 337.29,
+        "brightT31": 299.86,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.71118,
+      "longitude": 78.09945,
+      "date": "2026-08-15",
+      "features": {
+        "frpMw": 2.86,
+        "brightness": 330.16,
+        "brightT31": 300.21,
+        "confidence": 0.25,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.71568,
+      "longitude": 77.94273,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 5.73,
+        "brightness": 351.14,
+        "brightT31": 305.18,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.71631,
+      "longitude": 77.94712,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 10.01,
+        "brightness": 343.37,
+        "brightT31": 306.07,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.71938,
+      "longitude": 77.94218,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 5.73,
+        "brightness": 345.04,
+        "brightT31": 305.13,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.72422,
+      "longitude": 77.74713,
+      "date": "2026-08-15",
+      "features": {
+        "frpMw": 3.01,
+        "brightness": 332.25,
+        "brightT31": 299.0,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.72452,
+      "longitude": 77.74837,
+      "date": "2026-08-15",
+      "features": {
+        "frpMw": 2.55,
+        "brightness": 332.27,
+        "brightT31": 299.1,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.72471,
+      "longitude": 77.55059,
+      "date": "2026-08-09",
+      "features": {
+        "frpMw": 11.72,
+        "brightness": 321.34,
+        "brightT31": 296.8,
+        "confidence": 0.35,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.72599,
+      "longitude": 77.55264,
+      "date": "2026-08-12",
+      "features": {
+        "frpMw": 4.2,
+        "brightness": 335.39,
+        "brightT31": 282.5,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.72601,
+      "longitude": 77.55209,
+      "date": "2026-08-12",
+      "features": {
+        "frpMw": 5.69,
+        "brightness": 336.48,
+        "brightT31": 282.7,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.72674,
+      "longitude": 77.83636,
+      "date": "2026-08-14",
+      "features": {
+        "frpMw": 1.74,
+        "brightness": 334.57,
+        "brightT31": 297.43,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.73011,
+      "longitude": 77.58573,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 318.3,
+        "brightness": 364.59,
+        "brightT31": 298.33,
+        "confidence": 1.0,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.73037,
+      "longitude": 77.89612,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 6.32,
+        "brightness": 340.37,
+        "brightT31": 305.82,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.73371,
+      "longitude": 77.6069,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 407.79,
+        "brightness": 372.48,
+        "brightT31": 298.01,
+        "confidence": 1.0,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.73457,
+      "longitude": 78.0784,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 1.92,
+        "brightness": 333.92,
+        "brightT31": 299.67,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.73786,
+      "longitude": 77.60059,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 15.4,
+        "brightness": 352.24,
+        "brightT31": 298.64,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.73847,
+      "longitude": 77.60493,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 5.83,
+        "brightness": 351.61,
+        "brightT31": 295.21,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.73907,
+      "longitude": 77.60947,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 26.36,
+        "brightness": 324.51,
+        "brightT31": 299.28,
+        "confidence": 0.76,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.73922,
+      "longitude": 77.60026,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 8.25,
+        "brightness": 352.24,
+        "brightT31": 282.23,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.73994,
+      "longitude": 77.59967,
+      "date": "2026-08-23",
+      "features": {
+        "frpMw": 3.45,
+        "brightness": 336.65,
+        "brightT31": 302.47,
+        "confidence": 0.5,
+        "dayNightRatio": 0.0,
+        "sevenDayDetectionCount": 1,
+        "activeMonths": 1
+      },
+      "label": "agricultural_burning",
+      "labelEvidence": {
+        "labelMethod": "daytime_isolated_thermal_proxy",
+        "industrialMatch": false,
+        "agriculturalProxy": true
+      }
+    },
+    {
+      "latitude": 8.73686,
+      "longitude": 77.60081,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 7.27,
+        "brightness": 337.37,
+        "brightT31": 290.24,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 8.74178,
+      "longitude": 77.60125,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 148.6,
+        "brightness": 344.38,
+        "brightT31": 294.61,
+        "confidence": 1.0,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 8.74219,
+      "longitude": 77.60104,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 11.51,
+        "brightness": 353.29,
+        "brightT31": 291.75,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 8.74267,
+      "longitude": 77.59756,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 11.51,
+        "brightness": 367.0,
+        "brightT31": 286.78,
+        "confidence": 1.0,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 8.74296,
+      "longitude": 77.59831,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 21.46,
+        "brightness": 367.0,
+        "brightT31": 291.41,
+        "confidence": 1.0,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 9.70958,
+      "longitude": 77.59943,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 6.59,
+        "brightness": 339.29,
+        "brightT31": 295.83,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 9.72176,
+      "longitude": 77.61125,
+      "date": "2026-08-09",
+      "features": {
+        "frpMw": 6.99,
+        "brightness": 344.7,
+        "brightT31": 294.5,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 10.0502,
+      "longitude": 77.95194,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 13.76,
+        "brightness": 367.0,
+        "brightT31": 294.07,
+        "confidence": 1.0,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 10.05023,
+      "longitude": 77.95309,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 6.6,
+        "brightness": 347.01,
+        "brightT31": 303.4,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 10.35903,
+      "longitude": 77.1489,
+      "date": "2026-08-17",
+      "features": {
+        "frpMw": 6.91,
+        "brightness": 319.67,
+        "brightT31": 286.21,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 17.60865,
+      "longitude": 83.20535,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 5.91,
+        "brightness": 332.41,
+        "brightT31": 298.32,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 20.79575,
+      "longitude": 85.25475,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 8.12,
+        "brightness": 342.63,
+        "brightT31": 292.68,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 20.96293,
+      "longitude": 85.18935,
+      "date": "2026-08-11",
+      "features": {
+        "frpMw": 5.15,
+        "brightness": 321.55,
+        "brightT31": 286.34,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 20.96745,
+      "longitude": 86.01298,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 7.71,
+        "brightness": 349.96,
+        "brightT31": 288.46,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 21.75521,
+      "longitude": 83.84486,
+      "date": "2026-08-12",
+      "features": {
+        "frpMw": 7.93,
+        "brightness": 343.61,
+        "brightT31": 296.36,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 21.92081,
+      "longitude": 83.35064,
+      "date": "2026-08-12",
+      "features": {
+        "frpMw": 6.75,
+        "brightness": 346.59,
+        "brightT31": 298.87,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 22.37782,
+      "longitude": 87.28007,
+      "date": "2026-08-24",
+      "features": {
+        "frpMw": 6.44,
+        "brightness": 329.41,
+        "brightT31": 288.78,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 22.37793,
+      "longitude": 87.27869,
+      "date": "2026-08-23",
+      "features": {
+        "frpMw": 5.81,
+        "brightness": 334.11,
+        "brightT31": 285.45,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 22.37808,
+      "longitude": 87.27902,
+      "date": "2026-08-23",
+      "features": {
+        "frpMw": 6.18,
+        "brightness": 335.54,
+        "brightT31": 287.71,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.64755,
+      "longitude": 85.43784,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 5.55,
+        "brightness": 327.96,
+        "brightT31": 283.15,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.64833,
+      "longitude": 85.44051,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 7.15,
+        "brightness": 343.27,
+        "brightT31": 298.22,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.66471,
+      "longitude": 87.15631,
+      "date": "2026-08-11",
+      "features": {
+        "frpMw": 6.99,
+        "brightness": 306.24,
+        "brightT31": 289.18,
+        "confidence": 0.39,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.66504,
+      "longitude": 87.15353,
+      "date": "2026-08-12",
+      "features": {
+        "frpMw": 6.77,
+        "brightness": 337.81,
+        "brightT31": 295.99,
+        "confidence": 0.25,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.67512,
+      "longitude": 86.4021,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 5.73,
+        "brightness": 330.3,
+        "brightT31": 296.81,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.67603,
+      "longitude": 86.39613,
+      "date": "2026-08-11",
+      "features": {
+        "frpMw": 5.3,
+        "brightness": 332.7,
+        "brightT31": 297.42,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.67692,
+      "longitude": 86.3983,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 7.84,
+        "brightness": 332.68,
+        "brightT31": 294.29,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.67718,
+      "longitude": 86.3996,
+      "date": "2026-08-23",
+      "features": {
+        "frpMw": 8.98,
+        "brightness": 334.56,
+        "brightT31": 296.72,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.68436,
+      "longitude": 86.39455,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 6.05,
+        "brightness": 340.32,
+        "brightT31": 296.73,
+        "confidence": 0.5,
+        "dayNightRatio": 0.75,
+        "sevenDayDetectionCount": 4,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.68565,
+      "longitude": 86.39246,
+      "date": "2026-08-11",
+      "features": {
+        "frpMw": 7.42,
+        "brightness": 331.76,
+        "brightT31": 296.66,
+        "confidence": 0.25,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.68639,
+      "longitude": 86.39134,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 5.68,
+        "brightness": 330.74,
+        "brightT31": 294.17,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.69127,
+      "longitude": 87.12198,
+      "date": "2026-08-10",
+      "features": {
+        "frpMw": 8.44,
+        "brightness": 331.33,
+        "brightT31": 297.12,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.71159,
+      "longitude": 86.45226,
+      "date": "2026-08-13",
+      "features": {
+        "frpMw": 8.25,
+        "brightness": 346.75,
+        "brightT31": 295.82,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.71266,
+      "longitude": 86.45232,
+      "date": "2026-08-11",
+      "features": {
+        "frpMw": 8.07,
+        "brightness": 345.01,
+        "brightT31": 298.38,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.71326,
+      "longitude": 86.45322,
+      "date": "2026-08-23",
+      "features": {
+        "frpMw": 7.52,
+        "brightness": 334.56,
+        "brightT31": 295.7,
+        "confidence": 0.25,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.71334,
+      "longitude": 86.45167,
+      "date": "2026-08-11",
+      "features": {
+        "frpMw": 5.82,
+        "brightness": 308.28,
+        "brightT31": 292.51,
+        "confidence": 0.7,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.73584,
+      "longitude": 86.43473,
+      "date": "2026-08-23",
+      "features": {
+        "frpMw": 6.75,
+        "brightness": 337.91,
+        "brightT31": 294.67,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.73811,
+      "longitude": 86.43312,
+      "date": "2026-08-19",
+      "features": {
+        "frpMw": 6.07,
+        "brightness": 312.99,
+        "brightT31": 283.7,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.7604,
+      "longitude": 86.4017,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 5.92,
+        "brightness": 335.74,
+        "brightT31": 293.96,
+        "confidence": 0.5,
+        "dayNightRatio": 0.6666666666666666,
+        "sevenDayDetectionCount": 3,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.76064,
+      "longitude": 86.4042,
+      "date": "2026-08-23",
+      "features": {
+        "frpMw": 5.23,
+        "brightness": 333.93,
+        "brightT31": 294.65,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.761,
+      "longitude": 86.40435,
+      "date": "2026-08-16",
+      "features": {
+        "frpMw": 7.07,
+        "brightness": 327.5,
+        "brightT31": 282.0,
+        "confidence": 0.5,
+        "dayNightRatio": 0.6666666666666666,
+        "sevenDayDetectionCount": 3,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.76226,
+      "longitude": 86.40489,
+      "date": "2026-08-11",
+      "features": {
+        "frpMw": 7.9,
+        "brightness": 309.98,
+        "brightT31": 292.52,
+        "confidence": 0.45,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.7655,
+      "longitude": 86.40389,
+      "date": "2026-08-13",
+      "features": {
+        "frpMw": 5.14,
+        "brightness": 339.52,
+        "brightT31": 294.25,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.77894,
+      "longitude": 86.39065,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 5.67,
+        "brightness": 339.02,
+        "brightT31": 293.0,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.78723,
+      "longitude": 85.55419,
+      "date": "2026-08-21",
+      "features": {
+        "frpMw": 5.91,
+        "brightness": 331.56,
+        "brightT31": 297.75,
+        "confidence": 0.25,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.79607,
+      "longitude": 86.3521,
+      "date": "2026-08-11",
+      "features": {
+        "frpMw": 5.15,
+        "brightness": 334.26,
+        "brightT31": 289.52,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.79785,
+      "longitude": 86.35374,
+      "date": "2026-08-11",
+      "features": {
+        "frpMw": 5.42,
+        "brightness": 306.42,
+        "brightT31": 292.75,
+        "confidence": 0.29,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 23.80139,
+      "longitude": 86.32409,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 6.43,
+        "brightness": 332.78,
+        "brightT31": 294.67,
+        "confidence": 0.5,
+        "dayNightRatio": 0.6666666666666666,
+        "sevenDayDetectionCount": 3,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 25.94155,
+      "longitude": 72.18542,
+      "date": "2026-08-05",
+      "features": {
+        "frpMw": 12.04,
+        "brightness": 314.83,
+        "brightT31": 290.39,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 25.94194,
+      "longitude": 72.18545,
+      "date": "2026-08-05",
+      "features": {
+        "frpMw": 27.81,
+        "brightness": 327.96,
+        "brightT31": 296.3,
+        "confidence": 1.0,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 25.94461,
+      "longitude": 72.19249,
+      "date": "2026-08-08",
+      "features": {
+        "frpMw": 8.82,
+        "brightness": 327.14,
+        "brightT31": 291.79,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 29.45792,
+      "longitude": 76.8695,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 14.92,
+        "brightness": 330.42,
+        "brightT31": 294.61,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 29.45829,
+      "longitude": 76.86964,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 15.72,
+        "brightness": 319.27,
+        "brightT31": 296.1,
+        "confidence": 0.98,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 29.45899,
+      "longitude": 76.86539,
+      "date": "2026-08-20",
+      "features": {
+        "frpMw": 13.66,
+        "brightness": 343.34,
+        "brightT31": 288.53,
+        "confidence": 0.5,
+        "dayNightRatio": 1.0,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    },
+    {
+      "latitude": 29.46118,
+      "longitude": 76.86392,
+      "date": "2026-08-22",
+      "features": {
+        "frpMw": 13.33,
+        "brightness": 339.97,
+        "brightT31": 293.77,
+        "confidence": 0.5,
+        "dayNightRatio": 0.5,
+        "sevenDayDetectionCount": 2,
+        "activeMonths": 1
+      },
+      "label": "mining",
+      "labelEvidence": {
+        "labelMethod": "persistent_thermal_proxy",
+        "industrialMatch": false,
+        "miningProxy": true
+      }
+    }
+  ]
+}
