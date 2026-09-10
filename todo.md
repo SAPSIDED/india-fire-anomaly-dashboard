@@ -260,3 +260,6 @@ No Vercel compatibility implementation has been applied yet; this item records t
 
 - [x] Fix the reported missing AI Screening Signal/XGBoost result after hotspot verification by replacing the Vercel-incompatible localhost-only ML call with local inference from the checked-in Anaconda XGBoost JSON artifact; rule classification unchanged.
 - [x] Add regression coverage for local ML prediction/unavailable behavior; full suite passed (113 tests) and production build passed. The existing successful-response state handoff now receives a local prediction instead of null.
+
+- [x] Fix the Vercel production AI Screening Signal card showing the empty pre-verification state instead of XGBoost class/probability statistics after successful hotspot verification; live Vercel verification now renders the prediction.
+- [x] Add a production-response/UI regression test for visible XGBoost statistics and publish the verified Vercel fix; live browser verification shows class and probability values.
