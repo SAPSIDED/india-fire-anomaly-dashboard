@@ -30,6 +30,15 @@ export type VerificationRailResult = {
   longTermHistory?: { totalDetectionCount: number; activeMonths: number };
   gppdReference?: { name: string; fuelType: string | null; capacityMw: number | null; distanceKm: number; source: string };
   classification: { classification: string; confidence: string; reason: string };
+  mlComparison?: {
+    state: "available" | "unavailable";
+    label: string | null;
+    probability: number | null;
+    confidence: string;
+    features: { frpMw: number | null; dayNightRatio: number | null; sevenDayDetectionCount: number | null; activeMonths: number | null };
+    modelVersion: string | null;
+    detail: string;
+  };
 };
 
 type Props = {
@@ -89,6 +98,20 @@ export function HotspotVerificationRail({ selected, state, result, onVerify }: P
         <p>{loading ? "The existing corroboration pipeline is querying source evidence for this exact coordinate. No classification is issued until it returns." : failed ? "The selection is retained and no industrial-fire conclusion was issued. Retry the same existing per-coordinate check when the temporary source or network issue clears." : complete ? <><b>{result.classification.confidence.toUpperCase()} CONFIDENCE.</b> {result.classification.reason}</> : "A thermal candidate is not a confirmed industrial fire. Select Run source verification to load source-backed results."}</p>
         <button onClick={onVerify} disabled={loading}>{loading ? "Verification running…" : failed ? "Retry source verification" : complete ? "Review full evidence" : "Run source verification"} <ChevronRight size={15} /></button>
       </div>
+      {complete && <section className="ml-comparison" aria-label="AI/ML Integration">
+        <div className="ml-comparison-heading"><span>AI/ML INTEGRATION</span><b>{result.mlComparison?.state === "available" ? "MODEL SIGNAL" : "UNAVAILABLE"}</b></div>
+        {result.mlComparison?.state === "available" ? <>
+          <strong>{formatClassification(result.mlComparison.label ?? "unknown")}</strong>
+          <p>{result.mlComparison.detail} <b>{result.mlComparison.confidence.toUpperCase()} CONFIDENCE.</b></p>
+          <dl className="ml-feature-grid">
+            <div><dt>Wildfire probability</dt><dd>{result.mlComparison.probability === null ? "—" : `${(result.mlComparison.probability * 100).toFixed(1)}%`}</dd></div>
+            <div><dt>FRP MW</dt><dd>{result.mlComparison.features.frpMw ?? "missing"}</dd></div>
+            <div><dt>7-day detections</dt><dd>{result.mlComparison.features.sevenDayDetectionCount ?? "missing"}</dd></div>
+            <div><dt>Active months</dt><dd>{result.mlComparison.features.activeMonths ?? "missing"}</dd></div>
+          </dl>
+          <small>Comparison only. The rule-based classification above remains the application decision.</small>
+        </> : <p>The trained XGBoost artifact was not available for this response. The rule-based classification remains unchanged and authoritative for this screen.</p>}
+      </section>}
     </aside>
   );
 }

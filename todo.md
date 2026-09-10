@@ -240,3 +240,20 @@ No Vercel compatibility implementation has been applied yet; this item records t
 - [x] Add a lightweight evidence/provider popup panel using existing hotspot and corroboration data without adding new backend calls.
 - [x] Validate and publish the follow-up UI only if the proxy/domain checks and popup implementation are safe.
 - [x] Add a Vercel-safe current-location hover/provider popup with an authorized-image fallback and a fullscreen map control, preserving existing marker verification and avoiding new backend calls.
+- [x] Add an isolated ML comparison signal using the current trained XGBoost model and approved four-feature contract; keep the rule-based classifier authoritative and unchanged.
+- [x] Expose additive ML prediction/comparison data through a Vercel-compatible backend path with safe unavailable/error states and no live inference deployment until validated.
+- [x] Add the Rule vs ML comparison UI to the dashboard, test it, and deploy it through the connected Vercel project without changing FIRMS retrieval, scheduler, or database schema.
+
+## Newly Attached MAPFIX Scope (awaiting priority confirmation)
+- [x] Clarify whether the attached MAPFIX task (live hotspot count and functional Thermal/OSM context/Persistence/Exposure layers) is the next priority or should remain deferred while the additive Rule-vs-ML integration proceeds; user selected ML integration first.
+- [ ] If MAPFIX is approved, audit current data availability for each layer before implementation and preserve rule logic, schema, and stored records.
+- [ ] If MAPFIX is approved, implement only the confirmed UI/data-display scope, validate it, and deploy to Vercel with a categorized change report.
+- [x] Continue the additive Rule-vs-ML integration using the trained four-feature XGBoost artifact without replacing the rule-based classifier; user confirmed ML integration priority.
+
+## Additive Anaconda XGBoost Integration
+- [x] Inspect the repository copy of the Anaconda-trained XGBoost artifact, approved feature order, model labels, and current Vercel deployment contract.
+- [x] Implement a lightweight Node.js XGBoost JSON inference adapter that matches the trained four-feature preprocessing and returns an ML comparison signal without replacing rule classification.
+- [x] Add the ML comparison result additively to the existing corroboration response and preserve all existing response fields and retrieval behavior.
+- [x] Render the AI/ML Integration Rule-vs-ML comparison in the dashboard investigation UI, including safe unavailable/error states.
+- [x] Add deterministic inference and response-shape tests, run the full test suite, TypeScript check, and production build.
+- [x] Verify the rendered dashboard flow and save/publish the Vercel-connected repository version only after validation.

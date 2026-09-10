@@ -11,6 +11,7 @@ import { lookupNearestGppdPlant, type GppdPlantReference } from "./gppdReference
 import { assessFacilitySignals, type FacilitySignals } from "./facilityReference";
 import { lookupSeasonalAgriculturalBurning } from "./seasonalAgriculture";
 import { makeRequest, type PlacesSearchResult } from "./_core/map";
+import { predictMlClassification, type MlClassificationResult } from "./mlClassification";
 
 // Some scientific-data hosts are intermittently unreachable over IPv6 from cloud runtimes.
 // Prefer IPv4 without reducing the source's TLS or request-validation requirements.
@@ -26,7 +27,7 @@ type BaseEvidence = {
 };
 
 type DailyDetection = { date: string; detections: number };
-type FirmsEvidence = BaseEvidence & { detections: number; dailyDetections: DailyDetection[] };
+type FirmsEvidence = BaseEvidence & { detections: number; dailyDetections: DailyDetection[]; historyRows?: DetectionHistoryInput[] };
 type IndustrialEvidence = BaseEvidence & {
   features: number;
   industrialFacilityName: string | null;
@@ -64,7 +65,18 @@ let detectionHistoryStatisticsReader = getDetectionHistoryStatistics;
 let seasonalAgriculturalBurningReader = lookupSeasonalAgriculturalBurning;
 let landCoverFetcher = fetchLandCover;
 let gppdReferenceLookup = lookupNearestGppdPlant;
-let facilitySignalLookup = assessFacilitySignals;
+  let facilitySignalLookup = assessFacilitySignals;
+
+function makeMlComparison(current: FirmsEvidence, history: FirmsEvidence, statistics: DetectionHistoryStatistics, longTermHistory: Awaited<ReturnType<typeof getLongTermPersistence>>): MlClassificationResult {
+  const newestFrp = (current.historyRows ?? []).map(row => row.frp).find(value => value !== null && value !== undefined && Number.isFinite(Number(value)))
+    ?? null;
+  return predictMlClassification({
+    frpMw: newestFrp === null ? null : Number(newestFrp),
+    dayNightRatio: statistics.dayToNightRatio,
+    sevenDayDetectionCount: history.detections,
+    activeMonths: longTermHistory.state === "available" ? longTermHistory.activeMonths : 0,
+  });
+}
 const FIRMS_RELAY_BASE_URL = (process.env.FIRMS_RELAY_BASE_URL ?? "https://fireguard-firms-relay.fireguard-2cddbeab.workers.dev").replace(/\/+$/, "");
 
 function nowIso() {
@@ -478,21 +490,21 @@ async function fetchFirms(lat: number, lng: number, days: number, sensor: FirmsS
     }
     await writeCached(key, provider, evidence, days === 1 ? 20 * 60_000 : 6 * 60 * 60_000);
     return {
-      state: "available", detections: evidence.detections, dailyDetections: evidence.dailyDetections, provider, checkedAt,
+      state: "available", detections: evidence.detections, dailyDetections: evidence.dailyDetections, historyRows: evidence.historyRows, provider, checkedAt,
       detail: evidence.detections > 0
         ? `${evidence.detections} live NASA FIRMS ${label} detections in the local ${days}-day window.`
         : `No live NASA FIRMS ${label} detections in the local ${days}-day window.`,
     };
   } catch {
-    const cached = await readCached<{ detections: number; dailyDetections?: DailyDetection[] }>(key);
+    const cached = await readCached<{ detections: number; dailyDetections?: DailyDetection[]; historyRows?: DetectionHistoryInput[] }>(key);
     if (cached) {
       return {
-        state: "cached", detections: cached.value.detections, dailyDetections: cached.value.dailyDetections ?? [], provider, checkedAt,
+        state: "cached", detections: cached.value.detections, dailyDetections: cached.value.dailyDetections ?? [], historyRows: cached.value.historyRows, provider, checkedAt,
         detail: `${cached.value.detections} previously verified NASA FIRMS ${label} detections are shown while the live response is delayed.${cacheSuffix(cached)}`,
       };
     }
     return {
-        state: "unavailable", detections: 0, dailyDetections: [], provider, checkedAt,
+        state: "unavailable", detections: 0, dailyDetections: [], historyRows: [], provider, checkedAt,
         detail: `The permanent FIRMS relay could not retrieve NASA ${label} data after bounded Area API, India route, and WFS retries. No verified cached reading is available.`,
     };
   }
@@ -661,6 +673,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
       detectionHistoryStatisticsReader(input.lat, input.lng),
       seasonalAgriculturalBurningReader(input.lat, input.lng, evaluatedMonth),
     ]);
+    const mlComparison = makeMlComparison(firmsCurrent, firmsHistory, detectionHistoryStatistics, longTermHistory);
     const classification = classifyCorroborationEvidence({
       industrialFeatures: industrial.features,
       industrialState: industrial.state,
@@ -675,7 +688,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     });
     return {
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
-      firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
+      firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, mlComparison, longTermHistory,
       dayNightDetectionRatio: { state: detectionHistoryStatistics.state, dayDetections: detectionHistoryStatistics.dayDetections, nightDetections: detectionHistoryStatistics.nightDetections, ratio: detectionHistoryStatistics.dayToNightRatio, sampleCount: detectionHistoryStatistics.dayNightSampleCount },
       frpVariance: frpVarianceEvidence(detectionHistoryStatistics),
       seasonalAgriculturalBurning,
@@ -701,6 +714,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     detectionHistoryStatisticsReader(input.lat, input.lng),
     seasonalAgriculturalBurningReader(input.lat, input.lng, evaluatedMonth),
   ]);
+  const mlComparison = makeMlComparison(firmsCurrent, firmsHistory, detectionHistoryStatistics, longTermHistory);
   const classification = classifyCorroborationEvidence({
     industrialFeatures: industrial.features,
     industrialState: industrial.state,
@@ -746,7 +760,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
 
   return {
     detectionId: input.detectionId, checkedAt: nowIso(), sourcesRunInParallel: true,
-    firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
+    firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, mlComparison, longTermHistory,
     dayNightDetectionRatio: { state: detectionHistoryStatistics.state, dayDetections: detectionHistoryStatistics.dayDetections, nightDetections: detectionHistoryStatistics.nightDetections, ratio: detectionHistoryStatistics.dayToNightRatio, sampleCount: detectionHistoryStatistics.dayNightSampleCount },
     frpVariance: frpVarianceEvidence(detectionHistoryStatistics),
     seasonalAgriculturalBurning,
