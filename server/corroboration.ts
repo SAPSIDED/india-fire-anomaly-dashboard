@@ -5,13 +5,13 @@
  */
 import { setDefaultResultOrder } from "node:dns";
 import { classifyCorroborationEvidence } from "./classification";
+import { classifyWithML } from "./mlClassifier";
 import { getActiveIncidentEvidence, getDetectionHistoryStatistics, getLongTermPersistence, getSourceEvidenceCache, recordDetectionHistory, saveSourceEvidenceCache, type DetectionHistoryInput, type DetectionHistoryStatistics, type IndiaHotspotSnapshotInput, type IndiaHotspotSnapshotSource } from "./db";
 import { fetchLandCover, type LandCoverResult } from "./landcover";
 import { lookupNearestGppdPlant, type GppdPlantReference } from "./gppdReference";
 import { assessFacilitySignals, type FacilitySignals } from "./facilityReference";
 import { lookupSeasonalAgriculturalBurning } from "./seasonalAgriculture";
 import { makeRequest, type PlacesSearchResult } from "./_core/map";
-import { predictMlClassification, type MlClassificationResult } from "./mlClassification";
 
 // Some scientific-data hosts are intermittently unreachable over IPv6 from cloud runtimes.
 // Prefer IPv4 without reducing the source's TLS or request-validation requirements.
@@ -27,7 +27,14 @@ type BaseEvidence = {
 };
 
 type DailyDetection = { date: string; detections: number };
-type FirmsEvidence = BaseEvidence & { detections: number; dailyDetections: DailyDetection[]; historyRows?: DetectionHistoryInput[] };
+type FirmsEvidence = BaseEvidence & {
+  detections: number;
+  dailyDetections: DailyDetection[];
+  frpMw: number | null;
+  brightness: number | null;
+  brightT31: number | null;
+  confidence: number | null;
+};
 type IndustrialEvidence = BaseEvidence & {
   features: number;
   industrialFacilityName: string | null;
@@ -65,18 +72,7 @@ let detectionHistoryStatisticsReader = getDetectionHistoryStatistics;
 let seasonalAgriculturalBurningReader = lookupSeasonalAgriculturalBurning;
 let landCoverFetcher = fetchLandCover;
 let gppdReferenceLookup = lookupNearestGppdPlant;
-  let facilitySignalLookup = assessFacilitySignals;
-
-function makeMlComparison(current: FirmsEvidence, history: FirmsEvidence, statistics: DetectionHistoryStatistics, longTermHistory: Awaited<ReturnType<typeof getLongTermPersistence>>): MlClassificationResult {
-  const newestFrp = (current.historyRows ?? []).map(row => row.frp).find(value => value !== null && value !== undefined && Number.isFinite(Number(value)))
-    ?? null;
-  return predictMlClassification({
-    frpMw: newestFrp === null ? null : Number(newestFrp),
-    dayNightRatio: statistics.dayToNightRatio,
-    sevenDayDetectionCount: history.detections,
-    activeMonths: longTermHistory.state === "available" ? longTermHistory.activeMonths : 0,
-  });
-}
+let facilitySignalLookup = assessFacilitySignals;
 const FIRMS_RELAY_BASE_URL = (process.env.FIRMS_RELAY_BASE_URL ?? "https://fireguard-firms-relay.fireguard-2cddbeab.workers.dev").replace(/\/+$/, "");
 
 function nowIso() {
@@ -243,7 +239,8 @@ function parseFirmsDetectionHistoryRows(csv: string, lat?: number, lng?: number,
   const latIndex = header.indexOf("latitude");
   const lngIndex = header.indexOf("longitude");
   const dateIndex = header.indexOf("acq_date");
-  const brightnessIndex = ["bright_ti4", "brightness", "bright_t31"].map(field => header.indexOf(field)).find(index => index >= 0) ?? -1;
+  const brightnessIndex = ["bright_ti4", "brightness"].map(field => header.indexOf(field)).find(index => index >= 0) ?? -1;
+  const brightT31Index = header.indexOf("bright_t31");
   const confidenceIndex = header.indexOf("confidence");
   const dayNightIndex = header.indexOf("daynight");
   const frpIndex = header.indexOf("frp");
@@ -259,6 +256,8 @@ function parseFirmsDetectionHistoryRows(csv: string, lat?: number, lng?: number,
     if (lat !== undefined && lng !== undefined && haversineKm(lat, lng, detectionLat, detectionLng) > 8) return [];
     const rawBrightness = brightnessIndex >= 0 ? values[brightnessIndex]?.trim() : undefined;
     const brightness = rawBrightness && Number.isFinite(Number(rawBrightness)) ? rawBrightness : null;
+    const rawBrightT31 = brightT31Index >= 0 ? values[brightT31Index]?.trim() : undefined;
+    const brightT31 = rawBrightT31 && Number.isFinite(Number(rawBrightT31)) ? rawBrightT31 : null;
     const confidence = confidenceIndex >= 0 ? values[confidenceIndex]?.trim() || null : null;
     const rawDayNight = dayNightIndex >= 0 ? values[dayNightIndex]?.trim().toUpperCase() : undefined;
     const dayNight = rawDayNight === "D" || rawDayNight === "N" ? rawDayNight : null;
@@ -268,7 +267,7 @@ function parseFirmsDetectionHistoryRows(csv: string, lat?: number, lng?: number,
       instrumentIndex >= 0 ? values[instrumentIndex] : undefined,
       satelliteIndex >= 0 ? values[satelliteIndex] : undefined,
     ) ?? platformHint ?? null;
-    return [{ latitude: detectionLat.toFixed(6), longitude: detectionLng.toFixed(6), detectionDate, brightness, confidence, dayNight, frp, platform }];
+    return [{ latitude: detectionLat.toFixed(6), longitude: detectionLng.toFixed(6), detectionDate, brightness, brightT31, confidence, dayNight, frp, platform }];
   });
 }
 
@@ -303,6 +302,9 @@ type FirmsFetchPayload = {
   detections: number;
   dailyDetections: DailyDetection[];
   historyRows: DetectionHistoryInput[];
+  brightness: number | null;
+  brightT31: number | null;
+  confidence: number | null;
 };
 
 type FirmsSensor = "VIIRS_NOAA20_NRT" | "VIIRS_NOAA21_NRT";
@@ -457,7 +459,7 @@ async function fetchFirms(lat: number, lng: number, days: number, sensor: FirmsS
   const mapKey = process.env.NASA_FIRMS_MAP_KEY;
   const relayAuthToken = process.env.FIRMS_RELAY_AUTH_TOKEN ?? mapKey;
   const checkedAt = nowIso();
-  if (!relayAuthToken) return { state: "unavailable", detections: 0, dailyDetections: [], provider, checkedAt, detail: `The secure FIRMS relay is not configured with backend authentication.` };
+  if (!relayAuthToken) return { state: "unavailable", detections: 0, dailyDetections: [], frpMw: null, brightness: null, brightT31: null, confidence: null, provider, checkedAt, detail: `The secure FIRMS relay is not configured with backend authentication.` };
 
   const areaUrl = `${FIRMS_RELAY_BASE_URL}/api/area/csv/${sensor}/${bboxFor(lat, lng)}/${days}`;
   const countryUrl = firmsCountryUrl(sensor, days);
@@ -470,17 +472,20 @@ async function fetchFirms(lat: number, lng: number, days: number, sensor: FirmsS
       requestWithRetry(areaUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } }).then(async response => {
         const csv = await response.text();
         if (/invalid\s+map[_ ]key|error/i.test(csv)) throw new Error("FIRMS area route rejected the request.");
-        return { detections: parseFirmsRows(csv), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv) : [], historyRows: parseFirmsDetectionHistoryRows(csv, undefined, undefined, "VIIRS") };
+        const historyRows = parseFirmsDetectionHistoryRows(csv, undefined, undefined, "VIIRS");
+        return { detections: parseFirmsRows(csv), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv) : [], historyRows, brightness: historyRows.reduce((max, d) => Math.max(max, Number(d.brightness) || 0), 0) || null, brightT31: historyRows.reduce((max, d) => Math.max(max, Number(d.brightT31) || 0), 0) || null, confidence: historyRows.reduce((max, d) => Math.max(max, Number(d.confidence) || 0), 0) || null };
       }),
       requestWithRetry(countryUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } }).then(async response => {
         const csv = await response.text();
         if (/invalid\s+map[_ ]key|error/i.test(csv)) throw new Error("FIRMS country route rejected the request.");
-        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [], historyRows: parseFirmsDetectionHistoryRows(csv, lat, lng, "VIIRS") };
+        const historyRows = parseFirmsDetectionHistoryRows(csv, lat, lng, "VIIRS");
+        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [], historyRows, brightness: historyRows.reduce((max, d) => Math.max(max, Number(d.brightness) || 0), 0) || null, brightT31: historyRows.reduce((max, d) => Math.max(max, Number(d.brightT31) || 0), 0) || null, confidence: historyRows.reduce((max, d) => Math.max(max, Number(d.confidence) || 0), 0) || null };
       }),
       requestWithRetry(wfsUrl, { headers: { Authorization: `Bearer ${relayAuthToken}` } }).then(async response => {
         const csv = await response.text();
         if (/invalid\s+map[_ ]key|serviceexception|error/i.test(csv)) throw new Error("FIRMS WFS route rejected the request.");
-        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [], historyRows: parseFirmsDetectionHistoryRows(csv, lat, lng, "VIIRS") };
+        const historyRows = parseFirmsDetectionHistoryRows(csv, lat, lng, "VIIRS");
+        return { detections: parseFirmsRows(csv, lat, lng), dailyDetections: days > 1 ? parseFirmsDailyDetections(csv, lat, lng) : [], historyRows, brightness: historyRows.reduce((max, d) => Math.max(max, Number(d.brightness) || 0), 0) || null, brightT31: historyRows.reduce((max, d) => Math.max(max, Number(d.brightT31) || 0), 0) || null, confidence: historyRows.reduce((max, d) => Math.max(max, Number(d.confidence) || 0), 0) || null };
       }),
     ]);
     try {
@@ -490,21 +495,25 @@ async function fetchFirms(lat: number, lng: number, days: number, sensor: FirmsS
     }
     await writeCached(key, provider, evidence, days === 1 ? 20 * 60_000 : 6 * 60 * 60_000);
     return {
-      state: "available", detections: evidence.detections, dailyDetections: evidence.dailyDetections, historyRows: evidence.historyRows, provider, checkedAt,
+      state: "available", detections: evidence.detections, dailyDetections: evidence.dailyDetections, frpMw: evidence.historyRows.reduce((max, d) => Math.max(max, Number(d.frp) || 0), 0) || null,
+      brightness: evidence.historyRows.reduce((max, d) => Math.max(max, Number(d.brightness) || 0), 0) || null,
+      brightT31: evidence.historyRows.reduce((max, d) => Math.max(max, Number(d.brightT31) || 0), 0) || null,
+      confidence: evidence.historyRows.reduce((max, d) => Math.max(max, Number(d.confidence) || 0), 0) || null,
+      provider, checkedAt,
       detail: evidence.detections > 0
         ? `${evidence.detections} live NASA FIRMS ${label} detections in the local ${days}-day window.`
         : `No live NASA FIRMS ${label} detections in the local ${days}-day window.`,
     };
   } catch {
-    const cached = await readCached<{ detections: number; dailyDetections?: DailyDetection[]; historyRows?: DetectionHistoryInput[] }>(key);
+    const cached = await readCached<{ detections: number; dailyDetections?: DailyDetection[] }>(key);
     if (cached) {
       return {
-        state: "cached", detections: cached.value.detections, dailyDetections: cached.value.dailyDetections ?? [], historyRows: cached.value.historyRows, provider, checkedAt,
+        state: "cached", detections: cached.value.detections, dailyDetections: cached.value.dailyDetections ?? [], frpMw: null, brightness: null, brightT31: null, confidence: null, provider, checkedAt,
         detail: `${cached.value.detections} previously verified NASA FIRMS ${label} detections are shown while the live response is delayed.${cacheSuffix(cached)}`,
       };
     }
     return {
-        state: "unavailable", detections: 0, dailyDetections: [], historyRows: [], provider, checkedAt,
+        state: "unavailable", detections: 0, dailyDetections: [], frpMw: null, brightness: null, brightT31: null, confidence: null, provider, checkedAt,
         detail: `The permanent FIRMS relay could not retrieve NASA ${label} data after bounded Area API, India route, and WFS retries. No verified cached reading is available.`,
     };
   }
@@ -627,7 +636,7 @@ async function fetchAuthorityIncidentEvidence(input: { detectionId: string; lat:
 }
 
 function pendingFirms(provider: string, checkedAt: string): FirmsEvidence {
-  return { state: "unavailable", detections: 0, dailyDetections: [], provider, checkedAt, detail: "The source did not return within the live evidence window. It has been marked pending; no result has been inferred." };
+  return { state: "unavailable", detections: 0, dailyDetections: [], frpMw: null, brightness: null, brightT31: null, confidence: null, provider, checkedAt, detail: "The source did not return within the live evidence window. It has been marked pending; no result has been inferred." };
 }
 
 function pendingIndustrial(checkedAt: string): IndustrialEvidence {
@@ -673,7 +682,6 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
       detectionHistoryStatisticsReader(input.lat, input.lng),
       seasonalAgriculturalBurningReader(input.lat, input.lng, evaluatedMonth),
     ]);
-    const mlComparison = makeMlComparison(firmsCurrent, firmsHistory, detectionHistoryStatistics, longTermHistory);
     const classification = classifyCorroborationEvidence({
       industrialFeatures: industrial.features,
       industrialState: industrial.state,
@@ -688,7 +696,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     });
     return {
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
-      firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, mlComparison, longTermHistory,
+      firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
       dayNightDetectionRatio: { state: detectionHistoryStatistics.state, dayDetections: detectionHistoryStatistics.dayDetections, nightDetections: detectionHistoryStatistics.nightDetections, ratio: detectionHistoryStatistics.dayToNightRatio, sampleCount: detectionHistoryStatistics.dayNightSampleCount },
       frpVariance: frpVarianceEvidence(detectionHistoryStatistics),
       seasonalAgriculturalBurning,
@@ -714,7 +722,15 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     detectionHistoryStatisticsReader(input.lat, input.lng),
     seasonalAgriculturalBurningReader(input.lat, input.lng, evaluatedMonth),
   ]);
-  const mlComparison = makeMlComparison(firmsCurrent, firmsHistory, detectionHistoryStatistics, longTermHistory);
+  const mlResult = await classifyWithML(
+    firmsCurrent.frpMw ?? 0,
+    firmsCurrent.brightness ?? 0,
+    firmsCurrent.brightT31 ?? 0,
+    firmsCurrent.confidence ?? 0,
+    detectionHistoryStatistics.dayToNightRatio ?? 0,
+    firmsHistory.detections,
+  );
+
   const classification = classifyCorroborationEvidence({
     industrialFeatures: industrial.features,
     industrialState: industrial.state,
@@ -760,7 +776,8 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
 
   return {
     detectionId: input.detectionId, checkedAt: nowIso(), sourcesRunInParallel: true,
-    firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, mlComparison, longTermHistory,
+    firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
+    ...(mlResult ? { mlPrediction: mlResult } : {}),
     dayNightDetectionRatio: { state: detectionHistoryStatistics.state, dayDetections: detectionHistoryStatistics.dayDetections, nightDetections: detectionHistoryStatistics.nightDetections, ratio: detectionHistoryStatistics.dayToNightRatio, sampleCount: detectionHistoryStatistics.dayNightSampleCount },
     frpVariance: frpVarianceEvidence(detectionHistoryStatistics),
     seasonalAgriculturalBurning,

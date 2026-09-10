@@ -72,7 +72,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 
 @keyframes modal-enter { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } } @keyframes live-source-progress { from { opacity: .35; transform: translateX(0); } to { opacity: 1; transform: translateX(95%); } }
 @media (prefers-reduced-motion: reduce) { *, *:before, *:after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
-@media (max-width: 1050px) { .mission-nav { display: none; }.mission-header { gap: 12px; }.mission-actions { margin-left: auto; }.mission-actions span { display: none; }.mission-hero { grid-template-columns: 1fr; }.hero-copy { max-width: 680px; }.workbench-shell { grid-template-columns: 1fr; }.analysis-rail { border-top: 1px solid var(--line); border-left: 0; }.investigation-flow { grid-template-columns: repeat(3,1fr); }.investigation-flow li:nth-child(4) { border-left: 1px solid var(--line); }.source-flow { grid-template-columns: 1fr; }.source-flow > div { overflow-x: auto; }.source-flow > b { display: none; }.evidence-grid { grid-template-columns: 1fr 1fr; }.classification-panel { grid-column: span 2; }.methods-section { grid-template-columns: 1fr; }.section-cap { grid-template-columns: 1fr; gap: 18px; }.section-cap > p { max-width: 620px; } }
+@media (max-width: 1050px) { .mission-nav { display: none; }.mission-header { gap: 12px; }.mission-actions { margin-left: auto; }.mission-actions span { display: none; }.mission-hero { grid-template-columns: 1fr; }.hero-copy { max-width: 680px; }.workbench-shell { grid-template-columns: 1fr; }.analysis-rail { border-top: 1px solid var(--line); border-left: 0; }.investigation-flow { grid-template-columns: repeat(3,1fr); }.investigation-flow li:nth-child(4) { border-left: 1px solid var(--line); }.source-flow { grid-template-columns: 1fr; }.source-flow > div { overflow-x: auto; }.source-flow > b { display: none; }.evidence-grid { grid-template-columns: 1fr 1fr; }.methods-section { grid-template-columns: 1fr; }.section-cap { grid-template-columns: 1fr; gap: 18px; }.section-cap > p { max-width: 620px; } }
 @media (max-width: 680px) { .mission-header { min-height: 57px; padding: 8px 14px; }.brand-lockup { min-width: 0; flex: 1; font-size: 9px; }.brand-lockup img { width: 29px; height: 29px; }.brand-lockup small { font-size: 7px; }.mission-actions button { display: none; }.mission-hero, .analysis-field, .investigation-section, .conditions-section, .methods-section, .sources-section, .evidence-board { padding-right: 18px; padding-left: 18px; }.hero-copy h1 { font-size: 45px; }.hero-actions { align-items: flex-start; flex-direction: column; gap: 12px; }.thermal-illustration { min-height: 0; }.thermal-plot { height: 235px; }.thermal-readout div { min-height: 57px; padding: 9px 11px; }.thermal-readout b { font-size: 9px; }.thermal-scale b { display: none; }.map-stage { min-height: 430px; }.map-topline b { display: none; }.map-topline { font-size: 8px; }.map-legend { max-width: 220px; }.map-attribution { display: none; }.layer-row { overflow-x: auto; }.layer-row span { display: none; }.instrument-grid { max-width: 420px; }.investigation-flow { grid-template-columns: 1fr; }.investigation-flow li, .investigation-flow li:nth-child(4) { min-height: 112px; border-left: 1px solid rgba(226,229,220,.16); }.investigation-flow h3 { margin-top: 16px; }.source-flow > div { flex-direction: column; }.source-flow i { width: 1px; min-height: 10px; margin: 0 0 0 15px; border-top: 0; border-left: 1px solid #d99742; }.evidence-grid { grid-template-columns: 1fr; }.classification-panel { grid-column: auto; }.condition-register { grid-template-columns: 1fr; }.method-register article { grid-template-columns: 1fr; gap: 7px; }.roadmap-section { padding-right: 18px; padding-left: 18px; }.roadmap-section > div { font-size: 9px; }.source-list span { font-size: 10px; }.authority-evidence-grid { grid-template-columns: 1fr; }.verification-modal { padding: 25px 20px; } footer { flex-direction: column; } }
 @media print { .mission-header, .map-workbench, .verification-overlay { display: none !important; }.fireguard-page, body { background: #fff; color: #182021; }.analysis-rail, .evidence-grid article, .condition-register article { border-color: #aaa; background: #fff; }.analysis-field, .conditions-section, .sources-section { background: #fff; }.workbench-shell { display: block; border: 0; }.methods-section { display: block; } }
 
@@ -180,3 +180,47 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .fireguard-hotspot-hover-preview span { display: block; color: #69736f; font-size: 8px; line-height: 1.35; }
 .fireguard-hotspot-hover-preview code { display: block; margin-top: 5px; color: #687571; font-size: 8px; }
 @media (max-width: 720px) { .map-fullscreen-button { top: 9px; left: 9px; padding: 7px 8px; font-size: 8px; } .fireguard-hotspot-hover-preview { width: 190px; } .fireguard-hotspot-hover-preview img { width: 190px; height: 88px; } }
+.ml-prediction-panel { margin-top: 18px; padding: 20px 22px; border: 1px solid rgba(226,229,220,.16); background: #181d1f; box-shadow: 0 12px 30px rgba(0,0,0,.16); }
+.ml-prediction-panel .eyebrow { margin: 0 0 7px; color: #d99742; font: 500 8px "IBM Plex Mono", monospace; letter-spacing: .08em; }
+.ml-prediction-panel h3 { margin: 0; color: #e9ebe5; font-size: 18px; font-weight: 500; letter-spacing: -.035em; }
+.ml-classification { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 17px 0 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.ml-classification strong { color: #f0e5df; font-size: 14px; font-weight: 500; }
+.ml-classification span { color: #9ea8a4; font: 8px "IBM Plex Mono", monospace; white-space: nowrap; }
+.ml-probabilities { display: grid; gap: 11px; }
+.ml-probabilities > div { display: grid; grid-template-columns: minmax(130px,1fr) auto; gap: 12px; align-items: center; position: relative; padding-bottom: 7px; border-bottom: 1px solid rgba(226,229,220,.07); }
+.ml-probabilities > div span { color: #b7c0bc; font-size: 10px; }
+.ml-probabilities > div b { color: #dfe4de; font: 500 9px "IBM Plex Mono", monospace; }
+.ml-probabilities > div::after { content: ""; grid-column: 1 / 3; display: block; width: calc(var(--probability, 0) * 1%); height: 2px; margin-top: -3px; background: #d99742; opacity: .72; }
+.ml-prediction-panel small { display: block; margin-top: 15px; color: #7f8985; font: 8px/1.6 "IBM Plex Mono", monospace; }
+@media (max-width: 680px) { .ml-prediction-panel { margin-top: 14px; padding: 17px; }.ml-classification { align-items: flex-start; flex-direction: column; gap: 5px; }.ml-classification span { white-space: normal; }.ml-probabilities > div { grid-template-columns: 1fr auto; } }
+
+
+.classification-ai-group {
+  grid-column: 1 / 3;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+  gap: 1px;
+  background: var(--line);
+}
+
+.classification-ai-group .classification-panel,
+.classification-ai-group .ml-prediction-panel {
+  margin: 0;
+  min-height: 282px;
+}
+
+.classification-ai-group .ml-prediction-panel {
+  box-shadow: none;
+}
+
+@media (max-width: 1050px) {
+  .classification-ai-group {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .classification-ai-group {
+    grid-template-columns: 1fr;
+  }
+}
