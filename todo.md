@@ -282,3 +282,9 @@ No Vercel compatibility implementation has been applied yet; this item records t
 
 - [x] Diagnose why the live XGBoost signal returns wildfire for every hotspot: corroboration was still importing the stale six-feature/four-class `mlClassifier`, not the checked-in four-feature Anaconda artifact adapter.
 - [x] Apply the smallest safe correction: route corroboration through `predictMlClassification`, preserve the existing response shape, narrow the panel to the trained binary scope, add diversity/parity coverage, and validate with representative inputs; publication remains pending final live verification.
+
+## Genuine four-class ML correction
+
+- [x] Locate and verify the Git-connected Anaconda four-class model artifact, class mapping, feature order, and evaluation metadata: `ml/model/fire_classifier.json`, four classes ordered wildfire, industrial_facility, agricultural_burning, mining, six effective features after constant-feature removal.
+- [x] Replace the binary approximation with exact four-class local inference by restoring `classifyWithML` in corroboration and retaining all four probabilities in the dashboard response/panel.
+- [x] Restore four-class probabilities in the corroboration response and dashboard, add native-parity/diversity tests, run 116 tests plus TypeScript and production build; publication is the next checkpoint action.
