@@ -12,4 +12,14 @@ describe("Vercel map fallback interaction contract", () => {
     expect(source).toContain("exitFullscreen");
     expect(source).toContain("fireguard-provider-grid");
   });
+
+  it("encodes the three meaningful analytic layers from existing hotspot fields", () => {
+    expect(source).toContain("frpMw?: number | null");
+    expect(source).toContain("namedFacilityMatch?: boolean");
+    expect(source).toContain("activeMonths?: number | null");
+    expect(source).toContain("thermalScale");
+    expect(source).toContain("fireguard-factory-marker");
+    expect(source).toContain("persistenceRings");
+    expect(source).not.toContain("name=\"Exposure\"");
+  });
 });

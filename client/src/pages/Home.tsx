@@ -23,6 +23,9 @@ type Hotspot = {
   score: number;
   outcome: string;
   location: { lat: number; lng: number };
+  frpMw?: number | null;
+  namedFacilityMatch?: boolean;
+  activeMonths?: number | null;
 };
 
 type IndiaSnapshotHotspot = {
@@ -189,6 +192,7 @@ export default function Home() {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [verificationPresentation, setVerificationPresentation] = useState<HotspotVerificationPresentation<VerificationRailResult>>(initialHotspotVerificationPresentation);
   const [lastMLPrediction, setLastMLPrediction] = useState<{ classification: "wildfire" | "industrial_facility" | "agricultural_burning" | "mining"; wildfireProbability: number; industrialProbability: number; agriculturalProbability: number; miningProbability: number } | null>(null);
+  const [verifiedMapContext, setVerifiedMapContext] = useState<Record<string, { frpMw: number | null; namedFacilityMatch: boolean; activeMonths: number | null }>>({});
   const thermalFieldRef = useRef<HTMLDivElement>(null);
   const { user, isAuthenticated } = useAuth();
   const corroboration = trpc.corroboration.run.useMutation();
@@ -200,6 +204,7 @@ export default function Home() {
   const snapshotTargets: Hotspot[] = snapshotRows.map(row => {
     const latitude = Number(row.latitude);
     const longitude = Number(row.longitude);
+    const context = verifiedMapContext[`FIRMS-${row.id}`];
     return {
       id: `FIRMS-${row.id}`,
       facility: "Current NASA FIRMS hotspot",
@@ -211,6 +216,9 @@ export default function Home() {
       score: 55,
       outcome: "Requires source verification",
       location: { lat: latitude, lng: longitude },
+      frpMw: context?.frpMw ?? null,
+      namedFacilityMatch: context?.namedFacilityMatch ?? false,
+      activeMonths: context?.activeMonths ?? null,
     };
   }).filter(target => Number.isFinite(target.location.lat) && Number.isFinite(target.location.lng));
   const fallbackHotspots = (snapshotTargets.length > 0 ? snapshotTargets : hotspots).map(hotspot => ({
@@ -238,7 +246,18 @@ export default function Home() {
         // The selected rail consumes this explicit presentation state instead
         // of reading a mutable cache field after the request has completed.
         setVerificationPresentation(current => completeHotspotVerification(current, selectedTarget.id, requestSequence, response));
-         if (typeof response === "object" && response !== null && "mlPrediction" in response && response.mlPrediction) setLastMLPrediction(response.mlPrediction);
+        if (typeof response === "object" && response !== null) {
+          const evidence = response as { mlPrediction?: typeof lastMLPrediction extends infer T ? T : never; firmsCurrent?: { frpMw?: number | null }; industrial?: { industrialFacilityName?: string | null; industrialFacilityCategory?: string | null }; longTermHistory?: { activeMonths?: number | null } };
+          if (evidence.mlPrediction) setLastMLPrediction(evidence.mlPrediction as NonNullable<typeof lastMLPrediction>);
+          setVerifiedMapContext(current => ({
+            ...current,
+            [selectedTarget.id]: {
+              frpMw: typeof evidence.firmsCurrent?.frpMw === "number" ? evidence.firmsCurrent.frpMw : null,
+              namedFacilityMatch: Boolean(evidence.industrial?.industrialFacilityName && evidence.industrial.industrialFacilityCategory),
+              activeMonths: typeof evidence.longTermHistory?.activeMonths === "number" ? evidence.longTermHistory.activeMonths : null,
+            },
+          }));
+        }
       },
       onError: () => {
         setVerificationPresentation(current => failHotspotVerification(current, selectedTarget.id, requestSequence));
@@ -319,7 +338,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!map) return;
-    const mapTypeId = activeLayer === "Exposure" ? "satellite" : activeLayer === "Persistence" ? "terrain" : "roadmap";
+    const mapTypeId = activeLayer === "Persistence" ? "terrain" : "roadmap";
     if (typeof map.setMapTypeId === "function") map.setMapTypeId(mapTypeId);
   }, [map, activeLayer]);
 
@@ -328,18 +347,29 @@ export default function Home() {
     mapMarkers.current.forEach(marker => marker.setMap(null));
     mapMarkers.current = [];
     const infoWindow = new google.maps.InfoWindow();
-    const markerIcon = (color: string) => ({
-      url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="17" fill="${color}" fill-opacity=".13" stroke="${color}" stroke-width="1.5"/><circle cx="21" cy="21" r="7" fill="${color}" stroke="#f2eee6" stroke-width="2.5"/></svg>`)}`,
-      scaledSize: new google.maps.Size(42, 42),
-      anchor: new google.maps.Point(21, 21),
+    const markerIcon = (color: string, size: number, opacity: number, factory: boolean) => ({
+      url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(factory ? `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42"><path d="M6 35V18l8 5v-10l8 5V9l14 8v18H6Z" fill="${color}" fill-opacity="${opacity}" stroke="#f2eee6" stroke-width="2"/><path d="M11 35v-8h5v8m7 0v-8h5v8m6 0v-8h3v8" fill="none" stroke="#f2eee6" stroke-width="1.8"/></svg>` : `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 42 42"><circle cx="21" cy="21" r="${Math.max(6, size / 2 - 3)}" fill="${color}" fill-opacity="${opacity * .22}" stroke="${color}" stroke-width="1.5"/><circle cx="21" cy="21" r="${Math.max(3, size / 5)}" fill="${color}" stroke="#f2eee6" stroke-width="2.5"/></svg>`)}`,
+      scaledSize: new google.maps.Size(size, size),
+      anchor: new google.maps.Point(size / 2, size / 2),
     });
     const targets = snapshotTargets.length > 0 ? snapshotTargets : hotspots;
     targets.forEach(hotspot => {
       const thermalColor = hotspot.score > 70 ? "#d46b63" : "#e0ac68";
-      const color = activeLayer === "OSM context" ? "#668a78" : activeLayer === "Persistence" ? "#786aa8" : activeLayer === "Exposure" ? "#c68b52" : thermalColor;
+      const thermalValues = targets.map(item => item.frpMw).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+      const thermalMin = thermalValues.length ? Math.min(...thermalValues) : 0;
+      const thermalMax = thermalValues.length ? Math.max(...thermalValues) : 1;
+      const thermalRatio = typeof hotspot.frpMw === "number" && thermalMax !== thermalMin ? (hotspot.frpMw - thermalMin) / (thermalMax - thermalMin) : 0.5;
+      const thermalSize = 30 + Math.round(thermalRatio * 18);
+      const thermalOpacity = 0.58 + thermalRatio * 0.36;
+      const color = activeLayer === "OSM context" ? "#668a78" : activeLayer === "Persistence" ? "#786aa8" : thermalColor;
       const radius = activeLayer === "Persistence" ? (hotspot.score > 70 ? 10_350 : 6_900) : activeLayer === "OSM context" ? (hotspot.score > 70 ? 7_380 : 4_920) : hotspot.score > 70 ? 9_000 : 6_000;
-      const marker = new google.maps.Marker({ map, position: hotspot.location, title: `${hotspot.place} — click to verify`, icon: markerIcon(color), zIndex: hotspot.score });
+      const markerSize = activeLayer === "Thermal" ? thermalSize : 34;
+      const markerOpacity = activeLayer === "Thermal" ? thermalOpacity : 0.82;
+      const isFactory = activeLayer === "OSM context" && hotspot.namedFacilityMatch === true;
+      const marker = new google.maps.Marker({ map, position: hotspot.location, title: `${hotspot.place} — click to verify`, icon: markerIcon(color, markerSize, markerOpacity, isFactory), zIndex: hotspot.score });
       const zone = new google.maps.Circle({ map, center: hotspot.location, radius, strokeColor: color, strokeOpacity: 0.82, strokeWeight: activeLayer === "Thermal" ? 1 : 1.5, fillColor: color, fillOpacity: activeLayer === "Thermal" ? 0.07 : 0.13, clickable: true });
+      const persistenceMonths = activeLayer === "Persistence" && typeof hotspot.activeMonths === "number" ? Math.min(4, Math.max(0, hotspot.activeMonths)) : 0;
+      const persistenceRings = Array.from({ length: persistenceMonths }, (_, index) => new google.maps.Circle({ map, center: hotspot.location, radius: radius + (index + 1) * 2_500, strokeColor: "#786aa8", strokeOpacity: 0.7 - index * 0.12, strokeWeight: 1.2, fillOpacity: 0, clickable: false }));
       const showSummary = () => {
         infoWindow.setContent(`<div style="font-family:Arial,sans-serif;min-width:205px;color:#4f5a5d"><strong>${hotspot.place}</strong><div style="margin-top:6px;font-family:monospace;font-size:11px">${hotspot.coords} · FRP ${hotspot.frp}</div><div style="margin-top:8px;color:#b65f58;font-size:11px">Click the zone to start source verification</div></div>`);
         infoWindow.open({ map, anchor: marker, shouldFocus: false });
@@ -347,7 +377,7 @@ export default function Home() {
       const verifyZone = () => { infoWindow.close(); selectAndVerify(hotspot); };
       marker.addListener("mouseover", showSummary); marker.addListener("mouseout", () => infoWindow.close()); marker.addListener("click", verifyZone);
       zone.addListener("mouseover", showSummary); zone.addListener("mouseout", () => infoWindow.close()); zone.addListener("click", verifyZone);
-      mapMarkers.current.push(marker, zone);
+      mapMarkers.current.push(marker, zone, ...persistenceRings);
     });
     return () => { mapMarkers.current.forEach(marker => marker.setMap(null)); mapMarkers.current = []; };
   }, [map, snapshotRows, activeLayer]);
@@ -372,8 +402,8 @@ export default function Home() {
           <div className="workbench-shell">
             <div className="map-workbench">
               <div className="map-topline"><span>OBSERVATION MAP</span><span>INDIA / 68°E–98°E / 8°N–37°N</span><b>BASE MAP + ANALYTIC OVERLAYS</b></div>
-              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} /><div className="map-frame-label"><b>THERMAL ANOMALY FIELD</b><span>{snapshotTargets.length > 0 ? `${snapshotTargets.length} live FIRMS hotspots loaded · click to verify` : "Awaiting scheduled FIRMS snapshot"}</span></div><div className="map-legend"><span><i className="legend-dot critical" /> Critical signal</span><span><i className="legend-dot elevated" /> Elevated signal</span><span><i className="legend-line" /> Investigation radius</span></div><div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
-              <div className="layer-row" aria-label="Map analysis layers">{["Thermal", "OSM context", "Persistence", "Exposure"].map(layer => <button key={layer} type="button" onClick={() => setActiveLayer(layer)} className={activeLayer === layer ? "active" : ""} aria-pressed={activeLayer === layer}>{layer}</button>)}<span>{activeLayer === "Exposure" ? "Exposure context · satellite imagery" : activeLayer === "OSM context" ? "OSM context · verify for facility detail" : activeLayer === "Persistence" ? "Persistence · history when queried" : "Thermal intensity layer selected"}</span></div>
+              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} /><div className="map-frame-label"><b>THERMAL ANOMALY FIELD</b><span>{snapshotTargets.length > 0 ? `${snapshotTargets.length} live FIRMS hotspots loaded · click to verify` : "Awaiting scheduled FIRMS snapshot"}</span></div><div className="map-legend" aria-label={`${activeLayer} layer legend`}>{activeLayer === "Thermal" && <><span className="legend-sample"><i className="thermal-small" /> lower FRP</span><span className="legend-sample"><i className="thermal-large" /> higher FRP</span><span>size/brightness after verification</span></>}{activeLayer === "OSM context" && <><span className="legend-sample"><i className="factory-sample">⌂</i> factory icon</span><span>confirmed nearby OSM facility</span><span>dot = no confirmed match</span></>}{activeLayer === "Persistence" && <><span className="legend-sample"><i className="ring-sample" /> 1 ring</span><span>one active month</span><span>up to 4 rings = persistent history</span></>}</div><div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
+              <div className="layer-row" aria-label="Map analysis layers">{["Thermal", "OSM context", "Persistence"].map(layer => <button key={layer} type="button" onClick={() => setActiveLayer(layer)} className={activeLayer === layer ? "active" : ""} aria-pressed={activeLayer === layer}>{layer}</button>)}<span>{activeLayer === "OSM context" ? "Factory icon = confirmed nearby OSM facility" : activeLayer === "Persistence" ? "Rings = active months in stored history" : "Marker size and brightness = FRP when verified"}</span></div>
             </div>
             <HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} liveHotspotCount={snapshotTargets.length} />
           </div>

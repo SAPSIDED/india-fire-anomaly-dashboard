@@ -271,3 +271,9 @@ No Vercel compatibility implementation has been applied yet; this item records t
 - [x] Make Thermal, OSM context, Persistence, and Exposure controls functional with clear active/inactive states using only existing data and honest fallbacks.
 - [x] Add deterministic UI coverage, run tests/typecheck/build, visually verify the map, and publish the Vercel-connected MAPFIX deployment.
 - [x] Deliver the required categorized file/change report and confirm no classification logic, corroboration logic, fetching, storage, schema, or database records were altered.
+
+## UI FIX — hotspot count and meaningful three-layer map
+
+- [x] Replace the redundant live hotspot fraction with a raised `🔥 N hotspots detected` badge.
+- [x] Remove Exposure and implement Thermal FRP-scaled markers, OSM-context factory icons for confirmed facility matches, and Persistence rings scaled from activeMonths using existing data only.
+- [x] Add clear legends, regression coverage, full validation, and Vercel publication; confirm no backend retrieval, classification, storage, schema, or database records changed.

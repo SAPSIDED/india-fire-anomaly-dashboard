@@ -116,10 +116,10 @@ export function HotspotVerificationRail({
       aria-busy={loading}
     >
       <div className="rail-topline">
-        <span>LIVE HOTSPOTS LOADED</span>
-        <b className={liveHotspotCount > 0 ? "critical" : "elevated"}>
-          {liveHotspotCount > 0 ? `${liveHotspotCount}/${liveHotspotCount}` : "—/—"}
-        </b>
+        <span>LIVE HOTSPOTS</span>
+        <span className="live-count-badge" aria-label={`${liveHotspotCount} hotspots detected`}>
+          🔥 {liveHotspotCount} hotspot{liveHotspotCount === 1 ? "" : "s"} detected
+        </span>
       </div>
 
       <h3>{selected.facility}</h3>

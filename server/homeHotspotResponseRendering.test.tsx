@@ -118,11 +118,11 @@ describe("Home marker verification response rendering", () => {
     expect(screen.getByText(/3 live nearby OSM industrial-context features/)).toBeTruthy();
     expect(screen.getByText(/17 stored detections; 1 active month/)).toBeTruthy();
     expect(screen.getByText(/bare other · Esri Sentinel-2 10m/)).toBeTruthy();
-    expect(screen.getByText("1/1")).toBeTruthy();
+    expect(screen.getByLabelText("1 hotspots detected")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Thermal" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "OSM context" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Persistence" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Exposure" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Exposure" })).toBeNull();
     expect(screen.getAllByText("Likely industrial facility").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Model confidence: 81.0%", { exact: false }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Industrial facility").length).toBeGreaterThanOrEqual(1);
