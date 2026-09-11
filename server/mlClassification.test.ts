@@ -55,4 +55,14 @@ describe("ML classification adapter", () => {
     expect(result.probability).toEqual(expect.any(Number));
     expect(["industrial_facility", "wildfire"]).toContain(result.label);
   });
+
+  it("does not collapse representative inputs into one class", () => {
+    const lowerPersistence = predictMlClassification({ frpMw: 1, dayNightRatio: 0.5, sevenDayDetectionCount: 1, activeMonths: 1 });
+    const missingHistory = predictMlClassification({ frpMw: null, dayNightRatio: null, sevenDayDetectionCount: 0, activeMonths: null });
+    expect(lowerPersistence.state).toBe("available");
+    expect(missingHistory.state).toBe("available");
+    expect(lowerPersistence.label).toBe("industrial_facility");
+    expect(missingHistory.label).toBe("wildfire");
+    expect(lowerPersistence.probability).not.toBe(missingHistory.probability);
+  });
 });

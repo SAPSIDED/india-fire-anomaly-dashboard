@@ -5,7 +5,7 @@
  */
 import { setDefaultResultOrder } from "node:dns";
 import { classifyCorroborationEvidence } from "./classification";
-import { classifyWithML } from "./mlClassifier";
+import { predictMlClassification } from "./mlClassification";
 import { getActiveIncidentEvidence, getDetectionHistoryStatistics, getLongTermPersistence, getSourceEvidenceCache, recordDetectionHistory, saveSourceEvidenceCache, type DetectionHistoryInput, type DetectionHistoryStatistics, type IndiaHotspotSnapshotInput, type IndiaHotspotSnapshotSource } from "./db";
 import { fetchLandCover, type LandCoverResult } from "./landcover";
 import { lookupNearestGppdPlant, type GppdPlantReference } from "./gppdReference";
@@ -722,14 +722,25 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     detectionHistoryStatisticsReader(input.lat, input.lng),
     seasonalAgriculturalBurningReader(input.lat, input.lng, evaluatedMonth),
   ]);
-  const mlResult = await classifyWithML(
-    firmsCurrent.frpMw ?? 0,
-    firmsCurrent.brightness ?? 0,
-    firmsCurrent.brightT31 ?? 0,
-    firmsCurrent.confidence ?? 0,
-    detectionHistoryStatistics.dayToNightRatio ?? 0,
-    firmsHistory.detections,
-  );
+  const mlSignal = predictMlClassification({
+    frpMw: firmsCurrent.frpMw,
+    dayNightRatio: detectionHistoryStatistics.dayToNightRatio,
+    sevenDayDetectionCount: firmsHistory.detections,
+    activeMonths: longTermHistory.state === "available" ? longTermHistory.activeMonths : null,
+  });
+  const mlResult = mlSignal.state === "available" && mlSignal.label
+    ? {
+        classification: mlSignal.label,
+        wildfireProbability: mlSignal.label === "wildfire" ? mlSignal.probability ?? 0 : 1 - (mlSignal.probability ?? 0),
+        industrialProbability: mlSignal.label === "industrial_facility" ? mlSignal.probability ?? 0 : 1 - (mlSignal.probability ?? 0),
+        agriculturalProbability: 0,
+        miningProbability: 0,
+        inference: "local-json-model" as const,
+        modelVersion: mlSignal.modelVersion,
+        featureState: mlSignal.features,
+        detail: mlSignal.detail,
+      }
+    : null;
 
   const classification = classifyCorroborationEvidence({
     industrialFeatures: industrial.features,

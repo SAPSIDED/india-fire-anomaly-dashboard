@@ -1,6 +1,6 @@
 import React from "react";
 
-type Props = { prediction: { classification: "wildfire" | "industrial_facility" | "agricultural_burning" | "mining"; wildfireProbability: number; industrialProbability: number; agriculturalProbability: number; miningProbability: number } | null };
+type Props = { prediction: { classification: "wildfire" | "industrial_facility" | "agricultural_burning" | "mining"; wildfireProbability: number; industrialProbability: number; agriculturalProbability?: number; miningProbability?: number; modelVersion?: string | null; detail?: string } | null };
 
 export function MLPredictionPanel({ prediction }: Props) {
   if (!prediction) {
@@ -17,17 +17,14 @@ export function MLPredictionPanel({ prediction }: Props) {
   const probabilities = [
     { label: "Wildfire", value: prediction.wildfireProbability },
     { label: "Industrial facility", value: prediction.industrialProbability },
-    { label: "Agricultural burning", value: prediction.agriculturalProbability },
-    { label: "Mining", value: prediction.miningProbability },
   ];
 
   const confidence = Math.max(...probabilities.map(item => item.value)) * 100;
-
   const classificationLabel = {
     wildfire: "Likely wildfire",
     industrial_facility: "Likely industrial facility",
-    agricultural_burning: "Likely agricultural burning",
-    mining: "Likely mining activity",
+    agricultural_burning: "Unsupported by current binary model",
+    mining: "Unsupported by current binary model",
   }[prediction.classification];
 
   return (
@@ -46,7 +43,7 @@ export function MLPredictionPanel({ prediction }: Props) {
           </div>
         ))}
       </div>
-      <small>Learned signal from thermal intensity and temporal behaviour. This prediction supports screening and does not replace source-backed corroboration.</small>
+      <small>{prediction.detail ?? "Binary XGBoost screening signal from thermal intensity and temporal behaviour. This supports screening and does not replace source-backed corroboration."}{prediction.modelVersion ? ` Model ${prediction.modelVersion}.` : ""}</small>
     </div>
   );
 }

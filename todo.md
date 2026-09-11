@@ -277,3 +277,8 @@ No Vercel compatibility implementation has been applied yet; this item records t
 - [x] Replace the redundant live hotspot fraction with a raised `🔥 N hotspots detected` badge.
 - [x] Remove Exposure and implement Thermal FRP-scaled markers, OSM-context factory icons for confirmed facility matches, and Persistence rings scaled from activeMonths using existing data only.
 - [x] Add clear legends, regression coverage, full validation, and Vercel publication; confirm no backend retrieval, classification, storage, schema, or database records changed.
+
+## ML classification accuracy regression
+
+- [x] Diagnose why the live XGBoost signal returns wildfire for every hotspot: corroboration was still importing the stale six-feature/four-class `mlClassifier`, not the checked-in four-feature Anaconda artifact adapter.
+- [x] Apply the smallest safe correction: route corroboration through `predictMlClassification`, preserve the existing response shape, narrow the panel to the trained binary scope, add diversity/parity coverage, and validate with representative inputs; publication remains pending final live verification.
