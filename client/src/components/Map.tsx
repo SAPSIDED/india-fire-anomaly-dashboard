@@ -48,6 +48,19 @@ export type FallbackMapHotspot = {
   onClick: () => void;
 };
 
+function layerColor(hotspot: FallbackMapHotspot, activeLayer: string) {
+  if (activeLayer === "OSM context") return "#668a78";
+  if (activeLayer === "Persistence") return "#786aa8";
+  if (activeLayer === "Exposure") return "#c68b52";
+  return hotspot.color;
+}
+
+function layerRadius(hotspot: FallbackMapHotspot, activeLayer: string) {
+  if (activeLayer === "Persistence") return hotspot.radiusM * 1.15;
+  if (activeLayer === "OSM context") return hotspot.radiusM * 0.82;
+  return hotspot.radiusM;
+}
+
 interface MapViewProps {
   className?: string;
   initialCenter?: google.maps.LatLngLiteral;
@@ -92,7 +105,7 @@ function explorerIcon() {
 }
 
 function HotspotProviderPopup({ hotspot, activeLayer }: { hotspot: FallbackMapHotspot; activeLayer: string }) {
-  const overlayLabel = activeLayer === "Thermal" ? "Thermal signal" : activeLayer === "OSM context" ? "OSM context" : activeLayer === "Persistence" ? "Persistence" : activeLayer === "Exposure" ? "Exposure" : activeLayer;
+  const overlayLabel = activeLayer === "Thermal" ? "Thermal intensity" : activeLayer === "OSM context" ? "OSM context · verify for facility detail" : activeLayer === "Persistence" ? "Persistence · history when queried" : activeLayer === "Exposure" ? "Exposure context · imagery" : activeLayer;
   return <div className="fireguard-hotspot-popup">
     <span className="fireguard-popup-kicker">LIVE EVIDENCE · NASA FIRMS</span>
     <strong>{hotspot.title.replace(" — click to verify", "")}</strong>
@@ -160,15 +173,15 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer }: { c
         <Fragment key={hotspot.id}>
           <LeafletCircle
             center={[hotspot.location.lat, hotspot.location.lng]}
-            radius={hotspot.radiusM}
-            pathOptions={{ color: hotspot.color, weight: 1, opacity: 0.72, fillColor: hotspot.color, fillOpacity: 0.08 }}
+            radius={layerRadius(hotspot, activeLayer)}
+            pathOptions={{ color: layerColor(hotspot, activeLayer), weight: activeLayer === "Thermal" ? 1 : 1.5, opacity: 0.82, fillColor: layerColor(hotspot, activeLayer), fillOpacity: activeLayer === "Thermal" ? 0.08 : 0.13 }}
             eventHandlers={{ click: hotspot.onClick }}
           >
             <LeafletPopup closeButton>
               <HotspotProviderPopup hotspot={hotspot} activeLayer={activeLayer} />
             </LeafletPopup>
           </LeafletCircle>
-          <LeafletMarker position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(hotspot.color)} eventHandlers={{ click: () => undefined }}>
+          <LeafletMarker position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(layerColor(hotspot, activeLayer))} eventHandlers={{ click: hotspot.onClick }}>
             <LeafletTooltip direction="top" offset={[0, -12]} opacity={1} interactive>
               <HotspotHoverPreview hotspot={hotspot} />
             </LeafletTooltip>

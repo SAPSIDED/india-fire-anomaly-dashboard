@@ -335,9 +335,11 @@ export default function Home() {
     });
     const targets = snapshotTargets.length > 0 ? snapshotTargets : hotspots;
     targets.forEach(hotspot => {
-      const color = hotspot.score > 70 ? "#d46b63" : "#e0ac68";
+      const thermalColor = hotspot.score > 70 ? "#d46b63" : "#e0ac68";
+      const color = activeLayer === "OSM context" ? "#668a78" : activeLayer === "Persistence" ? "#786aa8" : activeLayer === "Exposure" ? "#c68b52" : thermalColor;
+      const radius = activeLayer === "Persistence" ? (hotspot.score > 70 ? 10_350 : 6_900) : activeLayer === "OSM context" ? (hotspot.score > 70 ? 7_380 : 4_920) : hotspot.score > 70 ? 9_000 : 6_000;
       const marker = new google.maps.Marker({ map, position: hotspot.location, title: `${hotspot.place} — click to verify`, icon: markerIcon(color), zIndex: hotspot.score });
-      const zone = new google.maps.Circle({ map, center: hotspot.location, radius: hotspot.score > 70 ? 9_000 : 6_000, strokeColor: color, strokeOpacity: 0.72, strokeWeight: 1, fillColor: color, fillOpacity: 0.07, clickable: true });
+      const zone = new google.maps.Circle({ map, center: hotspot.location, radius, strokeColor: color, strokeOpacity: 0.82, strokeWeight: activeLayer === "Thermal" ? 1 : 1.5, fillColor: color, fillOpacity: activeLayer === "Thermal" ? 0.07 : 0.13, clickable: true });
       const showSummary = () => {
         infoWindow.setContent(`<div style="font-family:Arial,sans-serif;min-width:205px;color:#4f5a5d"><strong>${hotspot.place}</strong><div style="margin-top:6px;font-family:monospace;font-size:11px">${hotspot.coords} · FRP ${hotspot.frp}</div><div style="margin-top:8px;color:#b65f58;font-size:11px">Click the zone to start source verification</div></div>`);
         infoWindow.open({ map, anchor: marker, shouldFocus: false });
@@ -348,7 +350,7 @@ export default function Home() {
       mapMarkers.current.push(marker, zone);
     });
     return () => { mapMarkers.current.forEach(marker => marker.setMap(null)); mapMarkers.current = []; };
-  }, [map, snapshotRows]);
+  }, [map, snapshotRows, activeLayer]);
 
   return (
     <div className="fireguard-page" onPointerMove={moveThermalField}>
@@ -370,10 +372,10 @@ export default function Home() {
           <div className="workbench-shell">
             <div className="map-workbench">
               <div className="map-topline"><span>OBSERVATION MAP</span><span>INDIA / 68°E–98°E / 8°N–37°N</span><b>BASE MAP + ANALYTIC OVERLAYS</b></div>
-              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} /><div className="map-frame-label"><b>THERMAL ANOMALY FIELD</b><span>{snapshotTargets.length > 0 ? `${snapshotTargets.length} stored FIRMS hotspots · click to verify` : "Awaiting scheduled FIRMS snapshot"}</span></div><div className="map-legend"><span><i className="legend-dot critical" /> Critical signal</span><span><i className="legend-dot elevated" /> Elevated signal</span><span><i className="legend-line" /> Investigation radius</span></div><div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
-              <div className="layer-row" aria-label="Demonstrative layers">{["Thermal", "OSM context", "Persistence", "Exposure"].map(layer => <button key={layer} onClick={() => setActiveLayer(layer)} className={activeLayer === layer ? "active" : ""}>{layer}</button>)}<span>{activeLayer} layer selected</span></div>
+              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} /><div className="map-frame-label"><b>THERMAL ANOMALY FIELD</b><span>{snapshotTargets.length > 0 ? `${snapshotTargets.length} live FIRMS hotspots loaded · click to verify` : "Awaiting scheduled FIRMS snapshot"}</span></div><div className="map-legend"><span><i className="legend-dot critical" /> Critical signal</span><span><i className="legend-dot elevated" /> Elevated signal</span><span><i className="legend-line" /> Investigation radius</span></div><div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
+              <div className="layer-row" aria-label="Map analysis layers">{["Thermal", "OSM context", "Persistence", "Exposure"].map(layer => <button key={layer} type="button" onClick={() => setActiveLayer(layer)} className={activeLayer === layer ? "active" : ""} aria-pressed={activeLayer === layer}>{layer}</button>)}<span>{activeLayer === "Exposure" ? "Exposure context · satellite imagery" : activeLayer === "OSM context" ? "OSM context · verify for facility detail" : activeLayer === "Persistence" ? "Persistence · history when queried" : "Thermal intensity layer selected"}</span></div>
             </div>
-            <HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} />
+            <HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} liveHotspotCount={snapshotTargets.length} />
           </div>
         </section>
 

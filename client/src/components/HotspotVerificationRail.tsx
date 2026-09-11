@@ -70,6 +70,7 @@ type Props = {
   result?: VerificationRailResult;
   onVerify: () => void;
   lastMLPrediction?: MLPrediction | null;
+  liveHotspotCount?: number;
 };
 
 const formatClassification = (value: string) =>
@@ -93,6 +94,7 @@ export function HotspotVerificationRail({
   result,
   onVerify,
   lastMLPrediction = null,
+  liveHotspotCount = 0,
 }: Props) {
   const loading = state === "loading";
   const failed = state === "error";
@@ -114,9 +116,9 @@ export function HotspotVerificationRail({
       aria-busy={loading}
     >
       <div className="rail-topline">
-        <span>SELECTED TARGET</span>
-        <b className={selected.score > 70 ? "critical" : "elevated"}>
-          {selected.score}/100
+        <span>LIVE HOTSPOTS LOADED</span>
+        <b className={liveHotspotCount > 0 ? "critical" : "elevated"}>
+          {liveHotspotCount > 0 ? `${liveHotspotCount}/${liveHotspotCount}` : "—/—"}
         </b>
       </div>
 

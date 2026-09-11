@@ -263,3 +263,11 @@ No Vercel compatibility implementation has been applied yet; this item records t
 
 - [x] Fix the Vercel production AI Screening Signal card showing the empty pre-verification state instead of XGBoost class/probability statistics after successful hotspot verification; live Vercel verification now renders the prediction.
 - [x] Add a production-response/UI regression test for visible XGBoost statistics and publish the verified Vercel fix; live browser verification shows class and probability values.
+
+## MAPFIX — live map count and layers
+
+- [x] Audit existing read-only data available for live hotspot count, Thermal, OSM context, Persistence, and Exposure layers; document honest Exposure limitations before implementation.
+- [x] Replace the hardcoded Selected Target placeholder with the live loaded FIRMS snapshot count while preserving the existing target score semantics elsewhere.
+- [x] Make Thermal, OSM context, Persistence, and Exposure controls functional with clear active/inactive states using only existing data and honest fallbacks.
+- [x] Add deterministic UI coverage, run tests/typecheck/build, visually verify the map, and publish the Vercel-connected MAPFIX deployment.
+- [x] Deliver the required categorized file/change report and confirm no classification logic, corroboration logic, fetching, storage, schema, or database records were altered.
