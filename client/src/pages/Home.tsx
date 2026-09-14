@@ -191,6 +191,7 @@ export default function Home() {
   });
   const mapMarkers = useRef<Array<google.maps.Marker | google.maps.Circle>>([]);
   const verificationRequestSequence = useRef(0);
+  const verificationScrollRequested = useRef(false);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [verificationPresentation, setVerificationPresentation] = useState<HotspotVerificationPresentation<VerificationRailResult>>(initialHotspotVerificationPresentation);
   const [lastMLPrediction, setLastMLPrediction] = useState<{ classification: "wildfire" | "industrial_facility" | "agricultural_burning" | "mining"; wildfireProbability: number; industrialProbability: number; agriculturalProbability: number; miningProbability: number } | null>(null);
@@ -278,6 +279,7 @@ export default function Home() {
 
   const selectAndVerify = (hotspot: Hotspot) => {
     setHasInteractedWithMap(true);
+    verificationScrollRequested.current = true;
     setVerifierOpen(true);
     runVerifier(hotspot);
   };
@@ -286,7 +288,8 @@ export default function Home() {
   const selectedVerificationState = verificationPresentation.targetId === selected.id ? verificationPresentation.state : "ready";
 
   useEffect(() => {
-    if (!verifierOpen) return;
+    if (!verifierOpen || !verificationScrollRequested.current) return;
+    verificationScrollRequested.current = false;
     const frame = window.requestAnimationFrame(() => {
       const results = document.getElementById("verification-results");
       if (results && typeof results.scrollIntoView === "function") results.scrollIntoView({ behavior: "smooth", block: "start" });
