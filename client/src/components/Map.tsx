@@ -49,12 +49,12 @@ export type FallbackMapHotspot = {
   namedFacilityMatch?: boolean;
   activeMonths?: number | null;
   onClick: () => void;
+  onSelect?: () => void;
 };
 
 function layerColor(hotspot: FallbackMapHotspot, activeLayer: string) {
   if (activeLayer === "OSM context") return "#668a78";
   if (activeLayer === "Persistence") return "#786aa8";
-  if (activeLayer === "Exposure") return "#c68b52";
   return hotspot.color;
 }
 
@@ -71,19 +71,20 @@ interface MapViewProps {
   onMapReady?: (map: google.maps.Map) => void;
   fallbackHotspots?: FallbackMapHotspot[];
   activeLayer?: string;
+  onFirstHotspotClick?: () => void;
 }
 
-function hotspotIcon(color: string, variant: "thermal" | "factory" = "thermal", size = 30, opacity = 0.82) {
+function hotspotIcon(color: string, variant: "thermal" | "factory" = "thermal", size = 30, opacity = 0.82, radarActive = false, radarIndex = 0) {
   if (variant === "factory") {
     return L.divIcon({
-      className: "fireguard-factory-marker",
+      className: `fireguard-factory-marker${radarActive ? ` radar-target radar-target-${radarIndex % 5}` : ""}`,
       html: `<span style="--marker-color:${color};--marker-opacity:${opacity}" aria-label="Confirmed nearby OSM industrial facility"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 27V14l7 4v-8l7 4V7l10 6v14H4Z" fill="var(--marker-color)" fill-opacity=".92" stroke="#f2eee6" stroke-width="1.7"/><path d="M8 27v-6h4v6m5 0v-6h4v6m5 0v-6h3v6" fill="none" stroke="#f2eee6" stroke-width="1.5"/></svg></span>`,
       iconSize: [34, 34],
       iconAnchor: [17, 17],
     });
   }
   return L.divIcon({
-    className: "fireguard-leaflet-marker",
+    className: `fireguard-leaflet-marker${radarActive ? ` radar-target radar-target-${radarIndex % 5}` : ""}`,
     html: `<span style="--marker-color:${color};--marker-size:${size}px;--marker-opacity:${opacity}"><i></i></span>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
@@ -146,7 +147,7 @@ function HotspotProviderPopup({ hotspot, activeLayer }: { hotspot: FallbackMapHo
   </div>;
 }
 
-function LeafletFallback({ center, zoom, hotspots, className, activeLayer }: { center: google.maps.LatLngLiteral; zoom: number; hotspots: FallbackMapHotspot[]; className?: string; activeLayer: string }) {
+function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radarActive }: { center: google.maps.LatLngLiteral; zoom: number; hotspots: FallbackMapHotspot[]; className?: string; activeLayer: string; radarActive: boolean }) {
   const [explorerPosition, setExplorerPosition] = useState<LatLngLiteral>(center);
   const [explorerOpen, setExplorerOpen] = useState(true);
   const nearestHotspot = hotspots.reduce<{ hotspot: FallbackMapHotspot; distance: number } | null>((nearest, hotspot) => {
@@ -155,7 +156,7 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer }: { c
   }, null);
 
   return (
-    <LeafletMapContainer key={activeLayer} center={[center.lat, center.lng]} zoom={zoom} className={cn("h-full w-full", className)} scrollWheelZoom zoomControl>
+    <LeafletMapContainer key={activeLayer} center={[center.lat, center.lng]} zoom={zoom} className={cn("h-full w-full", className)} scrollWheelZoom zoomControl><div className={cn("map-radar-sweep", radarActive && "map-radar-sweep-active")} aria-hidden="true" />
       <LayersControl position="topright" collapsed={false}>
         <LayersControl.BaseLayer checked={activeLayer !== "Persistence"} name="Map">
           <LeafletTileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -204,14 +205,14 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer }: { c
             center={[hotspot.location.lat, hotspot.location.lng]}
             radius={layerRadius(hotspot, activeLayer)}
             pathOptions={{ color, weight: activeLayer === "Thermal" ? 1 : 1.5, opacity: scale.opacity, fillColor: color, fillOpacity: activeLayer === "Thermal" ? 0.08 : 0.13 }}
-            eventHandlers={{ click: hotspot.onClick }}
+            eventHandlers={{ click: () => { hotspot.onSelect?.(); } }}
           >
             <LeafletPopup closeButton>
               <HotspotProviderPopup hotspot={hotspot} activeLayer={activeLayer} />
             </LeafletPopup>
           </LeafletCircle>
           {Array.from({ length: rings }, (_, index) => <LeafletCircle key={`${hotspot.id}-ring-${index}`} center={[hotspot.location.lat, hotspot.location.lng]} radius={layerRadius(hotspot, activeLayer) + (index + 1) * 2_500} pathOptions={{ color: "#786aa8", weight: 1.2, opacity: 0.7 - index * 0.12, fillOpacity: 0, dashArray: "4 7" }} />)}
-          <LeafletMarker position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(color, iconVariant, scale.size, scale.opacity)} eventHandlers={{ click: hotspot.onClick }}>
+          <LeafletMarker position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(color, iconVariant, scale.size, scale.opacity, radarActive, hotspots.indexOf(hotspot))} eventHandlers={{ click: () => { hotspot.onSelect?.(); } }}>
             <LeafletTooltip direction="top" offset={[0, -12]} opacity={1} interactive>
               <HotspotHoverPreview hotspot={hotspot} />
             </LeafletTooltip>
@@ -225,7 +226,7 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer }: { c
   );
 }
 
-export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4194 }, initialZoom = 12, onMapReady, fallbackHotspots = [], activeLayer = "Thermal" }: MapViewProps) {
+export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4194 }, initialZoom = 12, onMapReady, fallbackHotspots = [], activeLayer = "Thermal", onFirstHotspotClick }: MapViewProps) {
   const mapShell = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -233,6 +234,7 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
   const initializing = useRef(false);
   const retryCount = useRef(0);
   const [useLeaflet, setUseLeaflet] = useState(false);
+  const [radarActive, setRadarActive] = useState(true);
 
   const init = usePersistFn(async () => {
     if (map.current || initializing.current || useLeaflet) return;
@@ -244,9 +246,9 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
         zoom: initialZoom,
         center: initialCenter,
         mapTypeControl: true,
-        fullscreenControl: true,
+        fullscreenControl: false,
         zoomControl: true,
-        streetViewControl: true,
+        streetViewControl: false,
         mapId: "DEMO_MAP_ID",
       });
       retryCount.current = 0;
@@ -264,6 +266,27 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
     }
     initializing.current = false;
   });
+
+  useEffect(() => {
+    const shell = mapShell.current;
+    if (!shell || typeof IntersectionObserver === "undefined") {
+      setRadarActive(true);
+      const timeout = window.setTimeout(() => setRadarActive(false), 3600);
+      return () => window.clearTimeout(timeout);
+    }
+    let timeout: number | undefined;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry?.isIntersecting || entry.intersectionRatio < 0.2) return;
+      setRadarActive(true);
+      if (timeout) window.clearTimeout(timeout);
+      timeout = window.setTimeout(() => setRadarActive(false), 3600);
+    }, { threshold: [0.2] });
+    observer.observe(shell);
+    return () => {
+      observer.disconnect();
+      if (timeout) window.clearTimeout(timeout);
+    };
+  }, []);
 
   useEffect(() => {
     init();
@@ -284,8 +307,8 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
   const fullscreenButton = <button type="button" className="map-fullscreen-button" onClick={toggleFullscreen} aria-label={isFullscreen ? "Exit full screen map" : "View map full screen"}>{isFullscreen ? "Exit full screen" : "Full screen map"}</button>;
 
   if (useLeaflet) {
-    return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots} activeLayer={activeLayer} />{fullscreenButton}<div className="map-provider-badge">OpenStreetMap fallback · live FireGuard markers · drag the explorer</div></div>;
+    return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots.map(hotspot => ({ ...hotspot, onSelect: () => { onFirstHotspotClick?.(); hotspot.onSelect?.(); } }))} activeLayer={activeLayer} radarActive={radarActive} />{fullscreenButton}</div>;
   }
 
-  return <div ref={mapShell} className={shellClassName}><div ref={mapContainer} className="relative w-full h-full"><div className="map-loading-label">Loading base map…</div></div>{fullscreenButton}</div>;
+  return <div ref={mapShell} className={shellClassName}><div ref={mapContainer} className="relative w-full h-full"><div className={cn("map-radar-sweep", radarActive && "map-radar-sweep-active")} aria-hidden="true" /><div className="map-loading-label">Loading base map…</div></div>{fullscreenButton}</div>;
 }

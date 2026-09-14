@@ -288,3 +288,25 @@ No Vercel compatibility implementation has been applied yet; this item records t
 - [x] Locate and verify the Git-connected Anaconda four-class model artifact, class mapping, feature order, and evaluation metadata: `ml/model/fire_classifier.json`, four classes ordered wildfire, industrial_facility, agricultural_burning, mining, six effective features after constant-feature removal.
 - [x] Replace the binary approximation with exact four-class local inference by restoring `classifyWithML` in corroboration and retaining all four probabilities in the dashboard response/panel.
 - [x] Restore four-class probabilities in the corroboration response and dashboard, add native-parity/diversity tests, run 116 tests plus TypeScript and production build; publication is the next checkpoint action.
+
+## Preview-only UI restructure
+
+- [x] Fix landing-page fullscreen sizing so no second-page sliver appears, without changing landing copy, fonts, images, or cursor-following red pulse.
+- [x] Restructure the second-page analysis field: move heading/subheading hierarchy, make the map full width, overlay the live hotspot badge, remove specified idle chrome, and preserve hotspot popup content.
+- [x] Hide Screening Status and AI Screening Signal cards until the selected hotspot verification fully completes; reveal the investigation dashboard from the right after Run source verification.
+- [x] Add focused frontend regression coverage, run preview build and visual verification, report touched files, and do not deploy to Vercel before explicit approval.
+
+- [x] Add a one-time, non-looping radar sweep on initial map load with brief hotspot glow/pulse as the sweep passes, using frontend state/CSS only.
+- [x] Add a subtle floating “Click any marker to investigate” hint before the first hotspot click and permanently dismiss it after that click.
+- [x] Preserve the existing NASA FIRMS evidence popup content/design, reveal investigation cards only after completed verification, and do not alter card internals.
+
+## Preview UI fixes 1–10
+
+- [x] Remove the duplicate ACTIVE ANALYSIS FIELD eyebrow and normalize subtitle/observation typography and contrast.
+- [x] Keep exactly one non-overlapping map fullscreen control and make the map full-width with a near-square aspect ratio.
+- [x] Redesign radar as a several-second map-overlay sweep with rings, viewport entry retriggers, and marker reveal/fade after discovery.
+- [x] Keep one higher-contrast live-hotspots badge on the map only.
+- [x] Move the investigation dashboard below the map with smooth reveal/scroll; keep the map full-width and square.
+- [x] Restore popup-only marker clicks; verification must begin only from the popup Run source verification button.
+- [x] Redesign the idle hint with restrained existing typography and no generic pointer icon.
+- [x] Add focused tests and preview screenshots; confirm protected backend/ML/classification logic, cursor pulse, and card internals remain unchanged; do not deploy to Vercel.

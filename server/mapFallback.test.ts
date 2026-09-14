@@ -21,5 +21,8 @@ describe("Vercel map fallback interaction contract", () => {
     expect(source).toContain("fireguard-factory-marker");
     expect(source).toContain("persistenceRings");
     expect(source).not.toContain("name=\"Exposure\"");
+    expect(source).toContain("map-radar-sweep-active");
+    expect(source).toContain("setRadarActive(false)");
+    expect(source).toContain("onFirstHotspotClick");
   });
 });
