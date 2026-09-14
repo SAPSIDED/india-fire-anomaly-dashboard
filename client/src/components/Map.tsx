@@ -192,7 +192,8 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radar
         {explorerOpen && <LeafletPopup closeButton autoPan>
           <div className="fireguard-explorer-popup">
             <strong>Explore this location</strong>
-            <span>Drag the field guide to inspect a point.</span>
+            <span aria-live="polite">To run source verification please click on a hotspot</span>
+            <small>Drag the field guide to inspect a point.</small>
             <code>{explorerPosition.lat.toFixed(4)}°N · {explorerPosition.lng.toFixed(4)}°E</code>
             {nearestHotspot ? <>
               <small>{nearestHotspot.distance.toFixed(1)} km from the nearest live FIRMS marker.</small>

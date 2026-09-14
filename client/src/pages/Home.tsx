@@ -285,6 +285,15 @@ export default function Home() {
   const selectedVerification = verificationPresentation.targetId === selected.id ? verificationPresentation.result : undefined;
   const selectedVerificationState = verificationPresentation.targetId === selected.id ? verificationPresentation.state : "ready";
 
+  useEffect(() => {
+    if (!verifierOpen) return;
+    const frame = window.requestAnimationFrame(() => {
+      const results = document.getElementById("verification-results");
+      if (results && typeof results.scrollIntoView === "function") results.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [verifierOpen, selected.id]);
+
   const submitAuthorityEvidence = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const reportedAt = new Date(authorityForm.reportedAt);
@@ -416,7 +425,7 @@ export default function Home() {
             <div className="map-workbench">
               <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
             </div>
-            {verifierOpen && <div className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} liveHotspotCount={snapshotTargets.length} /></div>}
+            {verifierOpen && <div id="verification-results" className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} liveHotspotCount={snapshotTargets.length} /></div>}
           </div>
           <LiveClimateDashboard weather={liveWeather.data} alerts={persistenceAlerts.data ?? []} loading={persistenceAlerts.isLoading} />
         </section>
