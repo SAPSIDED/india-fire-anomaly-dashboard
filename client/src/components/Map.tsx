@@ -52,6 +52,12 @@ export type FallbackMapHotspot = {
   onSelect?: () => void;
 };
 
+export type MapWind = {
+  state: "available" | "cached" | "unavailable";
+  windSpeedKmh: number | null;
+  windDirectionDeg: number | null;
+};
+
 function layerColor(hotspot: FallbackMapHotspot, activeLayer: string) {
   if (activeLayer === "OSM context") return "#668a78";
   if (activeLayer === "Persistence") return "#786aa8";
@@ -72,6 +78,7 @@ interface MapViewProps {
   fallbackHotspots?: FallbackMapHotspot[];
   activeLayer?: string;
   onFirstHotspotClick?: () => void;
+  wind?: MapWind;
 }
 
 function hotspotIcon(color: string, variant: "thermal" | "factory" = "thermal", size = 30, opacity = 0.82, radarActive = false, radarIndex = 0) {
@@ -226,7 +233,7 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radar
   );
 }
 
-export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4194 }, initialZoom = 12, onMapReady, fallbackHotspots = [], activeLayer = "Thermal", onFirstHotspotClick }: MapViewProps) {
+export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4194 }, initialZoom = 12, onMapReady, fallbackHotspots = [], activeLayer = "Thermal", onFirstHotspotClick, wind }: MapViewProps) {
   const mapShell = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -305,10 +312,12 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
 
   const shellClassName = cn("relative w-full h-[500px] map-shell", isFullscreen && "map-shell-fullscreen", className);
   const fullscreenButton = <button type="button" className="map-fullscreen-button" onClick={toggleFullscreen} aria-label={isFullscreen ? "Exit full screen map" : "View map full screen"}>{isFullscreen ? "Exit full screen" : "Full screen map"}</button>;
+  const windAngle = wind?.windDirectionDeg == null ? 0 : (wind.windDirectionDeg + 180) % 360;
+  const windOverlay = <div className="wind-overlay" aria-label={wind?.windSpeedKmh == null ? "Live wind unavailable" : `Live wind ${wind.windSpeedKmh.toFixed(1)} kilometers per hour toward ${(windAngle).toFixed(0)} degrees`}><span className="wind-overlay-kicker">LIVE WIND / SPREAD VECTOR</span><strong>{wind?.windSpeedKmh == null ? "—" : `${wind.windSpeedKmh.toFixed(1)} km/h`}</strong><span className="wind-arrow" style={{ transform: `rotate(${windAngle}deg)` }}>↑</span><small>{wind?.windDirectionDeg == null ? "Awaiting Open-Meteo" : `toward ${windAngle.toFixed(0)}° · ${wind.state}`}</small></div>;
 
   if (useLeaflet) {
-    return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots.map(hotspot => ({ ...hotspot, onSelect: () => { onFirstHotspotClick?.(); hotspot.onSelect?.(); } }))} activeLayer={activeLayer} radarActive={radarActive} />{fullscreenButton}</div>;
+    return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots.map(hotspot => ({ ...hotspot, onSelect: () => { onFirstHotspotClick?.(); hotspot.onSelect?.(); } }))} activeLayer={activeLayer} radarActive={radarActive} />{windOverlay}{fullscreenButton}</div>;
   }
 
-  return <div ref={mapShell} className={shellClassName}><div ref={mapContainer} className="relative w-full h-full"><div className={cn("map-radar-sweep", radarActive && "map-radar-sweep-active")} aria-hidden="true" /><div className="map-loading-label">Loading base map…</div></div>{fullscreenButton}</div>;
+  return <div ref={mapShell} className={shellClassName}><div ref={mapContainer} className="relative w-full h-full"><div className={cn("map-radar-sweep", radarActive && "map-radar-sweep-active")} aria-hidden="true" /><div className="map-loading-label">Loading base map…</div></div>{windOverlay}{fullscreenButton}</div>;
 }

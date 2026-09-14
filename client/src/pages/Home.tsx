@@ -4,6 +4,7 @@
  */
 import React, { useEffect, useRef, useState, type FormEvent } from "react";
 import { MapView } from "@/components/Map";
+import { LiveClimateDashboard } from "@/components/LiveClimateDashboard";
 import { HotspotVerificationRail, type VerificationRailResult } from "@/components/HotspotVerificationRail";
 import { MLPredictionPanel } from "@/components/MLPredictionPanel";
 import { trpc } from "@/lib/trpc";
@@ -199,6 +200,8 @@ export default function Home() {
   const corroboration = trpc.corroboration.run.useMutation();
   const authorityRecord = trpc.incidentEvidence.record.useMutation();
   const indiaHotspots = trpc.getIndiaHotspots.useQuery(undefined, { refetchInterval: 5 * 60_000 });
+  const liveWeather = trpc.getLiveWeather.useQuery({ lat: 22.4, lng: 78.2 }, { refetchInterval: 5 * 60_000, staleTime: 60_000 });
+  const persistenceAlerts = trpc.getPersistentHotspotAlerts.useQuery(undefined, { refetchInterval: 5 * 60_000, staleTime: 60_000 });
   const snapshotRows = (indiaHotspots.data ?? []) as IndiaSnapshotHotspot[];
   const snapshotSource = snapshotRows[0]?.source;
   const snapshotFetchedAt = snapshotRows[0]?.fetchedAt;
@@ -411,8 +414,9 @@ export default function Home() {
           <div className="section-cap analysis-field-cap"><div><h2>ACTIVE ANALYSIS FIELD</h2><p className="analysis-observation-line">Current India-wide thermal observation</p></div><p>From thermal signal to an evidence-backed screen.</p></div>
           <div className={`workbench-shell ${verifierOpen ? "verification-open" : "verification-idle"}`}>
             <div className="map-workbench">
-              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
+              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
             </div>
+            <LiveClimateDashboard weather={liveWeather.data} alerts={persistenceAlerts.data ?? []} loading={persistenceAlerts.isLoading} />
             {verifierOpen && <div className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} liveHotspotCount={snapshotTargets.length} /></div>}
           </div>
         </section>

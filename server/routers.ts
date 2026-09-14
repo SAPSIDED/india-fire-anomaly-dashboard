@@ -2,7 +2,8 @@ import { COOKIE_NAME } from "@shared/const";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { evaluateCorroboration } from "./corroboration";
-import { getIndiaHotspotSnapshot, recordIncidentEvidence } from "./db";
+import { getIndiaHotspotSnapshot, getPersistentHotspotAlerts, recordIncidentEvidence } from "./db";
+import { getLiveWeather } from "./weather";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
@@ -32,6 +33,12 @@ export const appRouter = router({
   }),
 
   getIndiaHotspots: publicProcedure.query(() => getIndiaHotspotSnapshot()),
+
+  getLiveWeather: publicProcedure
+    .input(z.object({ lat: z.number().min(6).max(38), lng: z.number().min(68).max(98) }))
+    .query(({ input }) => getLiveWeather(input.lat, input.lng)),
+
+  getPersistentHotspotAlerts: publicProcedure.query(() => getPersistentHotspotAlerts()),
 
   incidentEvidence: router({
     record: adminProcedure

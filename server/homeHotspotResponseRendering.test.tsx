@@ -43,6 +43,8 @@ vi.mock("../client/src/lib/trpc", () => ({
         }],
       }),
     },
+    getLiveWeather: { useQuery: () => ({ data: { state: "available", temperatureC: 31, windSpeedKmh: 12, windDirectionDeg: 220, timezone: "Asia/Kolkata", checkedAt: "2026-08-27T03:00:00.000Z" } }) },
+    getPersistentHotspotAlerts: { useQuery: () => ({ data: [], isLoading: false }) },
   },
 }));
 

@@ -270,6 +270,44 @@ export async function getIndiaHotspotSnapshot() {
   return db.select().from(indiaHotspotSnapshot).orderBy(desc(indiaHotspotSnapshot.acquiredDate), desc(indiaHotspotSnapshot.acquiredTime), desc(indiaHotspotSnapshot.id));
 }
 
+function distanceKmForAlert(latA: number, lngA: number, latB: number, lngB: number) {
+  const radians = (value: number) => value * Math.PI / 180;
+  const dLat = radians(latB - latA);
+  const dLng = radians(lngB - lngA);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(radians(latA)) * Math.cos(radians(latB)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}
+
+/** Builds a lightweight, read-only alert feed from the current FIRMS snapshot and stored history. */
+export async function getPersistentHotspotAlerts() {
+  const db = await getDb();
+  if (!db) return [];
+  try {
+    const [snapshotRows, historyRows, plants] = await Promise.all([
+      db.select().from(indiaHotspotSnapshot),
+      db.select({ latitude: detectionHistory.latitude, longitude: detectionHistory.longitude, detectionDate: detectionHistory.detectionDate }).from(detectionHistory),
+      db.select({ name: gppdReference.name, primaryFuel: gppdReference.primaryFuel, capacityMw: gppdReference.capacityMw, latitude: gppdReference.latitude, longitude: gppdReference.longitude }).from(gppdReference),
+    ]);
+    return snapshotRows.flatMap(row => {
+      const lat = Number(row.latitude);
+      const lng = Number(row.longitude);
+      const nearbyHistory = historyRows.filter(item => distanceKmForAlert(lat, lng, Number(item.latitude), Number(item.longitude)) <= 8);
+      const dates = new Set(nearbyHistory.map(item => new Date(item.detectionDate).toISOString().slice(0, 10)));
+      const months = new Set(Array.from(dates, date => date.slice(0, 7)));
+      if (dates.size < 3 && months.size < 2) return [];
+      const nearestPlant = plants.map(plant => ({ plant, distanceKm: distanceKmForAlert(lat, lng, Number(plant.latitude), Number(plant.longitude)) }))
+        .filter(candidate => candidate.distanceKm <= 10).sort((a, b) => a.distanceKm - b.distanceKm)[0];
+      return [{
+        hotspotId: row.id, latitude: lat, longitude: lng, acquiredDate: row.acquiredDate, acquiredTime: row.acquiredTime,
+        persistenceDetections: dates.size, activeMonths: months.size,
+        facility: nearestPlant ? { name: nearestPlant.plant.name, fuelType: nearestPlant.plant.primaryFuel, capacityMw: nearestPlant.plant.capacityMw === null ? null : Number(nearestPlant.plant.capacityMw), distanceKm: Number(nearestPlant.distanceKm.toFixed(2)) } : null,
+      }];
+    }).sort((a, b) => b.persistenceDetections - a.persistenceDetections);
+  } catch {
+    return [];
+  }
+}
+
 export type GppdReferenceInput = {
   gppdId: string;
   country: "IND";
