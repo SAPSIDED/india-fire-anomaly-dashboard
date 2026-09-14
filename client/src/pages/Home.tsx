@@ -2,7 +2,7 @@
  * FireGuard presentation layer. The map, verifier, authentication, and data bindings
  * intentionally remain unchanged; this file only reshapes how that information is presented.
  */
-import React, { useEffect, useRef, useState, type FormEvent } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { MapView } from "@/components/Map";
 import { LiveClimateDashboard } from "@/components/LiveClimateDashboard";
 import { HotspotVerificationRail, type VerificationRailResult } from "@/components/HotspotVerificationRail";
@@ -202,6 +202,20 @@ export default function Home() {
   const indiaHotspots = trpc.getIndiaHotspots.useQuery(undefined, { refetchInterval: 5 * 60_000 });
   const liveWeather = trpc.getLiveWeather.useQuery({ lat: 22.4, lng: 78.2 }, { refetchInterval: 5 * 60_000, staleTime: 60_000 });
   const persistenceAlerts = trpc.getPersistentHotspotAlerts.useQuery(undefined, { refetchInterval: 5 * 60_000, staleTime: 60_000 });
+
+  useLayoutEffect(() => {
+    const previousRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    } catch {
+      // Some test/browser shells do not implement window scrolling.
+    }
+    return () => {
+      window.history.scrollRestoration = previousRestoration;
+    };
+  }, []);
+
   const snapshotRows = (indiaHotspots.data ?? []) as IndiaSnapshotHotspot[];
   const snapshotSource = snapshotRows[0]?.source;
   const snapshotFetchedAt = snapshotRows[0]?.fetchedAt;
