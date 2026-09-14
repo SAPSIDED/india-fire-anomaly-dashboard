@@ -189,6 +189,9 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radar
           },
         }}
       >
+        <LeafletTooltip permanent direction="right" offset={[20, -24]} opacity={0.98} className="fireguard-explorer-tooltip">
+          To run source verification please click on a hotspot
+        </LeafletTooltip>
         {explorerOpen && <LeafletPopup closeButton autoPan>
           <div className="fireguard-explorer-popup">
             <strong>Explore this location</strong>
@@ -318,7 +321,7 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
   const windOverlay = <>{windField}<div className="wind-overlay" aria-label={wind?.windSpeedKmh == null ? "Live wind unavailable" : `Live wind ${wind.windSpeedKmh.toFixed(1)} kilometers per hour toward ${(windAngle).toFixed(0)} degrees`}><span className="wind-overlay-kicker">LIVE WIND / SPREAD VECTOR</span><strong>{wind?.windSpeedKmh == null ? "—" : `${wind.windSpeedKmh.toFixed(1)} km/h`}</strong><span className="wind-arrow" style={{ transform: `rotate(${windAngle}deg)` }}>↑</span><small>{wind?.windDirectionDeg == null ? "Awaiting Open-Meteo" : `toward ${windAngle.toFixed(0)}° · ${wind.state}`}</small></div></>;
 
   if (useLeaflet) {
-    return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots.map(hotspot => ({ ...hotspot, onSelect: () => { onFirstHotspotClick?.(); hotspot.onSelect?.(); } }))} activeLayer={activeLayer} radarActive={radarActive} /><div className="fireguard-explorer-hint" role="status">To run source verification please click on a hotspot</div>{windOverlay}{fullscreenButton}</div>;
+    return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots.map(hotspot => ({ ...hotspot, onSelect: () => { onFirstHotspotClick?.(); hotspot.onSelect?.(); } }))} activeLayer={activeLayer} radarActive={radarActive} />{windOverlay}{fullscreenButton}</div>;
   }
 
   return <div ref={mapShell} className={shellClassName}><div ref={mapContainer} className="relative w-full h-full"><div className={cn("map-radar-sweep", radarActive && "map-radar-sweep-active")} aria-hidden="true" /><div className="map-loading-label">Loading base map…</div></div>{windOverlay}{fullscreenButton}</div>;

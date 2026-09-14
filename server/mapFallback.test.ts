@@ -12,6 +12,8 @@ describe("Vercel map fallback interaction contract", () => {
     expect(source).toContain("exitFullscreen");
     expect(source).toContain("fireguard-provider-grid");
     expect(source).toContain("To run source verification please click on a hotspot");
+    expect(source).toContain('permanent direction="right"');
+    expect(source).toContain("fireguard-explorer-tooltip");
   });
 
   it("encodes the three meaningful analytic layers from existing hotspot fields", () => {
