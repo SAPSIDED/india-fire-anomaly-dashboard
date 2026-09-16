@@ -267,8 +267,8 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 
 /* Expanded preview corrections: restrained hierarchy, square map, below-map investigation */
 .bungee-inline-regular { font-family: "Bungee Inline", sans-serif; font-weight: 400; font-style: normal; }
-.limelight-observation { font-family: "Limelight", serif; font-size: 13.2px; color: #FF4E12; letter-spacing: .035em; }
-.analysis-subtitle { color: #E5EB7F !important; font-size: 14.3px !important; }
+.limelight-observation { font-family: "Limelight", serif; font-size: 13.2px; color: #FF6161; letter-spacing: .035em; margin-top: 12px; }
+.analysis-subtitle { color: #575757 !important; font-size: 14.3px !important; }
 .analysis-field-cap { align-items: end; }
 .analysis-field-cap h2 { color: #E05912; font-size: clamp(34px, 5vw, 62px); letter-spacing: -.025em; }
 .analysis-field-cap > p { color: #b9c3bf; font-family: var(--display-face); font-size: 13px; line-height: 1.5; }
