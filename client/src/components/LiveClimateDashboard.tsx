@@ -26,7 +26,7 @@ function direction(degrees: number | null) {
   return ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"][Math.round(degrees / 22.5) % 16];
 }
 
-function ClimateClock({ timezone }: { timezone: string | null }) {
+export function ClimateClock({ timezone }: { timezone: string | null }) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => { const timer = window.setInterval(() => setNow(new Date()), 1000); return () => window.clearInterval(timer); }, []);
   return <div className="climate-clock" aria-label="Live climate clock"><span>CLIMATE CLOCK</span><strong>{now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: timezone || undefined })}</strong><small>{timezone || "India / local station time"}</small></div>;
@@ -35,7 +35,7 @@ function ClimateClock({ timezone }: { timezone: string | null }) {
 export function LiveClimateDashboard({ weather, alerts, loading }: { weather?: ClimateReading; alerts: PersistenceAlert[]; loading?: boolean }) {
   const spreadDirection = weather?.windDirectionDeg === null || weather?.windDirectionDeg === undefined ? null : (weather.windDirectionDeg + 180) % 360;
   return <section className="live-climate-dashboard" aria-label="Live climate and persistence alerts">
-    <div className="climate-dashboard-head"><div><p className="eyebrow">LIVE CLIMATE / PERSISTENCE WATCH</p><h2>Conditions that move the risk.</h2><p>Wind is shown as the likely downwind spread vector; persistence alerts use stored NASA FIRMS detections and nearby reference facilities.</p></div><ClimateClock timezone={weather?.timezone ?? null} /></div>
+    <div className="climate-dashboard-head"><div><p className="eyebrow">LIVE CLIMATE / PERSISTENCE WATCH</p><h2>Conditions that move the risk.</h2><p>Wind is shown as the likely downwind spread vector; persistence alerts use stored NASA FIRMS detections and nearby reference facilities.</p></div></div>
     <div className="climate-metrics" aria-live="polite">
       <div className="climate-metric"><Wind size={17} /><span>WIND</span><strong>{weather?.windSpeedKmh == null ? "—" : `${weather.windSpeedKmh.toFixed(1)} km/h`}</strong><small>{weather?.windDirectionDeg == null ? "Direction unavailable" : `${direction(weather.windDirectionDeg)} · from ${weather.windDirectionDeg.toFixed(0)}°`}</small></div>
       <div className="climate-metric wind-vector"><span>SPREAD VECTOR</span><strong style={{ transform: `rotate(${spreadDirection ?? 0}deg)` }}>↑</strong><small>{spreadDirection == null ? "Awaiting live wind" : `${direction(spreadDirection)} · toward ${spreadDirection.toFixed(0)}°`}</small></div>

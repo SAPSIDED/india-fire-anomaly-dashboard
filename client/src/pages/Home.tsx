@@ -4,7 +4,7 @@
  */
 import React, { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { MapView } from "@/components/Map";
-import { LiveClimateDashboard } from "@/components/LiveClimateDashboard";
+import { ClimateClock, LiveClimateDashboard } from "@/components/LiveClimateDashboard";
 import { HotspotVerificationRail, type VerificationRailResult } from "@/components/HotspotVerificationRail";
 import { MLPredictionPanel } from "@/components/MLPredictionPanel";
 import { trpc } from "@/lib/trpc";
@@ -433,7 +433,7 @@ export default function Home() {
         </section>
 
         <section id="workbench" className="analysis-field" aria-label="Thermal anomaly analysis workbench">
-          <div className="section-cap analysis-field-cap"><div><h2 className="bungee-inline-regular">ACTIVE ANALYSIS FIELD</h2><p className="analysis-observation-line limelight-observation">Current India-wide thermal observation</p></div><p className="bungee-inline-regular analysis-subtitle">From thermal signal to an evidence-backed screen.</p></div>
+          <div className="section-cap analysis-field-cap"><div><h2 className="bungee-inline-regular">ACTIVE ANALYSIS FIELD</h2><p className="analysis-observation-line limelight-observation">Current India-wide thermal observation</p></div><div className="analysis-field-meta"><p className="bungee-inline-regular analysis-subtitle">From thermal signal to an evidence-backed screen.</p><ClimateClock timezone={liveWeather.data?.timezone ?? null} /></div></div>
           <div className={`workbench-shell ${verifierOpen ? "verification-open" : "verification-idle"}`}>
             <div className="map-workbench">
               <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
