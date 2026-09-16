@@ -130,26 +130,23 @@ export function HotspotVerificationRail({
         <span>{selected.coords}</span>
       </div>
 
-      <p className="evidence-summary">
-        This hotspot carries a <b>{complete ? `${formatClassification(result.classification.confidence)} confidence` : "pending confidence assessment"}</b> signal; the latest observation is <b>{selected.recency.replace("Observed ", "")}</b>.
-      </p>
-
-      <dl className="instrument-grid">
-        <div>
-          <dt>BRIGHTNESS (K)</dt>
-          <dd>{selected.frp}</dd>
+      <div className="field-report-header">
+        <div className="confidence-anchor">
+          <span>RULE ENGINE CONFIDENCE</span>
+          <strong>{complete ? formatClassification(result.classification.confidence) : "Pending"}</strong>
+          <small>{complete ? "Derived from the completed corroboration result." : "Appears after source verification returns."}</small>
         </div>
-
-        <div>
-          <dt>CONFIDENCE</dt>
-          <dd>{complete ? formatClassification(result.classification.confidence) : selected.confidence}</dd>
-        </div>
-
-        <div>
-          <dt>RECENCY</dt>
-          <dd>{selected.recency.replace("Observed ", "")}</dd>
-        </div>
-      </dl>
+        <dl className="instrument-support">
+          <div>
+            <dt>BRIGHTNESS (K)</dt>
+            <dd>{selected.frp}</dd>
+          </div>
+          <div>
+            <dt>RECENCY</dt>
+            <dd>{selected.recency.replace("Observed ", "")}</dd>
+          </div>
+        </dl>
+      </div>
 
       {loading && (
         <div className="verification-live-status" role="status">
