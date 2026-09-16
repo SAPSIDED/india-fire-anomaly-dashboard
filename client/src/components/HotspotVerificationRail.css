@@ -268,3 +268,24 @@
   .instrument-support { max-width: 420px; }
   .screening-ladder > div > span { font-size: 17px; }
 }
+
+/* Phase 2 follow-up: remove misleading confidence hero and guarantee verdict contrast */
+.field-report-header:has(.instrument-support:only-child) {
+  display: block;
+  padding: 16px 0;
+}
+.field-report-header:has(.instrument-support:only-child) .instrument-support {
+  max-width: 430px;
+}
+.verdict-cards .screening-callout.has-classification strong {
+  color: #243536 !important;
+  opacity: 1;
+  text-shadow: none;
+}
+.verdict-cards .screening-callout.has-classification p b {
+  color: #8f3f32 !important;
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}

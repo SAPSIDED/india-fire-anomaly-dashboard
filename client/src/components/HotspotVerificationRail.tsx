@@ -18,6 +18,7 @@ export type VerificationRailTarget = {
 type SourceEvidence = {
   state: "available" | "cached" | "unavailable";
   detail: string;
+  frpMw?: number | null;
 };
 
 export type VerificationRailResult = {
@@ -131,15 +132,14 @@ export function HotspotVerificationRail({
       </div>
 
       <div className="field-report-header">
-        <div className="confidence-anchor">
-          <span>RULE ENGINE CONFIDENCE</span>
-          <strong>{complete ? formatClassification(result.classification.confidence) : "Pending"}</strong>
-          <small>{complete ? "Derived from the completed corroboration result." : "Appears after source verification returns."}</small>
-        </div>
         <dl className="instrument-support">
           <div>
-            <dt>BRIGHTNESS (K)</dt>
-            <dd>{selected.frp}</dd>
+            <dt>FRP (MW)</dt>
+            <dd>
+              {complete && typeof result.firmsCurrent.frpMw === "number" && Number.isFinite(result.firmsCurrent.frpMw)
+                ? result.firmsCurrent.frpMw.toFixed(2)
+                : "Unavailable"}
+            </dd>
           </div>
           <div>
             <dt>RECENCY</dt>

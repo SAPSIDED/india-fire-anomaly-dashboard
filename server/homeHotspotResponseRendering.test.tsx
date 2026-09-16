@@ -79,7 +79,7 @@ class FakePoint { constructor(_x: number, _y: number) {} }
 
 const successfulResponse = {
   detectionId: "FIRMS-660079",
-  firmsCurrent: { state: "available" as const, detail: "2 live NASA FIRMS NOAA-20 detections in the local 1-day window." },
+  firmsCurrent: { state: "available" as const, detail: "2 live NASA FIRMS NOAA-20 detections in the local 1-day window.", frpMw: 12.34 },
   industrial: { state: "available" as const, detail: "3 live nearby OSM industrial-context features found within 5 km." },
   firmsHistory: { state: "available" as const, detail: "10 live NASA FIRMS NOAA-20 detections in the local 7-day window." },
   longTermHistory: { state: "available" as const, totalDetectionCount: 17, firstSeen: "2026-08-19", lastSeen: "2026-08-26", activeMonths: 1 },
@@ -116,9 +116,11 @@ describe("Home marker verification response rendering", () => {
     act(() => { testState.callbacks?.onSuccess(successfulResponse); });
     expect(await screen.findByText("Industrial Thermal Source")).toBeTruthy();
     expect(screen.getByText("HIGH CONFIDENCE.", { exact: false })).toBeTruthy();
-    expect(screen.getByText("High", { exact: true })).toBeTruthy();
-    expect(screen.getByText("BRIGHTNESS (K)", { exact: true })).toBeTruthy();
-    expect(screen.queryByText("FRP", { exact: true })).toBeNull();
+    expect(screen.queryByText("High", { exact: true })).toBeNull();
+    expect(screen.queryByText("RULE ENGINE CONFIDENCE", { exact: true })).toBeNull();
+    expect(screen.getByText("FRP (MW)", { exact: true })).toBeTruthy();
+    expect(screen.getByText("12.34", { exact: true })).toBeTruthy();
+    expect(screen.queryByText("BRIGHTNESS (K)", { exact: true })).toBeNull();
     expect(screen.getByText(/2 live NASA FIRMS NOAA-20 detections/)).toBeTruthy();
     expect(screen.getByText(/3 live nearby OSM industrial-context features/)).toBeTruthy();
     expect(screen.getByText(/17 stored detections; 1 active month/)).toBeTruthy();
