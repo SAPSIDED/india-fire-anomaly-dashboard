@@ -116,6 +116,9 @@ describe("Home marker verification response rendering", () => {
     act(() => { testState.callbacks?.onSuccess(successfulResponse); });
     expect(await screen.findByText("Industrial Thermal Source")).toBeTruthy();
     expect(screen.getByText("HIGH CONFIDENCE.", { exact: false })).toBeTruthy();
+    expect(screen.getByText("High", { exact: true })).toBeTruthy();
+    expect(screen.getByText("BRIGHTNESS (K)", { exact: true })).toBeTruthy();
+    expect(screen.queryByText("FRP", { exact: true })).toBeNull();
     expect(screen.getByText(/2 live NASA FIRMS NOAA-20 detections/)).toBeTruthy();
     expect(screen.getByText(/3 live nearby OSM industrial-context features/)).toBeTruthy();
     expect(screen.getByText(/17 stored detections; 1 active month/)).toBeTruthy();

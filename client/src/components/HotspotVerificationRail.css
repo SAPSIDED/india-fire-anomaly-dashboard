@@ -75,3 +75,25 @@
 @media (max-width:1050px) {
   .verdict-cards { grid-template-columns:1fr; }
 }
+
+.evidence-summary {
+  margin: 16px 0 12px;
+  color: #c4cec6;
+  font: 10px/1.7 "IBM Plex Mono", monospace;
+  max-width: 70ch;
+}
+.evidence-summary b { color: #f1c272; font-family: "IBM Plex Sans", sans-serif; font-weight: 700; }
+.analysis-rail h3,
+.screening-ladder > p,
+.screening-ladder > div > span:first-of-type,
+.screening-callout strong { font-family: "Bungee Inline", "IBM Plex Sans", sans-serif; }
+.analysis-rail h3 { line-height: 1.12; }
+.screening-ladder { padding: 16px 0; }
+.screening-ladder > div { padding: 14px 0; line-height: 1.6; }
+.screening-ladder > div > span { min-width: 0; }
+.screening-ladder > div > span > small { display: block; margin-top: 7px; line-height: 1.7; }
+.facility-context { gap: 12px; margin-top: 12px; padding: 13px; }
+.facility-context-item { gap: 6px; padding-top: 2px; }
+.facility-context-item + .facility-context-item { border-top: 1px solid rgba(226,229,220,.12); padding-top: 12px; }
+.facility-context-item > span { overflow-wrap: anywhere; white-space: normal; }
+.facility-context-item b { line-height: 1.45; }

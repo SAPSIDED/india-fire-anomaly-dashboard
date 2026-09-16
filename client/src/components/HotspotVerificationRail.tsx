@@ -130,15 +130,19 @@ export function HotspotVerificationRail({
         <span>{selected.coords}</span>
       </div>
 
+      <p className="evidence-summary">
+        This hotspot carries a <b>{complete ? `${formatClassification(result.classification.confidence)} confidence` : "pending confidence assessment"}</b> signal; the latest observation is <b>{selected.recency.replace("Observed ", "")}</b>.
+      </p>
+
       <dl className="instrument-grid">
         <div>
-          <dt>FRP</dt>
+          <dt>BRIGHTNESS (K)</dt>
           <dd>{selected.frp}</dd>
         </div>
 
         <div>
           <dt>CONFIDENCE</dt>
-          <dd>{selected.confidence}</dd>
+          <dd>{complete ? formatClassification(result.classification.confidence) : selected.confidence}</dd>
         </div>
 
         <div>
