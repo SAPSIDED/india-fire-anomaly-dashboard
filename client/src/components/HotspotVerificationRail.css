@@ -6,7 +6,8 @@
   gap: 10px;
   align-items: start;
   margin: 16px 0 -4px;
-  padding: 11px 12px;
+  min-height: 76px;
+  padding: 16px 12px 17px;
   border: 1px solid rgba(217, 151, 66, 0.55);
   background: rgba(217, 151, 66, 0.1);
 }
@@ -58,8 +59,8 @@
 
 .verification-live-status b,
 .verification-live-status span { display: block; }
-.verification-live-status b { color: #f4d49f; font: 600 10px "IBM Plex Sans", sans-serif; }
-.verification-live-status span { margin-top: 3px; color: #b8c0ba; font: 9px/1.55 "IBM Plex Mono", monospace; }
+.verification-live-status b { color: #f4d49f; font: 600 11px "IBM Plex Sans", sans-serif; }
+.verification-live-status span { margin-top: 6px; color: #b8c0ba; font: 10px/1.65 "IBM Plex Mono", monospace; }
 
 @keyframes verification-live-pulse {
   50% { box-shadow: 0 0 0 6px rgba(234, 179, 107, 0); }
