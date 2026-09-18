@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronRight, MapPin } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import type { HotspotVerificationState } from "@/lib/hotspotVerification";
 import { MLPredictionPanel } from "@/components/MLPredictionPanel";
 import "./HotspotVerificationRail.css";
@@ -121,15 +121,6 @@ export function HotspotVerificationRail({
       </div>
 
       <h3>{selected.facility}</h3>
-
-      <p className="target-location">
-        <MapPin size={13} /> {selected.place}
-      </p>
-
-      <div className="target-code">
-        <span>{selected.id}</span>
-        <span>{selected.coords}</span>
-      </div>
 
       <div className="field-report-header">
         <dl className="instrument-support">
