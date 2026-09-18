@@ -291,3 +291,38 @@
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
+
+/* Scoped rail refinement: measured values and verdict evidence need distinct hierarchy. */
+.instrument-support dt {
+  color: #d98a68;
+  font-size: 10px;
+  letter-spacing: .14em;
+}
+.instrument-support dd {
+  color: #f0a078;
+  font-size: 16px;
+  font-weight: 700;
+}
+.screening-ladder > div > span {
+  font-size: 22px;
+}
+.screening-ladder > div > span > small {
+  font-size: 13px;
+  line-height: 1.7;
+}
+.verdict-cards .screening-callout.has-classification p {
+  color: #243536 !important;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.verdict-cards .screening-callout.has-classification p b {
+  color: #8f3f32 !important;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  font-weight: 800;
+}
+@media (max-width: 760px) {
+  .screening-ladder > div > span { font-size: 18px; }
+  .instrument-support dd { font-size: 15px; }
+}
