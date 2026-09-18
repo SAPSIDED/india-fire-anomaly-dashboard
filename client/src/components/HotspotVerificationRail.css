@@ -322,6 +322,40 @@
   font-size: 12px;
   font-weight: 800;
 }
+.land-cover-evidence {
+  display: grid;
+  gap: 5px;
+  margin-top: 2px;
+}
+.land-cover-evidence b {
+  color: #e6eee7;
+  font: 700 13px/1.35 "IBM Plex Sans", sans-serif;
+}
+.land-cover-evidence small {
+  color: #aebbb2;
+  font: 10px/1.5 "IBM Plex Mono", monospace;
+}
+.ml-independence-note {
+  margin: 7px 0 11px;
+  color: #d5a36e !important;
+  font: 700 10px/1.45 "IBM Plex Mono", monospace !important;
+  letter-spacing: .025em;
+}
+.ml-prediction-panel .ml-classification strong {
+  font-size: 22px;
+  line-height: 1.15;
+}
+.ml-prediction-panel .ml-classification span,
+.ml-prediction-panel .ml-probabilities span,
+.ml-prediction-panel .ml-probabilities b {
+  font-size: 12px;
+}
+.ml-prediction-panel > small {
+  display: block;
+  margin-top: 12px;
+  font-size: 11px;
+  line-height: 1.65;
+}
 @media (max-width: 760px) {
   .screening-ladder > div > span { font-size: 18px; }
   .instrument-support dd { font-size: 15px; }

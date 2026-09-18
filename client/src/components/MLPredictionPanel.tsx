@@ -33,6 +33,7 @@ export function MLPredictionPanel({ prediction }: Props) {
     <div className="ml-prediction-panel">
       <p className="eyebrow">AI SCREENING SIGNAL</p>
       <h3>XGBoost classification</h3>
+      <p className="ml-independence-note">Independent model prediction — does not use rule-based evidence</p>
       <div className="ml-classification">
         <strong>{classificationLabel}</strong>
         <span>Model confidence: {confidence.toFixed(1)}%</span>

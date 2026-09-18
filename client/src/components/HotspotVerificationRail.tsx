@@ -300,10 +300,16 @@ export function HotspotVerificationRail({
                   ? "Independent evidence was not completed. No classification is issued from this failed request."
                   : complete
                     ? result.landCover
-                      ? `${result.landCover.landCoverClass.replaceAll(
-                          "_",
-                          " ",
-                        )} · ${result.landCover.source}.`
+                      ? (
+                        <span className="land-cover-evidence">
+                          <b>
+                            Land cover: {formatClassification(result.landCover.landCoverClass)}
+                          </b>
+                          <small>
+                            {result.landCover.landCoverClass.replaceAll("_", " ")} · {result.landCover.source}
+                          </small>
+                        </span>
+                      )
                       : "Land-cover evidence is unavailable; no substitute is shown."
                     : "Land-cover context not yet queried."}
             </small>
