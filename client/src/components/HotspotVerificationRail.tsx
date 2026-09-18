@@ -110,7 +110,7 @@ export function HotspotVerificationRail({
 
     setActiveStep(0);
     const timer = window.setInterval(() => {
-      setActiveStep((current) => current === null ? 0 : Math.min(current + 1, 3));
+      setActiveStep((current) => current === null ? 0 : (current + 1) % 4);
     }, 1_350);
 
     return () => window.clearInterval(timer);
@@ -156,6 +156,9 @@ export function HotspotVerificationRail({
 
       {loading && (
         <div className="verification-live-status" role="status">
+          <span className="verification-evidence-convergence" aria-hidden="true">
+            <i /><i /><i /><i /><b />
+          </span>
           <i aria-hidden="true" />
           <div>
             <b>Live source verification in progress</b>

@@ -21,6 +21,30 @@
   animation: verification-live-scan 3.8s ease-in-out infinite;
 }
 .verification-live-status > * { position: relative; z-index: 1; }
+.verification-evidence-convergence {
+  position: absolute !important;
+  z-index: 1 !important;
+  inset: 0 12px 0 auto;
+  display: block !important;
+  width: 58px;
+  pointer-events: none;
+}
+.verification-evidence-convergence i,
+.verification-evidence-convergence b {
+  position: absolute;
+  display: block !important;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #eab36b;
+  box-shadow: 0 0 0 1px rgba(234, 179, 107, 0.18);
+  animation: evidence-converge 3.8s ease-in-out infinite;
+}
+.verification-evidence-convergence i:nth-child(1) { left: 3px; top: 5px; --node-x: 27px; --node-y: 9px; animation-delay: 0s; }
+.verification-evidence-convergence i:nth-child(2) { left: 45px; top: 7px; --node-x: -15px; --node-y: 7px; animation-delay: .12s; }
+.verification-evidence-convergence i:nth-child(3) { left: 9px; bottom: 6px; --node-x: 21px; --node-y: -9px; animation-delay: .24s; }
+.verification-evidence-convergence i:nth-child(4) { right: 2px; bottom: 5px; --node-x: -18px; --node-y: -8px; animation-delay: .36s; }
+.verification-evidence-convergence b { left: 27px; top: calc(50% - 2px); opacity: 0; animation: evidence-center-pulse 3.8s ease-in-out infinite; }
 
 .verification-live-status > i {
   width: 9px;
@@ -44,6 +68,16 @@
   0%, 18% { transform: translateX(0); opacity: 0; }
   32% { opacity: 1; }
   78%, 100% { transform: translateX(460%); opacity: 0; }
+}
+@keyframes evidence-converge {
+  0%, 18% { transform: translate(0, 0) scale(.75); opacity: .35; }
+  42%, 60% { transform: translate(var(--node-x), var(--node-y)) scale(1); opacity: 1; }
+  72%, 100% { transform: translate(var(--node-x), var(--node-y)) scale(.75); opacity: .18; }
+}
+@keyframes evidence-center-pulse {
+  0%, 42% { transform: scale(.7); opacity: 0; }
+  55% { transform: scale(1.8); opacity: .9; }
+  68%, 100% { transform: scale(.8); opacity: 0; }
 }
 
 .screening-ladder.is-loading .investigation-step {
@@ -71,6 +105,8 @@
 @media (prefers-reduced-motion: reduce) {
   .verification-live-status > i,
   .verification-live-status::after,
+  .verification-evidence-convergence i,
+  .verification-evidence-convergence b,
   .screening-ladder.is-loading .investigation-step.is-active { animation: none; }
   .screening-ladder.is-loading .investigation-step { transition: none; }
 }

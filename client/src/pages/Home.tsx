@@ -191,6 +191,7 @@ export default function Home() {
   });
   const mapMarkers = useRef<Array<google.maps.Marker | google.maps.Circle>>([]);
   const verificationRequestSequence = useRef(0);
+  const revealTimer = useRef<number | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [verificationPresentation, setVerificationPresentation] = useState<HotspotVerificationPresentation<VerificationRailResult>>(initialHotspotVerificationPresentation);
   const [lastMLPrediction, setLastMLPrediction] = useState<{ classification: "wildfire" | "industrial_facility" | "agricultural_burning" | "mining"; wildfireProbability: number; industrialProbability: number; agriculturalProbability: number; miningProbability: number } | null>(null);
@@ -254,6 +255,10 @@ export default function Home() {
   }, [snapshotRows, selected.id]);
 
   const runVerifier = (hotspot = selected) => {
+    if (revealTimer.current !== null) {
+      window.clearTimeout(revealTimer.current);
+      revealTimer.current = null;
+    }
     const { selectedTarget, verificationInput } = selectHotspotForVerification(hotspot);
     const requestSequence = verificationRequestSequence.current + 1;
     verificationRequestSequence.current = requestSequence;
@@ -262,9 +267,12 @@ export default function Home() {
     corroboration.reset();
     corroboration.mutate(verificationInput, {
       onSuccess: response => {
-        // The selected rail consumes this explicit presentation state instead
-        // of reading a mutable cache field after the request has completed.
-        setVerificationPresentation(current => completeHotspotVerification(current, selectedTarget.id, requestSequence, response));
+        // Keep the real response buffered while the existing loading presentation
+        // completes its short, frontend-only reveal pause. No evidence is changed.
+        revealTimer.current = window.setTimeout(() => {
+          revealTimer.current = null;
+          setVerificationPresentation(current => completeHotspotVerification(current, selectedTarget.id, requestSequence, response));
+        }, 1_900);
         if (typeof response === "object" && response !== null) {
           const evidence = response as { mlPrediction?: typeof lastMLPrediction extends infer T ? T : never; firmsCurrent?: { frpMw?: number | null }; industrial?: { industrialFacilityName?: string | null; industrialFacilityCategory?: string | null }; longTermHistory?: { activeMonths?: number | null } };
           if (evidence.mlPrediction) setLastMLPrediction(evidence.mlPrediction as NonNullable<typeof lastMLPrediction>);
@@ -279,6 +287,10 @@ export default function Home() {
         }
       },
       onError: () => {
+        if (revealTimer.current !== null) {
+          window.clearTimeout(revealTimer.current);
+          revealTimer.current = null;
+        }
         setVerificationPresentation(current => failHotspotVerification(current, selectedTarget.id, requestSequence));
       },
     });

@@ -114,6 +114,8 @@ describe("Home marker verification response rendering", () => {
     expect(screen.getByLabelText("Selected anomaly analysis").getAttribute("aria-busy")).toBe("true");
 
     act(() => { testState.callbacks?.onSuccess(successfulResponse); });
+    expect(screen.getByText("Live source verification in progress")).toBeTruthy();
+    await new Promise(resolve => setTimeout(resolve, 2_000));
     expect(await screen.findByText("Industrial Thermal Source")).toBeTruthy();
     expect(screen.getByText("HIGH CONFIDENCE.", { exact: false })).toBeTruthy();
     expect(screen.queryByText("High", { exact: true })).toBeNull();
