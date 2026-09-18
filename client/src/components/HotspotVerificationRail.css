@@ -1,4 +1,6 @@
 .verification-live-status {
+  position: relative;
+  overflow: hidden;
   display: grid;
   grid-template-columns: 9px 1fr;
   gap: 10px;
@@ -8,6 +10,17 @@
   border: 1px solid rgba(217, 151, 66, 0.55);
   background: rgba(217, 151, 66, 0.1);
 }
+.verification-live-status::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0 auto 0 -28%;
+  width: 28%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(234, 179, 107, 0.16), transparent);
+  animation: verification-live-scan 3.8s ease-in-out infinite;
+}
+.verification-live-status > * { position: relative; z-index: 1; }
 
 .verification-live-status > i {
   width: 9px;
@@ -27,9 +40,39 @@
 @keyframes verification-live-pulse {
   50% { box-shadow: 0 0 0 6px rgba(234, 179, 107, 0); }
 }
+@keyframes verification-live-scan {
+  0%, 18% { transform: translateX(0); opacity: 0; }
+  32% { opacity: 1; }
+  78%, 100% { transform: translateX(460%); opacity: 0; }
+}
+
+.screening-ladder.is-loading .investigation-step {
+  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), border-color 220ms ease, background-color 220ms ease, box-shadow 220ms ease;
+}
+.screening-ladder.is-loading .investigation-step.is-active {
+  z-index: 1;
+  transform: translateY(-3px);
+  border-bottom-color: rgba(234, 179, 107, 0.72);
+  background: rgba(234, 179, 107, 0.055);
+  box-shadow: 0 5px 12px rgba(5, 9, 10, 0.2);
+  animation: investigation-step-pop 360ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.screening-ladder.is-loading .investigation-step.is-active > b {
+  border-color: #eab36b;
+  background: #f1c272;
+  box-shadow: 0 2px 7px rgba(234, 179, 107, 0.2);
+}
+@keyframes investigation-step-pop {
+  0% { transform: translateY(0); }
+  60% { transform: translateY(-4px); }
+  100% { transform: translateY(-3px); }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .verification-live-status > i { animation: none; }
+  .verification-live-status > i,
+  .verification-live-status::after,
+  .screening-ladder.is-loading .investigation-step.is-active { animation: none; }
+  .screening-ladder.is-loading .investigation-step { transition: none; }
 }
 
 .facility-context {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import type { HotspotVerificationState } from "@/lib/hotspotVerification";
 import { MLPredictionPanel } from "@/components/MLPredictionPanel";
@@ -100,6 +100,21 @@ export function HotspotVerificationRail({
   const loading = state === "loading";
   const failed = state === "error";
   const complete = state === "complete" && result;
+  const [activeStep, setActiveStep] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!loading) {
+      setActiveStep(null);
+      return;
+    }
+
+    setActiveStep(0);
+    const timer = window.setInterval(() => {
+      setActiveStep((current) => current === null ? 0 : Math.min(current + 1, 3));
+    }, 1_350);
+
+    return () => window.clearInterval(timer);
+  }, [loading]);
 
   const persistence = result?.longTermHistory
     ? `${result.longTermHistory.totalDetectionCount} stored detection${
@@ -177,7 +192,7 @@ export function HotspotVerificationRail({
           </small>
         </p>
 
-        <div>
+        <div className={`investigation-step ${activeStep === 0 ? "is-active" : ""}`} aria-current={activeStep === 0 ? "step" : undefined}>
           <b>01</b>
           <span>
             Thermal observation
@@ -193,7 +208,7 @@ export function HotspotVerificationRail({
           </span>
         </div>
 
-        <div>
+        <div className={`investigation-step ${activeStep === 1 ? "is-active" : ""}`} aria-current={activeStep === 1 ? "step" : undefined}>
           <b>02</b>
           <span>
             Geographic context
@@ -273,7 +288,7 @@ export function HotspotVerificationRail({
           </span>
         </div>
 
-        <div>
+        <div className={`investigation-step ${activeStep === 2 ? "is-active" : ""}`} aria-current={activeStep === 2 ? "step" : undefined}>
           <b>03</b>
           <span>
             Historical behaviour
@@ -289,7 +304,7 @@ export function HotspotVerificationRail({
           </span>
         </div>
 
-        <div>
+        <div className={`investigation-step ${activeStep === 3 ? "is-active" : ""}`} aria-current={activeStep === 3 ? "step" : undefined}>
           <b>04</b>
           <span>
             Independent evidence
