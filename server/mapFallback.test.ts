@@ -5,15 +5,17 @@ import { resolve } from "node:path";
 describe("Vercel map fallback interaction contract", () => {
   const source = readFileSync(resolve(process.cwd(), "client/src/components/Map.tsx"), "utf8");
 
-  it("keeps the optimized hover preview and fullscreen interaction in the fallback", () => {
+  it("keeps the direct hotspot popup and fullscreen interaction in the fallback", () => {
     expect(source).toContain("function HotspotHoverPreview");
     expect(source).toContain('loading="lazy"');
     expect(source).toContain("requestFullscreen");
     expect(source).toContain("exitFullscreen");
     expect(source).toContain("fireguard-provider-grid");
-    expect(source).toContain("To run source verification please click on a hotspot");
-    expect(source).toContain('permanent direction="right"');
-    expect(source).toContain("fireguard-explorer-tooltip");
+    expect(source).toContain("LIVE EVIDENCE · NASA FIRMS");
+    expect(source).toContain("Run source verification");
+    expect(source).not.toContain("explorerIcon");
+    expect(source).not.toContain("draggable");
+    expect(source).not.toContain("Drag the field guide");
   });
 
   it("encodes the three meaningful analytic layers from existing hotspot fields", () => {
@@ -27,5 +29,7 @@ describe("Vercel map fallback interaction contract", () => {
     expect(source).toContain("map-radar-sweep-active");
     expect(source).toContain("setRadarActive(false)");
     expect(source).toContain("onFirstHotspotClick");
+    expect(source).toContain('return "#b86751"');
+    expect(source).not.toContain("radar-target");
   });
 });

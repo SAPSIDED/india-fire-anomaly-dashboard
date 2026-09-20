@@ -160,23 +160,15 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .map-loading-label { position: absolute; inset: 0; display: grid; place-items: center; color: #aeb7b4; font: 10px "IBM Plex Mono", monospace; letter-spacing: .06em; background: #1a2022; }
 
 /* Vercel fallback map interactions */
-.fireguard-leaflet-marker, .fireguard-explorer-marker { background: transparent; border: 0; }
+.fireguard-leaflet-marker { background: transparent; border: 0; }
 .fireguard-leaflet-marker span { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid var(--marker-color); border-radius: 50%; background: color-mix(in srgb, var(--marker-color) 14%, transparent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--marker-color) 9%, transparent); }
 .fireguard-leaflet-marker i { width: 10px; height: 10px; border: 2px solid #f7f2e9; border-radius: 50%; background: var(--marker-color); }
-.fireguard-explorer-puppet { position: relative; display: block; width: 34px; height: 44px; border: 2px solid #2a3435; border-radius: 13px 13px 10px 10px; background: #dfa365; box-shadow: 0 4px 0 rgba(20,23,25,.28), 0 7px 14px rgba(20,23,25,.22); animation: fireguard-explorer-bob 1.7s ease-in-out infinite; }
-.fireguard-explorer-head { position: absolute; top: -13px; left: 7px; width: 17px; height: 17px; border: 2px solid #2a3435; border-radius: 50%; background: #f1c39a; }
-.fireguard-explorer-body { position: absolute; left: 11px; top: 17px; width: 9px; height: 15px; border-radius: 7px; background: #5b7778; }
-.fireguard-explorer-arm { position: absolute; top: 19px; width: 13px; height: 4px; border-radius: 4px; background: #2a3435; }
-.fireguard-explorer-arm-left { left: -8px; transform: rotate(24deg); }.fireguard-explorer-arm-right { right: -8px; transform: rotate(-24deg); }
-.fireguard-explorer-popup, .fireguard-hotspot-popup { min-width: 190px; color: #273133; font-family: "IBM Plex Mono", monospace; font-size: 10px; }
-.fireguard-explorer-popup strong, .fireguard-hotspot-popup strong { display: block; margin-bottom: 6px; font-family: var(--display-face); font-size: 14px; letter-spacing: -.02em; }
-.fireguard-explorer-popup span, .fireguard-hotspot-popup small { display: block; color: #69736f; line-height: 1.45; }.fireguard-explorer-popup code, .fireguard-hotspot-popup code { display: block; margin: 8px 0; color: #687571; font-size: 9px; }
+.fireguard-hotspot-popup { min-width: 190px; color: #273133; font-family: "IBM Plex Mono", monospace; font-size: 10px; }
+.fireguard-hotspot-popup strong { display: block; margin-bottom: 6px; font-family: var(--display-face); font-size: 14px; letter-spacing: -.02em; }
+.fireguard-hotspot-popup small { display: block; color: #69736f; line-height: 1.45; }.fireguard-hotspot-popup code { display: block; margin: 8px 0; color: #687571; font-size: 9px; }
 .fireguard-popup-kicker { display: block; margin-bottom: 7px; color: #b86751; font-size: 8px; letter-spacing: .08em; }
-.fireguard-explorer-popup button, .fireguard-hotspot-popup button { display: inline-block; margin-top: 10px; padding: 7px 9px; color: #fff8ec; border: 0; border-radius: 2px; background: #b86751; font: 600 9px "IBM Plex Mono", monospace; cursor: pointer; }
-.fireguard-explorer-popup button:hover, .fireguard-hotspot-popup button:hover { background: #8e4c43; }
-.fireguard-explorer-tooltip { border: 1px solid rgba(184,103,81,.42) !important; border-radius: 3px !important; background: rgba(255,249,239,.96) !important; color: #70463d !important; box-shadow: 0 8px 20px rgba(39,49,51,.16) !important; font: 600 10px/1.35 "IBM Plex Mono", monospace !important; }
-@keyframes fireguard-explorer-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-@media (prefers-reduced-motion: reduce) { .fireguard-explorer-puppet { animation: none; } }
+.fireguard-hotspot-popup button { display: inline-block; margin-top: 10px; padding: 7px 9px; color: #fff8ec; border: 0; border-radius: 2px; background: #b86751; font: 600 9px "IBM Plex Mono", monospace; cursor: pointer; }
+.fireguard-hotspot-popup button:hover { background: #8e4c43; }
 
 .fireguard-provider-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 9px 0 7px; padding: 7px; border: 1px solid rgba(39,49,51,.14); background: rgba(239,235,225,.72); }
 .fireguard-provider-grid span { display: grid; gap: 2px; color: #44504e; font-size: 8px; line-height: 1.2; }
@@ -256,13 +248,11 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .verification-idle .analysis-rail { pointer-events: none; }
 .map-radar-sweep { position: absolute; z-index: 4; inset: -20%; pointer-events: none; opacity: 0; transform: rotate(-35deg); transform-origin: 50% 50%; background: linear-gradient(90deg, transparent 49.6%, rgba(224,172,104,.72) 49.9%, rgba(224,172,104,.08) 50.5%, transparent 51%); }
 .map-radar-sweep-active { opacity: 1; animation: radar-sweep-once 1.8s cubic-bezier(.2,.7,.3,1) 1 both; }
-.radar-target { animation: radar-target-glow 1.8s ease-out 1 both; }
 @keyframes radar-sweep-once { from { transform: rotate(-35deg); } to { transform: rotate(325deg); } }
-@keyframes radar-target-glow { 0%, 42% { filter: brightness(1); } 56% { filter: brightness(1.85) drop-shadow(0 0 9px rgba(224,172,104,.85)); } 78%, 100% { filter: brightness(1); } }
 @keyframes hint-fade-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
 @keyframes hint-pointer { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 .map-attribution { bottom: 12px; }
-@media (prefers-reduced-motion: reduce) { .map-radar-sweep-active, .radar-target, .map-idle-hint { animation: none; } .analysis-rail { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .map-radar-sweep-active, .map-idle-hint { animation: none; } .analysis-rail { transition: none; } }
 @media (max-width: 760px) { .mission-hero { min-height: auto; } .analysis-field-cap { padding-left: 18px; padding-right: 18px; } .analysis-field-cap h2 { font-size: clamp(42px, 13vw, 68px); } .map-stage { min-height: 620px; height: 78svh; } .analysis-rail { top: 12px; right: 12px; bottom: 12px; width: calc(100% - 24px); } .map-live-overlay { top: 12px; right: 12px; } }
 
 /* Expanded preview corrections: restrained hierarchy, square map, below-map investigation */
@@ -291,12 +281,10 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .map-radar-sweep { inset: 0; opacity: 0; overflow: hidden; transform: none; background: radial-gradient(circle at 50% 50%, transparent 0 11%, rgba(224,172,104,.12) 11.1% 11.25%, transparent 11.35% 28%, rgba(224,172,104,.1) 28.1% 28.2%, transparent 28.3% 45%, rgba(224,172,104,.08) 45.1% 45.2%, transparent 45.3%), conic-gradient(from -55deg at 50% 50%, rgba(224,172,104,.32) 0deg, rgba(224,172,104,.05) 15deg, transparent 30deg 360deg); mix-blend-mode: screen; }
 .map-radar-sweep-active { opacity: 1; animation: radar-sweep-once 3.6s linear 1 both; }
 @keyframes radar-sweep-once { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.radar-target { animation: radar-target-glow 3.6s ease-out 1 both; }
-@keyframes radar-target-glow { 0%, 34% { opacity: 0; filter: brightness(.7); } 46% { opacity: 1; filter: brightness(1.9) drop-shadow(0 0 10px rgba(224,172,104,.88)); } 68%, 100% { opacity: 1; filter: brightness(1); } }
 .radar-discovery { animation: radar-discovery 3.6s ease-out 1 both; }
 @keyframes radar-discovery { 0%, 34% { opacity: 0; } 48% { opacity: 1; } 100% { opacity: 1; } }
 @keyframes dashboard-reveal-down { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) { .map-radar-sweep-active, .radar-target, .radar-discovery, .investigation-dashboard-reveal { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .map-radar-sweep-active, .radar-discovery, .investigation-dashboard-reveal { animation: none; } }
 @media (max-width: 760px) { .map-stage { height: min(86vw, 720px); min-height: 420px; aspect-ratio: 1 / 1; } .map-fullscreen-button { top: 12px !important; left: 12px !important; } .map-live-overlay { top: 12px; right: 12px; font-size: 8px; } }
 
 /* Live climate and persistence watch */

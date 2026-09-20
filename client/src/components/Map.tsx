@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Circle as LeafletCircle, LayersControl, MapContainer as LeafletMapContainer, Marker as LeafletMarker, Popup as LeafletPopup, TileLayer as LeafletTileLayer, Tooltip as LeafletTooltip } from "react-leaflet";
-import L, { type LatLngLiteral } from "leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { usePersistFn } from "@/hooks/usePersistFn";
 import { cn } from "@/lib/utils";
@@ -61,7 +61,7 @@ export type MapWind = {
 function layerColor(hotspot: FallbackMapHotspot, activeLayer: string) {
   if (activeLayer === "OSM context") return "#668a78";
   if (activeLayer === "Persistence") return "#786aa8";
-  return hotspot.color;
+  return "#b86751";
 }
 
 function layerRadius(hotspot: FallbackMapHotspot, activeLayer: string) {
@@ -81,17 +81,17 @@ interface MapViewProps {
   wind?: MapWind;
 }
 
-function hotspotIcon(color: string, variant: "thermal" | "factory" = "thermal", size = 30, opacity = 0.82, radarActive = false, radarIndex = 0) {
+function hotspotIcon(color: string, variant: "thermal" | "factory" = "thermal", size = 30, opacity = 0.82) {
   if (variant === "factory") {
     return L.divIcon({
-      className: `fireguard-factory-marker${radarActive ? ` radar-target radar-target-${radarIndex % 5}` : ""}`,
+      className: "fireguard-factory-marker",
       html: `<span style="--marker-color:${color};--marker-opacity:${opacity}" aria-label="Confirmed nearby OSM industrial facility"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 27V14l7 4v-8l7 4V7l10 6v14H4Z" fill="var(--marker-color)" fill-opacity=".92" stroke="#f2eee6" stroke-width="1.7"/><path d="M8 27v-6h4v6m5 0v-6h4v6m5 0v-6h3v6" fill="none" stroke="#f2eee6" stroke-width="1.5"/></svg></span>`,
       iconSize: [34, 34],
       iconAnchor: [17, 17],
     });
   }
   return L.divIcon({
-    className: `fireguard-leaflet-marker${radarActive ? ` radar-target radar-target-${radarIndex % 5}` : ""}`,
+    className: "fireguard-leaflet-marker",
     html: `<span style="--marker-color:${color};--marker-size:${size}px;--marker-opacity:${opacity}"><i></i></span>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
@@ -127,16 +127,6 @@ function HotspotHoverPreview({ hotspot }: { hotspot: FallbackMapHotspot }) {
   </div>;
 }
 
-function explorerIcon() {
-  return L.divIcon({
-    className: "fireguard-explorer-marker",
-    html: '<span class="fireguard-explorer-puppet" aria-hidden="true"><i class="fireguard-explorer-head"></i><i class="fireguard-explorer-body"></i><i class="fireguard-explorer-arm fireguard-explorer-arm-left"></i><i class="fireguard-explorer-arm fireguard-explorer-arm-right"></i></span>',
-    iconSize: [42, 52],
-    iconAnchor: [21, 48],
-    popupAnchor: [0, -43],
-  });
-}
-
 function HotspotProviderPopup({ hotspot, activeLayer }: { hotspot: FallbackMapHotspot; activeLayer: string }) {
   const overlayLabel = activeLayer === "Thermal" ? "Thermal intensity · FRP when verified" : activeLayer === "OSM context" ? "OSM context · facility matches" : activeLayer === "Persistence" ? "Persistence · active months" : activeLayer;
   return <div className="fireguard-hotspot-popup">
@@ -155,13 +145,6 @@ function HotspotProviderPopup({ hotspot, activeLayer }: { hotspot: FallbackMapHo
 }
 
 function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radarActive }: { center: google.maps.LatLngLiteral; zoom: number; hotspots: FallbackMapHotspot[]; className?: string; activeLayer: string; radarActive: boolean }) {
-  const [explorerPosition, setExplorerPosition] = useState<LatLngLiteral>(center);
-  const [explorerOpen, setExplorerOpen] = useState(true);
-  const nearestHotspot = hotspots.reduce<{ hotspot: FallbackMapHotspot; distance: number } | null>((nearest, hotspot) => {
-    const distance = Math.hypot((hotspot.location.lat - explorerPosition.lat) * 111, (hotspot.location.lng - explorerPosition.lng) * 102);
-    return !nearest || distance < nearest.distance ? { hotspot, distance } : nearest;
-  }, null);
-
   return (
     <LeafletMapContainer key={activeLayer} center={[center.lat, center.lng]} zoom={zoom} className={cn("h-full w-full", className)} scrollWheelZoom zoomControl><div className={cn("map-radar-sweep", radarActive && "map-radar-sweep-active")} aria-hidden="true" />
       <LayersControl position="topright" collapsed={false}>
@@ -175,36 +158,6 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radar
           <LeafletTileLayer attribution='Map data &copy; OpenStreetMap contributors' url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png" />
         </LayersControl.BaseLayer>
       </LayersControl>
-
-      <LeafletMarker
-        position={[explorerPosition.lat, explorerPosition.lng]}
-        icon={explorerIcon()}
-        draggable
-        eventHandlers={{
-          click: () => setExplorerOpen(true),
-          dragend: event => {
-            const position = event.target.getLatLng();
-            setExplorerPosition({ lat: position.lat, lng: position.lng });
-            setExplorerOpen(true);
-          },
-        }}
-      >
-        <LeafletTooltip permanent direction="right" offset={[20, -24]} opacity={0.98} className="fireguard-explorer-tooltip">
-          To run source verification please click on a hotspot
-        </LeafletTooltip>
-        {explorerOpen && <LeafletPopup closeButton autoPan>
-          <div className="fireguard-explorer-popup">
-            <strong>Explore this location</strong>
-            <span aria-live="polite">To run source verification please click on a hotspot</span>
-            <small>Drag the field guide to inspect a point.</small>
-            <code>{explorerPosition.lat.toFixed(4)}°N · {explorerPosition.lng.toFixed(4)}°E</code>
-            {nearestHotspot ? <>
-              <small>{nearestHotspot.distance.toFixed(1)} km from the nearest live FIRMS marker.</small>
-              <button type="button" onClick={nearestHotspot.hotspot.onClick}>Open hotspot verification</button>
-            </> : <small>Move the guide over a live marker to open its source popup.</small>}
-          </div>
-        </LeafletPopup>}
-      </LeafletMarker>
 
       {hotspots.map(hotspot => {
         const color = layerColor(hotspot, activeLayer);
@@ -223,7 +176,7 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radar
             </LeafletPopup>
           </LeafletCircle>
           {Array.from({ length: rings }, (_, index) => <LeafletCircle key={`${hotspot.id}-ring-${index}`} center={[hotspot.location.lat, hotspot.location.lng]} radius={layerRadius(hotspot, activeLayer) + (index + 1) * 2_500} pathOptions={{ color: "#786aa8", weight: 1.2, opacity: 0.7 - index * 0.12, fillOpacity: 0, dashArray: "4 7" }} />)}
-          <LeafletMarker position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(color, iconVariant, scale.size, scale.opacity, radarActive, hotspots.indexOf(hotspot))} eventHandlers={{ click: () => { hotspot.onSelect?.(); } }}>
+          <LeafletMarker position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(color, iconVariant, scale.size, scale.opacity)} eventHandlers={{ click: () => { hotspot.onSelect?.(); } }}>
             <LeafletTooltip direction="top" offset={[0, -12]} opacity={1} interactive>
               <HotspotHoverPreview hotspot={hotspot} />
             </LeafletTooltip>
