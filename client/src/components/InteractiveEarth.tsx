@@ -11,15 +11,16 @@ type LiveHotspot = GeoPoint & { born: number; life: number; phase: number };
 
 const countryCollection = JSON.parse(worldCountriesRaw) as CountryCollection;
 
-const countryLabels: GeoPoint[] = [
-  { name: "India", lat: 22.5, lon: 79 },
-  { name: "China", lat: 35, lon: 103 },
-  { name: "Brazil", lat: -10, lon: -52 },
-  { name: "Australia", lat: -25, lon: 134 },
-  { name: "South Africa", lat: -29, lon: 24 },
-  { name: "United States", lat: 38, lon: -97 },
-  { name: "Europe", lat: 50, lon: 15 },
-];
+const countryLabels: GeoPoint[] = countryCollection.features.flatMap(feature => {
+  if (!feature.geometry || !feature.properties?.NAME) return [];
+  const rings = feature.geometry.type === "Polygon"
+    ? feature.geometry.coordinates
+    : feature.geometry.coordinates.flat();
+  const ring = rings[0];
+  if (!ring?.length) return [];
+  const anchor = ring.reduce((sum, [lon, lat]) => ({ lon: sum.lon + lon, lat: sum.lat + lat }), { lon: 0, lat: 0 });
+  return [{ name: feature.properties.NAME, lon: anchor.lon / ring.length, lat: anchor.lat / ring.length }];
+});
 
 const cityLabels: GeoPoint[] = [
   { name: "Delhi", lat: 28.61, lon: 77.21 },
@@ -55,6 +56,27 @@ function project(lat: number, lon: number, rotationLon: number, rotationLat: num
   const y = Math.sin(latRad) * Math.cos(pitch) - Math.cos(latRad) * Math.cos(lonDelta) * Math.sin(pitch);
   const z = Math.sin(latRad) * Math.sin(pitch) + Math.cos(latRad) * Math.cos(lonDelta) * Math.cos(pitch);
   return { x: x * radius, y: -y * radius, z };
+}
+
+function firstSphereIntersection(
+  origin: { x: number; y: number },
+  target: { x: number; y: number },
+  center: { x: number; y: number },
+  radius: number,
+) {
+  const dx = target.x - origin.x;
+  const dy = target.y - origin.y;
+  const ox = origin.x - center.x;
+  const oy = origin.y - center.y;
+  const a = dx * dx + dy * dy;
+  const b = 2 * (ox * dx + oy * dy);
+  const c = ox * ox + oy * oy - radius * radius;
+  const discriminant = b * b - 4 * a * c;
+  if (discriminant < 0 || a === 0) return target;
+  const near = (-b - Math.sqrt(discriminant)) / (2 * a);
+  const far = (-b + Math.sqrt(discriminant)) / (2 * a);
+  const t = [near, far].filter(candidate => candidate >= 0 && candidate <= 1).sort((left, right) => left - right)[0] ?? 1;
+  return { x: origin.x + dx * t, y: origin.y + dy * t };
 }
 
 export function InteractiveEarth() {
@@ -123,7 +145,8 @@ export function InteractiveEarth() {
       const dprWidth = width;
       const dprHeight = height;
       context.clearRect(0, 0, dprWidth, dprHeight);
-      const radius = Math.min(dprWidth * 0.37, dprHeight * 0.43) * state.zoom;
+      const baseRadius = Math.min(dprWidth * 0.34, dprHeight * 0.38);
+      const radius = Math.min(baseRadius * state.zoom, Math.min(dprWidth, dprHeight) * 0.47);
       const centerX = dprWidth * 0.48;
       const centerY = dprHeight * 0.56;
       const pulse = 0.5 + Math.sin(age * 1.6) * 0.14;
@@ -169,7 +192,7 @@ export function InteractiveEarth() {
         }));
       });
 
-      const labelPoints = state.zoom < 1.08 ? [] : state.zoom < 1.2 ? countryLabels : [...countryLabels, ...cityLabels];
+      const labelPoints = state.zoom < 1.04 ? [] : state.zoom < 1.2 ? countryLabels : [...countryLabels, ...cityLabels];
       labelPoints.forEach(label => {
         const point = project(label.lat, label.lon, state.lon, state.lat, radius);
         if (point.z < 0.15) return;
@@ -187,21 +210,35 @@ export function InteractiveEarth() {
 
       // A modest inclined orbit keeps the satellite in a separate, believable motion loop.
       const orbit = age * 0.22;
-      const satX = centerX + Math.cos(orbit) * radius * 0.82;
-      const satY = centerY - radius * 0.72 + Math.sin(orbit) * radius * 0.18;
+      const satX = centerX + Math.cos(orbit) * radius * 1.18;
+      const satY = centerY - radius * 0.88 + Math.sin(orbit) * radius * 0.28;
       const satScale = 0.78 + (Math.sin(orbit) + 1) * 0.1;
-      const beamX = centerX + Math.cos(orbit) * radius * 0.52;
-      const beamY = centerY + Math.sin(orbit) * radius * 0.22;
+      const surfacePoint = firstSphereIntersection(
+        { x: satX, y: satY },
+        { x: centerX + Math.cos(orbit) * radius * 0.18, y: centerY + Math.sin(orbit) * radius * 0.18 },
+        { x: centerX, y: centerY },
+        radius,
+      );
       context.save();
       context.globalAlpha = 0.1 + pulse * 0.14;
       context.beginPath();
       context.moveTo(satX, satY + 10 * satScale);
-      context.lineTo(beamX - radius * 0.07, beamY - radius * 0.05);
-      context.lineTo(beamX + radius * 0.07, beamY + radius * 0.05);
+      context.lineTo(surfacePoint.x - radius * 0.025, surfacePoint.y - radius * 0.02);
+      context.lineTo(surfacePoint.x + radius * 0.025, surfacePoint.y + radius * 0.02);
       context.closePath();
       context.fillStyle = "#efd18e";
       context.fill();
       context.restore();
+      context.beginPath();
+      context.moveTo(satX, satY + 8 * satScale);
+      context.lineTo(surfacePoint.x, surfacePoint.y);
+      context.strokeStyle = `rgba(239, 209, 142, ${0.22 + pulse * 0.18})`;
+      context.lineWidth = 0.8;
+      context.stroke();
+      context.beginPath();
+      context.arc(surfacePoint.x, surfacePoint.y, 4 + pulse * 3, 0, Math.PI * 2);
+      context.strokeStyle = `rgba(239, 209, 142, ${0.3 + pulse * 0.22})`;
+      context.stroke();
 
       context.save();
       context.translate(satX, satY);
@@ -217,12 +254,19 @@ export function InteractiveEarth() {
       context.fillStyle = "#688fa3";
       context.fillRect(-35, -5, 20, 10);
       context.fillRect(15, -5, 20, 10);
+      context.strokeStyle = "rgba(218, 231, 225, .46)";
+      for (let panelX = -32; panelX <= 32; panelX += 6) {
+        if (Math.abs(panelX) < 13) continue;
+        context.beginPath(); context.moveTo(panelX, -5); context.lineTo(panelX, 5); context.stroke();
+      }
       context.strokeRect(-35, -5, 20, 10);
       context.strokeRect(15, -5, 20, 10);
       context.beginPath();
       context.moveTo(0, 7); context.lineTo(0, 19); context.lineTo(11, 24); context.moveTo(0, 19); context.lineTo(-11, 24);
       context.stroke();
       context.beginPath(); context.arc(0, 23, 4, 0, Math.PI * 2); context.stroke();
+      context.beginPath(); context.arc(0, -13, 5, Math.PI, Math.PI * 2); context.stroke();
+      context.beginPath(); context.moveTo(0, -13); context.lineTo(0, -20); context.stroke();
       context.restore();
 
       state.hotspots.forEach(hotspot => {
