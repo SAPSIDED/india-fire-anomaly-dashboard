@@ -170,12 +170,41 @@ export function InteractiveEarth() {
         }));
       });
 
+      const surfaceLight = context.createRadialGradient(
+        centerX - radius * 0.36,
+        centerY - radius * 0.42,
+        radius * 0.05,
+        centerX - radius * 0.15,
+        centerY - radius * 0.12,
+        radius * 1.06,
+      );
+      surfaceLight.addColorStop(0, "rgba(255, 248, 218, .18)");
+      surfaceLight.addColorStop(0.5, "rgba(255, 248, 218, .04)");
+      surfaceLight.addColorStop(1, "rgba(16, 39, 56, .16)");
+      context.fillStyle = surfaceLight;
+      context.beginPath();
+      context.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      context.fill();
+      const terminator = context.createLinearGradient(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
+      terminator.addColorStop(0, "rgba(255, 255, 240, 0)");
+      terminator.addColorStop(0.62, "rgba(20, 45, 62, .02)");
+      terminator.addColorStop(1, "rgba(10, 28, 44, .32)");
+      context.fillStyle = terminator;
+      context.beginPath();
+      context.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      context.fill();
+
       context.restore();
 
       context.beginPath();
       context.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      context.strokeStyle = "rgba(38, 77, 91, .78)";
-      context.lineWidth = 1.25;
+      context.strokeStyle = "rgba(38, 77, 91, .9)";
+      context.lineWidth = 1.35;
+      context.stroke();
+      context.beginPath();
+      context.arc(centerX, centerY, radius + 2.2, Math.PI * 0.95, Math.PI * 1.85);
+      context.strokeStyle = "rgba(203, 228, 222, .18)";
+      context.lineWidth = 2;
       context.stroke();
 
       // A modest inclined orbit keeps the satellite in a separate, believable motion loop.
