@@ -6,32 +6,10 @@ type CountryGeometry =
   | { type: "MultiPolygon"; coordinates: number[][][][] };
 type CountryFeature = { geometry: CountryGeometry | null; properties?: { NAME?: string } };
 type CountryCollection = { features: CountryFeature[] };
-type GeoPoint = { lat: number; lon: number; name?: string };
+type GeoPoint = { lat: number; lon: number };
 type LiveHotspot = GeoPoint & { born: number; life: number; phase: number };
 
 const countryCollection = JSON.parse(worldCountriesRaw) as CountryCollection;
-
-const countryLabels: GeoPoint[] = countryCollection.features.flatMap(feature => {
-  if (!feature.geometry || !feature.properties?.NAME) return [];
-  const rings = feature.geometry.type === "Polygon"
-    ? feature.geometry.coordinates
-    : feature.geometry.coordinates.flat();
-  const ring = rings[0];
-  if (!ring?.length) return [];
-  const anchor = ring.reduce((sum, [lon, lat]) => ({ lon: sum.lon + lon, lat: sum.lat + lat }), { lon: 0, lat: 0 });
-  return [{ name: feature.properties.NAME, lon: anchor.lon / ring.length, lat: anchor.lat / ring.length }];
-});
-
-const cityLabels: GeoPoint[] = [
-  { name: "Delhi", lat: 28.61, lon: 77.21 },
-  { name: "Mumbai", lat: 19.08, lon: 72.88 },
-  { name: "Kolkata", lat: 22.57, lon: 88.36 },
-  { name: "Singapore", lat: 1.35, lon: 103.82 },
-  { name: "Cairo", lat: 30.04, lon: 31.24 },
-  { name: "London", lat: 51.51, lon: -0.13 },
-  { name: "New York", lat: 40.71, lon: -74.01 },
-  { name: "Tokyo", lat: 35.68, lon: 139.69 },
-];
 
 // Land-biased candidates: representative populated/continental areas, never deep-ocean points.
 const landCandidates: GeoPoint[] = [
@@ -127,7 +105,7 @@ export function InteractiveEarth() {
     const spawnHotspot = (now: number) => {
       const candidate = landCandidates[Math.floor(random() * landCandidates.length)];
       state.hotspots.push({ ...candidate, born: now, life: 2.2 + random() * 1.2, phase: random() * Math.PI * 2 });
-      state.nextSpawn = now + 420 + random() * 1100;
+      state.nextSpawn = now + 300 + random() * 650;
     };
 
     const draw = (now: number) => {
@@ -140,15 +118,15 @@ export function InteractiveEarth() {
         state.velocityLon *= 0.94;
         state.velocityLat *= 0.94;
       }
-      if (now > state.nextSpawn || state.hotspots.length === 0) spawnHotspot(now);
+      if ((now > state.nextSpawn || state.hotspots.length === 0) && state.hotspots.length < 6) spawnHotspot(now);
       state.hotspots = state.hotspots.filter(hotspot => now - hotspot.born < hotspot.life * 1000);
       const dprWidth = width;
       const dprHeight = height;
       context.clearRect(0, 0, dprWidth, dprHeight);
-      const baseRadius = Math.min(dprWidth * 0.34, dprHeight * 0.38);
-      const radius = Math.min(baseRadius * state.zoom, Math.min(dprWidth, dprHeight) * 0.47);
+      const baseRadius = Math.min(dprWidth * 0.34, dprHeight * 0.36);
+      const radius = Math.min(baseRadius * state.zoom, Math.min(dprWidth, dprHeight) * 0.44);
       const centerX = dprWidth * 0.48;
-      const centerY = dprHeight * 0.56;
+      const centerY = dprHeight * 0.51;
       const pulse = 0.5 + Math.sin(age * 1.6) * 0.14;
 
       const ocean = context.createRadialGradient(centerX - radius * 0.3, centerY - radius * 0.35, radius * 0.05, centerX, centerY, radius * 1.08);
@@ -192,14 +170,6 @@ export function InteractiveEarth() {
         }));
       });
 
-      const labelPoints = state.zoom < 1.04 ? [] : state.zoom < 1.2 ? countryLabels : [...countryLabels, ...cityLabels];
-      labelPoints.forEach(label => {
-        const point = project(label.lat, label.lon, state.lon, state.lat, radius);
-        if (point.z < 0.15) return;
-        context.font = `${state.zoom > 1.2 ? 8 : 7}px "IBM Plex Mono", monospace`;
-        context.fillStyle = "rgba(231, 242, 237, .88)";
-        context.fillText(label.name ?? "", centerX + point.x + 4, centerY + point.y - 4);
-      });
       context.restore();
 
       context.beginPath();
@@ -220,11 +190,25 @@ export function InteractiveEarth() {
         radius,
       );
       context.save();
+      context.beginPath();
+      context.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      context.clip();
+      context.beginPath();
+      context.arc(surfacePoint.x, surfacePoint.y, 18 + pulse * 7, 0, Math.PI * 2);
+      context.clip();
+      const impact = context.createRadialGradient(surfacePoint.x, surfacePoint.y, 0, surfacePoint.x, surfacePoint.y, 18 + pulse * 7);
+      impact.addColorStop(0, `rgba(255, 224, 139, ${0.28 + pulse * 0.16})`);
+      impact.addColorStop(0.45, `rgba(239, 181, 91, ${0.12 + pulse * 0.08})`);
+      impact.addColorStop(1, "rgba(239, 181, 91, 0)");
+      context.fillStyle = impact;
+      context.fillRect(surfacePoint.x - 28, surfacePoint.y - 28, 56, 56);
+      context.restore();
+      context.save();
       context.globalAlpha = 0.1 + pulse * 0.14;
       context.beginPath();
       context.moveTo(satX, satY + 10 * satScale);
-      context.lineTo(surfacePoint.x - radius * 0.025, surfacePoint.y - radius * 0.02);
-      context.lineTo(surfacePoint.x + radius * 0.025, surfacePoint.y + radius * 0.02);
+      context.lineTo(surfacePoint.x - radius * 0.045, surfacePoint.y - radius * 0.035);
+      context.lineTo(surfacePoint.x + radius * 0.045, surfacePoint.y + radius * 0.035);
       context.closePath();
       context.fillStyle = "#efd18e";
       context.fill();
