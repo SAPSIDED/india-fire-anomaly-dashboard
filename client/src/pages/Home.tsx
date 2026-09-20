@@ -5,6 +5,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { MapView } from "@/components/Map";
 import { ClimateClock, LiveClimateDashboard } from "@/components/LiveClimateDashboard";
+import { InteractiveEarth } from "@/components/InteractiveEarth";
 import { HotspotVerificationRail, type VerificationRailResult } from "@/components/HotspotVerificationRail";
 import { MLPredictionPanel } from "@/components/MLPredictionPanel";
 import { trpc } from "@/lib/trpc";
@@ -151,27 +152,6 @@ function HistoricalAnalysis({ history, selected }: { history?: HistoryEvidence; 
       <div className="history-selection" aria-live="polite"><span>{queryPreview ? "QUERY-WINDOW PREVIEW" : view === "activity" ? "SELECTED DAY" : "EVIDENCE WINDOW"}</span><strong>{activeLabel}</strong><small>{active ? queryPreview ? "This date is part of the pending seven-day query window. Select Run source verification to replace preview markers with official FIRMS observations." : `${activeValue} in the local 8 km screening radius.${zeroObservation ? " The returned seven-day total is zero, so this is a visible zero-observation marker rather than an inferred value." : ""}` : history?.detail ?? "No history source has been requested for this target."}</small></div>
       <p className="history-caveat">Historical recurrence can support a routine-heat explanation. It does not establish the source or confirm an incident.</p>
     </article>
-  );
-}
-
-function ThermalIllustration({ selected }: { selected: Hotspot }) {
-  return (
-    <div className="thermal-illustration" aria-label="Illustrative satellite thermal analysis screen">
-      <div className="thermal-illustration-topline"><span>THERMAL FIELD / DEMONSTRATION</span><span>INDIA SECTOR</span></div>
-      <div className="thermal-plot" aria-hidden="true">
-        <span className="contour contour-a" /><span className="contour contour-b" /><span className="contour contour-c" />
-        <span className="thermal-marker moderate" /><span className="thermal-marker elevated" /><span className="thermal-marker critical selected" />
-        <span className="analysis-ring" /><span className="analysis-crosshair" />
-        <span className="map-coordinate x-axis">72°E</span><span className="map-coordinate y-axis">24°N</span>
-      </div>
-      <div className="thermal-readout">
-        <div><small>SELECTED TARGET</small><b>{selected.id}</b></div>
-        <div><small>COORDINATE</small><b>{selected.coords}</b></div>
-        <div><small>FIRE RADIATIVE POWER</small><b>{selected.frp}</b></div>
-        <div><small>SCREENING STATE</small><b>REQUIRES EVIDENCE</b></div>
-      </div>
-      <div className="thermal-scale"><span>BACKGROUND</span><i /><i /><i /><b>HIGH THERMAL SIGNAL</b></div>
-    </div>
   );
 }
 
@@ -441,7 +421,7 @@ export default function Home() {
       <main id="top">
         <section className="mission-hero" aria-label="FireGuard mission overview">
           <div className="hero-copy"><p className="eyebrow">SATELLITE THERMAL INTELLIGENCE / INDIA</p><h1>See the heat.<br /><em>Understand the source.</em></h1><p>Satellite observations can identify thermal anomalies. FireGuard keeps the next question explicit: what does the location, recurrence, independent satellite evidence and incident provenance indicate?</p><div className="hero-actions"><a href="#workbench">Open analysis field <ChevronRight size={15} /></a><span>NO CLAIM WITHOUT EVIDENCE</span></div></div>
-          <ThermalIllustration selected={selected} />
+          <InteractiveEarth />
         </section>
 
         <section id="workbench" className="analysis-field" aria-label="Thermal anomaly analysis workbench">
