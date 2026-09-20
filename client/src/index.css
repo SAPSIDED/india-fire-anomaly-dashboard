@@ -345,13 +345,10 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 
 
 /* Interactive orbital Earth preview — landing panel only */
-.interactive-earth { position: relative; min-height: 450px; overflow: hidden; border: 1px solid rgba(61,77,79,.24); background: #d9ebe4; touch-action: none; }
-.interactive-earth canvas { display: block; width: 100%; height: 100%; min-height: 450px; cursor: grab; }
+.interactive-earth { position: relative; min-height: 560px; overflow: hidden; background: transparent; touch-action: none; }
+.interactive-earth canvas { display: block; width: 100%; height: 100%; min-height: 560px; cursor: grab; }
 .interactive-earth canvas:active { cursor: grabbing; }
-.earth-scan-caption { position: absolute; inset: 0 0 auto; display: flex; justify-content: space-between; padding: 13px 15px; color: #60736f; pointer-events: none; font: 500 9px "IBM Plex Mono", monospace; letter-spacing: .07em; }
-.earth-scan-caption span:last-child { color: #a56d3c; }
 @media (max-width: 680px) {
-  .interactive-earth { min-height: 360px; }
-  .interactive-earth canvas { min-height: 360px; }
-  .earth-scan-caption { font-size: 8px; }
+  .interactive-earth { min-height: 420px; }
+  .interactive-earth canvas { min-height: 420px; }
 }

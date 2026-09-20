@@ -1,6 +1,25 @@
 import React, { useEffect, useRef } from "react";
+import worldCountriesRaw from "@/data/worldCountries.geojson?raw";
 
 type Point = { lat: number; lon: number; phase: number };
+type CountryGeometry =
+  | { type: "Polygon"; coordinates: number[][][] }
+  | { type: "MultiPolygon"; coordinates: number[][][][] };
+type CountryFeature = { geometry: CountryGeometry | null; properties?: { NAME?: string } };
+type CountryCollection = { features: CountryFeature[] };
+
+const countryCollection = JSON.parse(worldCountriesRaw) as CountryCollection;
+const landmarks = [
+  { name: "Delhi", lat: 28.61, lon: 77.21 },
+  { name: "Mumbai", lat: 19.08, lon: 72.88 },
+  { name: "Kolkata", lat: 22.57, lon: 88.36 },
+  { name: "Bengaluru", lat: 12.97, lon: 77.59 },
+  { name: "Chennai", lat: 13.08, lon: 80.27 },
+  { name: "Singapore", lat: 1.35, lon: 103.82 },
+  { name: "Cairo", lat: 30.04, lon: 31.24 },
+  { name: "London", lat: 51.51, lon: -0.13 },
+  { name: "New York", lat: 40.71, lon: -74.01 },
+];
 
 const indiaHotspots: Point[] = [
   { lat: 28.6, lon: 77.2, phase: 0.1 },
@@ -74,8 +93,6 @@ export function InteractiveEarth() {
       const dprWidth = width;
       const dprHeight = height;
       context.clearRect(0, 0, dprWidth, dprHeight);
-      context.fillStyle = "#e8f0eb";
-      context.fillRect(0, 0, dprWidth, dprHeight);
 
       const radius = Math.min(dprWidth * 0.34, dprHeight * 0.39) * state.zoom;
       const centerX = dprWidth * 0.48;
@@ -105,19 +122,42 @@ export function InteractiveEarth() {
         drawArc(points, centerX, centerY, radius, "rgba(72, 102, 96, .24)");
       }
 
-      // Simplified land silhouettes: restrained low-poly shapes, intentionally not photorealistic.
-      const landShapes = [[[-125, 45], [-70, 52], [-55, 25], [-80, 10], [-115, 20]], [[-15, 35], [35, 60], [75, 42], [52, 10], [5, 5]], [[70, 30], [90, 27], [88, 7], [70, 10], [55, 20]], [[110, 40], [150, 45], [150, 10], [115, 5]], [[-55, -5], [-35, -12], [-45, -50], [-70, -20]]];
-      landShapes.forEach(shape => {
-        const projected = shape.map(([lon, lat]) => project(lat, lon, state.lon, state.lat, radius));
-        context.beginPath();
-        projected.forEach((point, index) => index ? context.lineTo(centerX + point.x, centerY + point.y) : context.moveTo(centerX + point.x, centerY + point.y));
-        context.closePath();
-        context.fillStyle = "rgba(119, 147, 129, .28)";
-        context.fill();
-        context.strokeStyle = "rgba(77, 111, 101, .35)";
-        context.lineWidth = 0.8;
-        context.stroke();
+      // Actual Natural Earth country polygons, projected onto the rotating sphere.
+      countryCollection.features.forEach(feature => {
+        if (!feature.geometry) return;
+        const polygons = feature.geometry.type === "Polygon" ? [feature.geometry.coordinates] : feature.geometry.coordinates;
+        polygons.forEach(polygon => polygon.forEach(ring => {
+          context.beginPath();
+          ring.forEach(([lon, lat], index) => {
+            const point = project(lat, lon, state.lon, state.lat, radius);
+            if (index === 0) context.moveTo(centerX + point.x, centerY + point.y);
+            else context.lineTo(centerX + point.x, centerY + point.y);
+          });
+          context.closePath();
+          context.fillStyle = "rgba(119, 147, 129, .18)";
+          context.fill();
+          context.strokeStyle = "rgba(57, 91, 84, .56)";
+          context.lineWidth = state.zoom > 1.08 ? 0.9 : 0.62;
+          context.stroke();
+        }));
       });
+      if (state.zoom > 0.94) {
+        landmarks.forEach(landmark => {
+          const point = project(landmark.lat, landmark.lon, state.lon, state.lat, radius);
+          if (point.z < 0.06) return;
+          const x = centerX + point.x;
+          const y = centerY + point.y;
+          context.beginPath();
+          context.arc(x, y, state.zoom > 1.12 ? 2.7 : 1.8, 0, Math.PI * 2);
+          context.fillStyle = "#536f66";
+          context.fill();
+          if (state.zoom > 1.12) {
+            context.font = '500 8px "IBM Plex Mono", monospace';
+            context.fillStyle = "#536f66";
+            context.fillText(landmark.name, x + 5, y - 4);
+          }
+        });
+      }
       context.restore();
 
       context.beginPath();
@@ -141,21 +181,37 @@ export function InteractiveEarth() {
       context.fillStyle = "#d99742";
       context.fill();
       context.restore();
-      context.beginPath();
-      context.moveTo(satX - 15, satY + 7);
-      context.lineTo(satX + 15, satY + 7);
-      context.moveTo(satX - 7, satY + 7);
-      context.lineTo(satX - 18, satY + 20);
-      context.moveTo(satX + 7, satY + 7);
-      context.lineTo(satX + 18, satY + 20);
-      context.strokeStyle = "#4c6761";
-      context.lineWidth = 1.4;
-      context.stroke();
+      // Compact 3D-styled orbital satellite: body, solar arrays, antenna and boom.
+      context.save();
+      context.translate(satX, satY);
+      context.rotate(-0.16);
+      context.fillStyle = "#758e88";
+      context.fillRect(-10, -7, 20, 13);
       context.fillStyle = "#d99742";
-      context.fillRect(satX - 6, satY - 2, 12, 9);
+      context.fillRect(-7, -4, 14, 7);
+      context.strokeStyle = "#496961";
+      context.lineWidth = 1;
+      context.strokeRect(-10, -7, 20, 13);
+      context.fillStyle = "#789f98";
+      context.fillRect(-32, -5, 18, 9);
+      context.fillRect(14, -5, 18, 9);
+      context.strokeStyle = "rgba(58, 92, 86, .8)";
+      context.strokeRect(-32, -5, 18, 9);
+      context.strokeRect(14, -5, 18, 9);
+      context.beginPath();
+      context.moveTo(0, 6);
+      context.lineTo(0, 19);
+      context.lineTo(12, 23);
+      context.moveTo(0, 19);
+      context.lineTo(-12, 23);
+      context.stroke();
+      context.beginPath();
+      context.arc(0, 21, 4, 0, Math.PI * 2);
+      context.stroke();
+      context.restore();
 
       if (indiaFacing) {
-        indiaHotspots.forEach((hotspot, index) => {
+        indiaHotspots.forEach(hotspot => {
           const point = project(hotspot.lat, hotspot.lon, state.lon, state.lat, radius);
           if (point.z < 0) return;
           const visibility = (Math.sin(age * 2.2 + hotspot.phase) + 1) / 2;
@@ -170,20 +226,9 @@ export function InteractiveEarth() {
           context.arc(x, y, 7 + visibility * 5, 0, Math.PI * 2);
           context.strokeStyle = `rgba(204, 78, 54, ${0.2 + visibility * 0.32})`;
           context.stroke();
-          if (index === 0) {
-            context.font = '500 8px "IBM Plex Mono", monospace';
-            context.fillStyle = "#7a5144";
-            context.fillText("INDIA SCAN", x + 9, y - 8);
-          }
         });
       }
 
-      context.font = '500 8px "IBM Plex Mono", monospace';
-      context.fillStyle = "#63746f";
-      context.fillText(indiaFacing ? "INDIA UNDER BEAM · TRANSIENT FIRMS SIGNALS" : "BEAM ACTIVE · INDIA OUTSIDE SCAN WINDOW", 15, 40);
-      context.fillStyle = "#657873";
-      context.fillText("DRAG TO ROTATE", 15, dprHeight - 18);
-      context.fillText("WHEEL TO ZOOM", dprWidth - 92, dprHeight - 18);
       frame = requestAnimationFrame(draw);
     };
 
@@ -203,5 +248,5 @@ export function InteractiveEarth() {
     return () => { cancelAnimationFrame(frame); observer.disconnect(); canvas.removeEventListener("pointerdown", pointerDown); canvas.removeEventListener("pointermove", pointerMove); canvas.removeEventListener("pointerup", pointerUp); canvas.removeEventListener("pointercancel", pointerUp); canvas.removeEventListener("wheel", wheel); };
   }, []);
 
-  return <div className="interactive-earth" aria-label="Interactive low-poly Earth scan. Drag to rotate, scroll to zoom."><canvas ref={canvasRef} /><div className="earth-scan-caption"><span>ORBITAL THERMAL SCAN</span><span>INDIA-FOCUSED MONITORING</span></div></div>;
+  return <div className="interactive-earth" aria-label="Interactive low-poly Earth scan with actual country boundaries and landmarks. Drag to rotate, scroll to zoom."><canvas ref={canvasRef} /></div>;
 }
