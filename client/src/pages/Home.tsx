@@ -3,7 +3,7 @@
  * intentionally remain unchanged; this file only reshapes how that information is presented.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
-import { MapView } from "@/components/Map";
+import { MapView, thermalMarkerColor } from "@/components/Map";
 import { ClimateClock, LiveClimateDashboard } from "@/components/LiveClimateDashboard";
 import { InteractiveEarth } from "@/components/InteractiveEarth";
 import { HotspotVerificationRail, type VerificationRailResult } from "@/components/HotspotVerificationRail";
@@ -40,6 +40,7 @@ type IndiaSnapshotHotspot = {
   acquiredTime: string | null;
   source: "firms-country" | "firms-wfs-india-fallback";
   fetchedAt: Date | string;
+  frpMw?: number | null;
 };
 
 const snapshotSourceLabel = (source?: IndiaSnapshotHotspot["source"]) => source === "firms-country"
@@ -215,7 +216,7 @@ export default function Home() {
       score: 55,
       outcome: "Requires source verification",
       location: { lat: latitude, lng: longitude },
-      frpMw: context?.frpMw ?? null,
+      frpMw: context?.frpMw ?? row.frpMw ?? null,
       namedFacilityMatch: context?.namedFacilityMatch ?? false,
       activeMonths: context?.activeMonths ?? null,
     };
@@ -224,7 +225,7 @@ export default function Home() {
     id: hotspot.id,
     location: hotspot.location,
     title: `${hotspot.place} — click to verify`,
-    color: hotspot.score > 70 ? "#d46b63" : "#e0ac68",
+    color: thermalMarkerColor(hotspot.frpMw, snapshotTargets.map(item => item.frpMw)),
     radiusM: hotspot.score > 70 ? 9_000 : 6_000,
     onClick: () => { setHasInteractedWithMap(true); setVerifierOpen(true); selectAndVerify(hotspot); },
     onSelect: () => setHasInteractedWithMap(true),
@@ -428,7 +429,8 @@ export default function Home() {
           <div className="section-cap analysis-field-cap"><div><h2 className="bungee-inline-regular">ACTIVE ANALYSIS FIELD</h2><p className="analysis-observation-line limelight-observation">Current India-wide thermal observation</p></div><div className="analysis-field-meta"><p className="bungee-inline-regular analysis-subtitle">From thermal signal to an evidence-backed screen.</p><ClimateClock timezone={liveWeather.data?.timezone ?? null} /></div></div>
           <div className={`workbench-shell ${verifierOpen ? "verification-open" : "verification-idle"}`}>
             <div className="map-workbench">
-              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
+              <div className="gis-visualization-label"><div><p className="eyebrow">GIS-BASED VISUALIZATION</p><p>Geolocated thermal detections rendered as a live map overlay, color-coded by fire radiative power.</p></div></div>
+              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span><div className="thermal-gradient-legend" aria-label="Low to high thermal intensity, based on FRP in megawatts"><span>THERMAL INTENSITY · FRP (MW)</span><i aria-hidden="true" /><small><span>LOW</span><span>HIGH</span></small></div>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
             </div>
             {verifierOpen && <div id="verification-results" className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} liveHotspotCount={snapshotTargets.length} /></div>}
           </div>

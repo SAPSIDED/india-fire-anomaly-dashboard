@@ -23,6 +23,10 @@ describe("Vercel map fallback interaction contract", () => {
     expect(source).toContain("namedFacilityMatch?: boolean");
     expect(source).toContain("activeMonths?: number | null");
     expect(source).toContain("thermalScale");
+    expect(source).toContain("thermalMarkerColor");
+    const css = readFileSync(resolve(process.cwd(), "client/src/index.css"), "utf8");
+    expect(css).toContain("#f6d889");
+    expect(css).toContain("#c23d37");
     expect(source).toContain("fireguard-factory-marker");
     expect(source).toContain("persistenceRings");
     expect(source).not.toContain("name=\"Exposure\"");
@@ -31,5 +35,12 @@ describe("Vercel map fallback interaction contract", () => {
     expect(source).toContain("onFirstHotspotClick");
     expect(source).toContain('return "#b86751"');
     expect(source).not.toContain("radar-target");
+  });
+
+  it("documents the GIS visualization label and FRP legend", () => {
+    const home = readFileSync(resolve(process.cwd(), "client/src/pages/Home.tsx"), "utf8");
+    expect(home).toContain("GIS-BASED VISUALIZATION");
+    expect(home).toContain("color-coded by fire radiative power");
+    expect(home).toContain("THERMAL INTENSITY · FRP (MW)");
   });
 });

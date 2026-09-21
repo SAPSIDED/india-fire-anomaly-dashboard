@@ -58,10 +58,28 @@ export type MapWind = {
   windDirectionDeg: number | null;
 };
 
-function layerColor(hotspot: FallbackMapHotspot, activeLayer: string) {
+export function thermalMarkerColor(value: number | null | undefined, allValues: Array<number | null | undefined>) {
+  const values = allValues.filter((item): item is number => typeof item === "number" && Number.isFinite(item));
+  if (typeof value !== "number" || !Number.isFinite(value) || values.length < 2) return "#b86751";
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const ratio = max === min ? 0.5 : Math.max(0, Math.min(1, (value - min) / (max - min)));
+  const stops = [
+    { at: 0, color: [246, 216, 137] },
+    { at: 0.5, color: [232, 143, 75] },
+    { at: 1, color: [194, 61, 55] },
+  ];
+  const left = ratio <= 0.5 ? stops[0] : stops[1];
+  const right = ratio <= 0.5 ? stops[1] : stops[2];
+  const local = (ratio - left.at) / (right.at - left.at);
+  const rgb = left.color.map((channel, index) => Math.round(channel + (right.color[index] - channel) * local));
+  return `rgb(${rgb.join(", ")})`;
+}
+
+function layerColor(hotspot: FallbackMapHotspot, activeLayer: string, allHotspots: FallbackMapHotspot[]) {
   if (activeLayer === "OSM context") return "#668a78";
   if (activeLayer === "Persistence") return "#786aa8";
-  return "#b86751";
+  return thermalMarkerColor(hotspot.frpMw, allHotspots.map(item => item.frpMw));
 }
 
 function layerRadius(hotspot: FallbackMapHotspot, activeLayer: string) {
@@ -160,7 +178,7 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radar
       </LayersControl>
 
       {hotspots.map(hotspot => {
-        const color = layerColor(hotspot, activeLayer);
+        const color = layerColor(hotspot, activeLayer, hotspots);
         const scale = activeLayer === "Thermal" ? thermalScale(hotspot, hotspots) : { size: 30, opacity: 0.82 };
         const rings = activeLayer === "Persistence" ? persistenceRings(hotspot) : 0;
         const iconVariant = activeLayer === "OSM context" && hotspot.namedFacilityMatch ? "factory" : "thermal";

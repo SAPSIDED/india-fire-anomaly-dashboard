@@ -13,6 +13,7 @@ const testState = vi.hoisted(() => ({
 vi.mock("../client/src/components/Map", async () => {
   const ReactModule = await import("react");
   return {
+    thermalMarkerColor: () => "#b86751",
     MapView: ({ onMapReady, fallbackHotspots = [] }: { onMapReady: (map: unknown) => void; fallbackHotspots?: Array<{ onClick: () => void }> }) => {
       ReactModule.useEffect(() => { onMapReady(new (globalThis as any).google.maps.Map()); }, []);
       return <div aria-label="Mocked Google Map"><button type="button" aria-label="Run source verification" onClick={() => fallbackHotspots[0]?.onClick()}>Run source verification</button></div>;
