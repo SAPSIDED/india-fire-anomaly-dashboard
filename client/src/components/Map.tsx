@@ -58,6 +58,11 @@ export type MapWind = {
   windDirectionDeg: number | null;
 };
 
+/** Preserve the muted thermal palette for the pre-verification map view. */
+export function thermalMarkerColor(_value: number | null | undefined, _allValues: Array<number | null | undefined>) {
+  return "#b86751";
+}
+
 function layerColor(hotspot: FallbackMapHotspot, activeLayer: string) {
   if (activeLayer === "OSM context") return "#668a78";
   if (activeLayer === "Persistence") return "#786aa8";
