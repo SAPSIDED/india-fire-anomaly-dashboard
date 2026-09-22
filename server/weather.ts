@@ -12,6 +12,7 @@ export type LiveWeather = {
   precipitationMm: number | null;
   weatherCode: number | null;
   timezone: string | null;
+  forecast: Array<{ time: string; windSpeedKmh: number | null; windDirectionDeg: number | null }>;
   detail: string;
 };
 
@@ -29,11 +30,15 @@ export async function getLiveWeather(lat: number, lng: number): Promise<LiveWeat
     return { ...cachedMemory.value, state: "cached", checkedAt: checkedAt(), detail: "Recent Open-Meteo reading." };
   }
   try {
-    const query = new URLSearchParams({ latitude: String(lat), longitude: String(lng), current: "temperature_2m,wind_speed_10m,wind_direction_10m,precipitation,weather_code", timezone: "auto" });
+    const query = new URLSearchParams({ latitude: String(lat), longitude: String(lng), current: "temperature_2m,wind_speed_10m,wind_direction_10m,precipitation,weather_code", hourly: "wind_speed_10m,wind_direction_10m", forecast_days: "2", timezone: "auto" });
     const response = await fetch(`https://api.open-meteo.com/v1/forecast?${query}`, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(8_000) });
     if (!response.ok) throw new Error(`Open-Meteo HTTP ${response.status}`);
-    const data = await response.json() as { current?: Record<string, number | undefined>; timezone?: string };
+    const data = await response.json() as { current?: Record<string, number | undefined>; hourly?: { time?: string[]; wind_speed_10m?: Array<number | null>; wind_direction_10m?: Array<number | null> }; timezone?: string };
     const current = data.current ?? {};
+    const hourly = data.hourly ?? {};
+    const times = Array.isArray(hourly.time) ? hourly.time : [];
+    const speeds = Array.isArray(hourly.wind_speed_10m) ? hourly.wind_speed_10m : [];
+    const directions = Array.isArray(hourly.wind_direction_10m) ? hourly.wind_direction_10m : [];
     const value: CacheRecord["value"] = {
       provider: "open-meteo", latitude: lat, longitude: lng,
       temperatureC: typeof current.temperature_2m === "number" ? current.temperature_2m : null,
@@ -42,6 +47,11 @@ export async function getLiveWeather(lat: number, lng: number): Promise<LiveWeat
       precipitationMm: typeof current.precipitation === "number" ? current.precipitation : null,
       weatherCode: typeof current.weather_code === "number" ? current.weather_code : null,
       timezone: typeof data.timezone === "string" ? data.timezone : null,
+      forecast: times.slice(0, 24).map((time, index) => ({
+        time,
+        windSpeedKmh: typeof speeds[index] === "number" ? speeds[index] as number : null,
+        windDirectionDeg: typeof directions[index] === "number" ? directions[index] as number : null,
+      })),
     };
     const fetchedAt = new Date();
     const record = { value, fetchedAt, expiresAt: new Date(fetchedAt.getTime() + TTL_MS) };
@@ -56,7 +66,7 @@ export async function getLiveWeather(lat: number, lng: number): Promise<LiveWeat
         return { ...value, state: "cached", checkedAt: checkedAt(), detail: `Cached Open-Meteo reading from ${persisted.fetchedAt.toISOString()}.` };
       }
     } catch { /* safe unavailable state below */ }
-    return { provider: "open-meteo", latitude: lat, longitude: lng, state: "unavailable", checkedAt: checkedAt(), temperatureC: null, windSpeedKmh: null, windDirectionDeg: null, precipitationMm: null, weatherCode: null, timezone: null, detail: "Open-Meteo did not return within the bounded live request." };
+    return { provider: "open-meteo", latitude: lat, longitude: lng, state: "unavailable", checkedAt: checkedAt(), temperatureC: null, windSpeedKmh: null, windDirectionDeg: null, precipitationMm: null, weatherCode: null, timezone: null, forecast: [], detail: "Open-Meteo did not return within the bounded live request." };
   }
 }
 

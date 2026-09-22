@@ -316,6 +316,13 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .wind-overlay strong { display: block; margin-top: 4px; font: 700 20px var(--display-face); letter-spacing: -.04em; }
 .wind-overlay small { display: block; margin-top: 4px; color: #b8c4bf; font: 9px "IBM Plex Mono", monospace; line-height: 1.45; }
 .wind-arrow { position: absolute; top: 38px; right: 18px; display: grid; place-items: center; width: 28px; height: 28px; color: #e0ac68; font: 700 28px/1 sans-serif; transform-origin: 50% 75%; transition: transform .35s cubic-bezier(.23,1,.32,1); }
+.wind-intensity-legend { display: grid; grid-template-columns: auto 92px auto; align-items: center; gap: 6px; margin-top: 9px; color: #b8c4bf; font: 7px "IBM Plex Mono", monospace; letter-spacing: .06em; }
+.wind-intensity-legend i { display: block; height: 4px; border-radius: 999px; background: linear-gradient(90deg, #93b9b1, #e0ac68 52%, #b86751); box-shadow: 0 0 7px rgba(224,172,104,.32); }
+.wind-playback { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 7px; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(246,239,224,.2); }
+.wind-playback button { padding: 4px 6px; border: 1px solid rgba(246,239,224,.28); border-radius: 2px; color: #f8f0e4; background: rgba(255,255,255,.06); font: 8px "IBM Plex Mono", monospace; cursor: pointer; }
+.wind-playback button:hover { background: rgba(224,172,104,.2); }
+.wind-playback input { width: 100%; accent-color: #e0ac68; cursor: pointer; }
+.wind-playback span { color: #e0ac68; font: 8px "IBM Plex Mono", monospace; white-space: nowrap; }
 .live-climate-dashboard { margin: 22px 0 0; padding: clamp(24px, 4vw, 52px); border: 1px solid rgba(54,70,73,.18); background: rgba(250,247,240,.82); box-shadow: 0 12px 30px rgba(54,70,73,.07); }
 .climate-dashboard-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
 .climate-dashboard-head h2 { max-width: 620px; margin: 5px 0 8px; color: #29363a; font: 500 clamp(30px, 4vw, 58px)/.98 var(--display-face); letter-spacing: -.06em; }

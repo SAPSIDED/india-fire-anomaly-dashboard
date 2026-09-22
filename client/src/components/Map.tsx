@@ -54,8 +54,10 @@ export type FallbackMapHotspot = {
 
 export type MapWind = {
   state: "available" | "cached" | "unavailable";
+  checkedAt?: string;
   windSpeedKmh: number | null;
   windDirectionDeg: number | null;
+  forecast?: Array<{ time: string; windSpeedKmh: number | null; windDirectionDeg: number | null }>;
 };
 
 /** Preserve the muted thermal palette for the pre-verification map view. */
@@ -205,6 +207,26 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
   const [useLeaflet, setUseLeaflet] = useState(false);
   const [radarActive, setRadarActive] = useState(true);
   const [showWind, setShowWind] = useState(false);
+  const [forecastIndex, setForecastIndex] = useState(0);
+  const [forecastPlaying, setForecastPlaying] = useState(false);
+
+  const forecast = wind?.forecast ?? [];
+  const forecastPoint = forecast[forecastIndex] ?? null;
+  const displaySpeed = forecastPoint?.windSpeedKmh ?? wind?.windSpeedKmh ?? null;
+  const displayDirection = forecastPoint?.windDirectionDeg ?? wind?.windDirectionDeg ?? null;
+
+  useEffect(() => {
+    setForecastIndex(0);
+    setForecastPlaying(false);
+  }, [wind?.checkedAt]);
+
+  useEffect(() => {
+    if (!showWind || !forecastPlaying || forecast.length < 2) return;
+    const timer = window.setInterval(() => {
+      setForecastIndex(current => current >= forecast.length - 1 ? 0 : current + 1);
+    }, 1800);
+    return () => window.clearInterval(timer);
+  }, [forecast.length, forecastPlaying, showWind]);
 
   const init = usePersistFn(async () => {
     if (map.current || initializing.current || useLeaflet) return;
@@ -275,15 +297,16 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
 
   const shellClassName = cn("relative w-full h-[500px] map-shell", isFullscreen && "map-shell-fullscreen", className);
   const fullscreenButton = <button type="button" className="map-fullscreen-button" onClick={toggleFullscreen} aria-label={isFullscreen ? "Exit full screen map" : "View map full screen"}>{isFullscreen ? "Exit full screen" : "Full screen map"}</button>;
-  const windAngle = wind?.windDirectionDeg == null ? 0 : (wind.windDirectionDeg + 180) % 360;
-  const windSpeed = typeof wind?.windSpeedKmh === "number" && Number.isFinite(wind.windSpeedKmh) ? wind.windSpeedKmh : 0;
+  const windAngle = displayDirection == null ? 0 : (displayDirection + 180) % 360;
+  const windSpeed = typeof displaySpeed === "number" && Number.isFinite(displaySpeed) ? displaySpeed : 0;
   const windDuration = Math.max(1.8, Math.min(5.8, 5.8 - windSpeed * 0.12));
   const windField = <div className={cn("wind-field", windSpeed === 0 && "wind-field-muted")} aria-hidden="true" style={{ transform: `rotate(${windAngle}deg)` }}>{Array.from({ length: 28 }, (_, index) => {
     const row = index % 7;
     const column = Math.floor(index / 7);
     return <i key={index} className="wind-stream" style={{ top: `${5 + row * 15}%`, left: `${-24 + column * 31}%`, width: `${18 + (index % 4) * 5}%`, animationDelay: `${-index * 0.21}s`, animationDuration: `${windDuration + (index % 3) * 0.18}s` }} />;
   })}</div>;
-  const windOverlay = <>{windField}<div className="wind-overlay" aria-label={wind?.windSpeedKmh == null ? "Live wind unavailable" : `Live wind ${wind.windSpeedKmh.toFixed(1)} kilometers per hour toward ${(windAngle).toFixed(0)} degrees`}><span className="wind-overlay-kicker">LIVE WIND / SPREAD VECTOR</span><strong>{wind?.windSpeedKmh == null ? "—" : `${wind.windSpeedKmh.toFixed(1)} km/h`}</strong><span className="wind-arrow" style={{ transform: `rotate(${windAngle}deg)` }}>↑</span><small>{wind?.windDirectionDeg == null ? "Awaiting Open-Meteo" : `toward ${windAngle.toFixed(0)}° · ${wind.state}`}</small></div></>;
+  const playbackLabel = forecastPoint?.time ? new Date(forecastPoint.time).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) : "NOW";
+  const windOverlay = <>{windField}<div className="wind-overlay" aria-label={displaySpeed == null ? "Live wind unavailable" : `Wind forecast ${displaySpeed.toFixed(1)} kilometers per hour toward ${windAngle.toFixed(0)} degrees`}><span className="wind-overlay-kicker">WIND / FIRE-SPREAD VECTOR</span><strong>{displaySpeed == null ? "—" : `${displaySpeed.toFixed(1)} km/h`}</strong><span className="wind-arrow" style={{ transform: `rotate(${windAngle}deg)` }}>↑</span><small>{displayDirection == null ? "Awaiting Open-Meteo" : `${forecastPoint ? `forecast ${playbackLabel}` : "live now"} · toward ${windAngle.toFixed(0)}°`}</small><div className="wind-intensity-legend" aria-label="Wind speed intensity legend"><span>CALM</span><i aria-hidden="true" /><span>STRONG</span></div>{forecast.length > 1 && <div className="wind-playback"><button type="button" onClick={() => setForecastPlaying(value => !value)}>{forecastPlaying ? "Pause" : "Play forecast"}</button><input type="range" min={0} max={forecast.length - 1} value={forecastIndex} onChange={event => { setForecastPlaying(false); setForecastIndex(Number(event.target.value)); }} aria-label="Forecast time" /><span>{playbackLabel}</span></div>}</div></>;
   const windToggle = <button type="button" className={cn("wind-toggle-button", showWind && "active")} onClick={() => setShowWind(value => !value)} aria-pressed={showWind} aria-label={showWind ? "Hide live wind overlay" : "Show live wind overlay"}>{showWind ? "Wind on" : "Wind"}</button>;
 
   if (useLeaflet) {
