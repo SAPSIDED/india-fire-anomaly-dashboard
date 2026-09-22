@@ -403,8 +403,8 @@ export default function Home() {
         infoWindow.setContent(content);
         infoWindow.open({ map, anchor: marker, shouldFocus: false });
       };
-      marker.addListener("mouseover", showSummary); marker.addListener("mouseout", () => infoWindow.close()); marker.addListener("click", showSummary);
-      zone.addListener("mouseover", showSummary); zone.addListener("mouseout", () => infoWindow.close()); zone.addListener("click", showSummary);
+      marker.addListener("click", showSummary);
+      zone.addListener("click", showSummary);
       mapMarkers.current.push(marker, zone, ...persistenceRings);
     });
     return () => { mapMarkers.current.forEach(marker => marker.setMap(null)); mapMarkers.current = []; };

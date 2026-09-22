@@ -39,5 +39,11 @@ describe("Vercel map fallback interaction contract", () => {
     expect(source).toContain("Array.from({ length: 28 }");
     expect(source).toContain("wind-stream");
     expect(source).toContain("windDirectionDeg");
+    expect(source).toContain("const [showWind, setShowWind]");
+    expect(source).toContain('"Wind on"');
+    expect(source).toContain('"Show live wind overlay"');
+    const css = readFileSync(resolve(process.cwd(), "client/src/index.css"), "utf8");
+    expect(css).toContain(".fireguard-google-popup button");
+    expect(css).toContain(".wind-toggle-button");
   });
 });

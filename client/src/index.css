@@ -174,11 +174,19 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .fireguard-provider-grid span { display: grid; gap: 2px; color: #44504e; font-size: 8px; line-height: 1.2; }
 .fireguard-provider-grid b { color: #9b5548; font-size: 7px; letter-spacing: .08em; }
 .fireguard-hotspot-popup small { max-width: 230px; }
+.fireguard-google-popup { width: 282px; padding: 14px 15px 13px; color: #273133; font-family: "IBM Plex Mono", monospace; font-size: 10px; line-height: 1.35; }
+.fireguard-google-popup strong { display: block; margin: 0 0 7px; color: #273133; font-family: var(--display-face); font-size: 14px; line-height: 1.2; letter-spacing: -.02em; }
+.fireguard-google-popup code { display: block; margin: 0 0 9px; color: #687571; font: 9px/1.3 "IBM Plex Mono", monospace; }
+.fireguard-google-popup small { display: block; margin-top: 8px; color: #69736f; font: 9px/1.45 "IBM Plex Mono", monospace; }
+.fireguard-google-popup button { display: block; width: max-content; margin-top: 11px; padding: 8px 10px; color: #fff8ec; border: 0; border-radius: 2px; background: #b86751; font: 600 9px/1 "IBM Plex Mono", monospace; cursor: pointer; }
+.fireguard-google-popup button:hover { background: #8e4c43; }
 
 .map-shell { isolation: isolate; }
 .map-shell-fullscreen { height: 100vh !important; width: 100vw !important; background: #e9efe9; z-index: 2000; }
 .map-fullscreen-button { position: absolute; z-index: 1200; top: 12px; left: 12px; padding: 8px 10px; border: 1px solid rgba(39,49,51,.2); border-radius: 2px; background: rgba(248,244,237,.94); color: #273133; font: 9px "IBM Plex Mono", monospace; letter-spacing: .04em; cursor: pointer; box-shadow: 0 3px 12px rgba(20,23,25,.12); }
 .map-fullscreen-button:hover { background: #fffaf1; color: #9b5548; }
+.wind-toggle-button { position: absolute; z-index: 1200; top: 12px; right: 12px; padding: 8px 11px; border: 1px solid rgba(39,49,51,.2); border-radius: 2px; color: #273133; background: rgba(248,244,237,.95); font: 600 9px "IBM Plex Mono", monospace; letter-spacing: .04em; cursor: pointer; box-shadow: 0 3px 12px rgba(20,23,25,.12); }
+.wind-toggle-button:hover, .wind-toggle-button.active { color: #fff8ec; border-color: #b86751; background: #b86751; }
 .fireguard-hotspot-hover-preview { width: 220px; color: #273133; font-family: "IBM Plex Mono", monospace; }
 .fireguard-hotspot-hover-preview img { display: block; width: 220px; height: 100px; margin: -2px 0 7px; object-fit: cover; border-radius: 2px; background: #dbe8e4; }
 .fireguard-hotspot-hover-preview strong { display: block; margin-bottom: 4px; font-family: var(--display-face); font-size: 12px; }
