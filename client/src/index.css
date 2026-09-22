@@ -297,10 +297,13 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 
 /* Live climate and persistence watch */
 .wind-overlay { position: absolute; z-index: 7; left: 18px; bottom: 48px; width: 172px; padding: 12px 13px; border: 1px solid rgba(246,239,224,.3); border-radius: 4px; color: #f8f0e4; background: linear-gradient(145deg, rgba(38,48,49,.9), rgba(14,20,21,.88)); box-shadow: 0 5px 0 rgba(8,11,12,.36), 0 12px 25px rgba(8,11,12,.2); backdrop-filter: blur(12px); }
-.wind-field { position: absolute; z-index: 6; inset: 0; overflow: hidden; pointer-events: none; opacity: .72; transform-origin: 50% 50%; transition: transform .5s cubic-bezier(.23,1,.32,1); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
-.wind-stream { position: absolute; display: block; width: 24%; height: 1px; border-top: 1px solid rgba(255,245,225,.62); filter: drop-shadow(0 0 3px rgba(224,172,104,.48)); animation: wind-stream-flow 3.6s linear infinite; }
-.wind-stream::after { content: ""; position: absolute; right: -1px; top: -4px; width: 7px; height: 7px; border-top: 1px solid rgba(255,245,225,.76); border-right: 1px solid rgba(255,245,225,.76); transform: rotate(45deg); }
-@keyframes wind-stream-flow { from { translate: -18vw 0; opacity: 0; } 18% { opacity: .8; } 78% { opacity: .72; } to { translate: 70vw 0; opacity: 0; } }
+.wind-field { position: absolute; z-index: 6; inset: 0; overflow: hidden; pointer-events: none; opacity: .52; transform-origin: 50% 50%; transition: transform .5s cubic-bezier(.23,1,.32,1); mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); }
+.wind-field::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 18% 30%, rgba(224,172,104,.16), transparent 24%), radial-gradient(circle at 76% 68%, rgba(167,195,201,.13), transparent 28%); }
+.wind-field-muted { opacity: .18; }
+.wind-stream { position: absolute; display: block; height: 2px; border-radius: 999px; background: linear-gradient(90deg, transparent, rgba(238,231,211,.18) 12%, rgba(240,218,168,.72) 52%, rgba(238,231,211,.08)); filter: drop-shadow(0 0 3px rgba(224,172,104,.36)); animation: wind-stream-flow 3.6s linear infinite; will-change: translate, opacity; }
+.wind-stream::before { content: ""; position: absolute; left: 18%; top: -2px; width: 5px; height: 5px; border-radius: 50%; background: rgba(240,218,168,.88); box-shadow: 0 0 8px rgba(224,172,104,.72); }
+.wind-stream::after { content: ""; position: absolute; right: 1px; top: -4px; width: 7px; height: 7px; border-top: 1px solid rgba(255,245,225,.76); border-right: 1px solid rgba(255,245,225,.76); transform: rotate(45deg); }
+@keyframes wind-stream-flow { from { translate: -20vw 0; opacity: 0; } 14% { opacity: .2; } 28% { opacity: .78; } 78% { opacity: .62; } to { translate: 74vw 0; opacity: 0; } }
 .wind-overlay-kicker { display: block; color: #e0ac68; font: 8px "IBM Plex Mono", monospace; letter-spacing: .09em; }
 .wind-overlay strong { display: block; margin-top: 4px; font: 700 20px var(--display-face); letter-spacing: -.04em; }
 .wind-overlay small { display: block; margin-top: 4px; color: #b8c4bf; font: 9px "IBM Plex Mono", monospace; line-height: 1.45; }

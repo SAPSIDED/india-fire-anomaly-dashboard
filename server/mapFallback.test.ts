@@ -32,4 +32,12 @@ describe("Vercel map fallback interaction contract", () => {
     expect(source).toContain('return "#b86751"');
     expect(source).not.toContain("radar-target");
   });
+
+  it("renders an additive animated wind vector field from existing weather data", () => {
+    expect(source).toContain("const windSpeed");
+    expect(source).toContain("windDuration");
+    expect(source).toContain("Array.from({ length: 28 }");
+    expect(source).toContain("wind-stream");
+    expect(source).toContain("windDirectionDeg");
+  });
 });

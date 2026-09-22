@@ -275,7 +275,13 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
   const shellClassName = cn("relative w-full h-[500px] map-shell", isFullscreen && "map-shell-fullscreen", className);
   const fullscreenButton = <button type="button" className="map-fullscreen-button" onClick={toggleFullscreen} aria-label={isFullscreen ? "Exit full screen map" : "View map full screen"}>{isFullscreen ? "Exit full screen" : "Full screen map"}</button>;
   const windAngle = wind?.windDirectionDeg == null ? 0 : (wind.windDirectionDeg + 180) % 360;
-  const windField = <div className="wind-field" aria-hidden="true" style={{ transform: `rotate(${windAngle}deg)` }}>{Array.from({ length: 12 }, (_, index) => <i key={index} className="wind-stream" style={{ top: `${8 + (index % 6) * 16}%`, left: `${-18 + Math.floor(index / 6) * 50}%`, animationDelay: `${index * -0.45}s` }} />)}</div>;
+  const windSpeed = typeof wind?.windSpeedKmh === "number" && Number.isFinite(wind.windSpeedKmh) ? wind.windSpeedKmh : 0;
+  const windDuration = Math.max(1.8, Math.min(5.8, 5.8 - windSpeed * 0.12));
+  const windField = <div className={cn("wind-field", windSpeed === 0 && "wind-field-muted")} aria-hidden="true" style={{ transform: `rotate(${windAngle}deg)` }}>{Array.from({ length: 28 }, (_, index) => {
+    const row = index % 7;
+    const column = Math.floor(index / 7);
+    return <i key={index} className="wind-stream" style={{ top: `${5 + row * 15}%`, left: `${-24 + column * 31}%`, width: `${18 + (index % 4) * 5}%`, animationDelay: `${-index * 0.21}s`, animationDuration: `${windDuration + (index % 3) * 0.18}s` }} />;
+  })}</div>;
   const windOverlay = <>{windField}<div className="wind-overlay" aria-label={wind?.windSpeedKmh == null ? "Live wind unavailable" : `Live wind ${wind.windSpeedKmh.toFixed(1)} kilometers per hour toward ${(windAngle).toFixed(0)} degrees`}><span className="wind-overlay-kicker">LIVE WIND / SPREAD VECTOR</span><strong>{wind?.windSpeedKmh == null ? "—" : `${wind.windSpeedKmh.toFixed(1)} km/h`}</strong><span className="wind-arrow" style={{ transform: `rotate(${windAngle}deg)` }}>↑</span><small>{wind?.windDirectionDeg == null ? "Awaiting Open-Meteo" : `toward ${windAngle.toFixed(0)}° · ${wind.state}`}</small></div></>;
 
   if (useLeaflet) {
