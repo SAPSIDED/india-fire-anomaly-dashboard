@@ -20,16 +20,12 @@ describe("Vercel deployment contract", () => {
     expect(config.outputDirectory).toBe("dist/public");
   });
 
-  it("proxies API requests before applying the SPA fallback", () => {
+  it("keeps the same-origin API function and applies only the map proxy plus SPA fallback", () => {
     expect(config.rewrites?.[0]).toEqual({
-      source: "/api/:path*",
-      destination: "https://firedash-4ykkjf9a.manus.space/api/:path*",
-    });
-    expect(config.rewrites?.[1]).toEqual({
       source: "/maps-proxy/:path*",
       destination: "https://forge.butterfly-effect.dev/v1/maps/proxy/:path*",
     });
-    expect(config.rewrites?.[2]).toEqual({
+    expect(config.rewrites?.[1]).toEqual({
       source: "/:path*",
       destination: "/index.html",
     });

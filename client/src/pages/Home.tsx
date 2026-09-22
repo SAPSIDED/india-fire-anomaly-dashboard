@@ -207,8 +207,8 @@ export default function Home() {
     const context = verifiedMapContext[`FIRMS-${row.id}`];
     return {
       id: `FIRMS-${row.id}`,
-      facility: "Current NASA FIRMS hotspot",
-      place: "Current India-wide thermal observation",
+      facility: `NASA FIRMS detection ${row.id}`,
+      place: `Live NASA FIRMS detection ${row.id}`,
       coords: `${latitude.toFixed(4)}°N · ${longitude.toFixed(4)}°E`,
       frp: row.brightness ? `${Number(row.brightness).toFixed(1)} K` : "—",
       confidence: row.confidence ?? "—",

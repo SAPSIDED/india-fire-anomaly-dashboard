@@ -1,6 +1,6 @@
 import React from "react";
 
-type Props = { prediction: { classification: "wildfire" | "industrial_facility" | "agricultural_burning" | "mining"; wildfireProbability: number; industrialProbability: number; agriculturalProbability: number; miningProbability: number; inference?: string; modelVersion?: string | null } | null };
+type Props = { prediction: { classification: "wildfire" | "industrial_facility" | "agricultural_burning" | "mining"; wildfireProbability: number; industrialProbability: number; agriculturalProbability: number; miningProbability: number; inference?: string; modelVersion?: string | null; wildfireGate?: "eligible" | "blocked" | "unknown"; wildfireGateReason?: string } | null };
 
 export function MLPredictionPanel({ prediction }: Props) {
   if (!prediction) {
@@ -38,6 +38,7 @@ export function MLPredictionPanel({ prediction }: Props) {
         <strong>{classificationLabel}</strong>
         <span>Model confidence: {confidence.toFixed(1)}%</span>
       </div>
+      {prediction.wildfireGate && <div className="ml-independence-note">FSI wildfire gate: <strong>{prediction.wildfireGate}</strong>{prediction.wildfireGateReason ? ` · ${prediction.wildfireGateReason}` : ""}</div>}
       <div className="ml-probabilities">
         {probabilities.map(item => (
           <div key={item.label} style={{ "--probability": `${item.value * 100}` } as React.CSSProperties}>

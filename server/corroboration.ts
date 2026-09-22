@@ -8,6 +8,7 @@ import { classifyCorroborationEvidence } from "./classification";
 import { classifyWithML } from "./mlClassifier";
 import { getActiveIncidentEvidence, getDetectionHistoryStatistics, getLongTermPersistence, getSourceEvidenceCache, recordDetectionHistory, saveSourceEvidenceCache, type DetectionHistoryInput, type DetectionHistoryStatistics, type IndiaHotspotSnapshotInput, type IndiaHotspotSnapshotSource } from "./db";
 import { fetchLandCover, type LandCoverResult } from "./landcover";
+import { fetchFsiForestContext, unavailableFsiForestContext } from "./fsiForestContext";
 import { lookupNearestGppdPlant, type GppdPlantReference } from "./gppdReference";
 import { assessFacilitySignals, type FacilitySignals } from "./facilityReference";
 import { lookupSeasonalAgriculturalBurning } from "./seasonalAgriculture";
@@ -651,6 +652,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
   const authorityIncidentEvidence = fetchAuthorityIncidentEvidence(input);
   let landCover: LandCoverResult | undefined;
   void landCoverFetcher(input.lat, input.lng).then(result => { landCover = result; }).catch(() => undefined);
+  const fsiForestContextPromise = fetchFsiForestContext(input.lat, input.lng);
   let gppdReference: GppdPlantReference | undefined;
   void gppdReferenceLookup(input.lat, input.lng).then(result => { gppdReference = result; }).catch(() => undefined);
   const evaluatedMonth = new Date().getUTCMonth() + 1;
@@ -682,6 +684,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
       detectionHistoryStatisticsReader(input.lat, input.lng),
       seasonalAgriculturalBurningReader(input.lat, input.lng, evaluatedMonth),
     ]);
+    const fsiForestContext = unavailableFsiForestContext();
     const classification = classifyCorroborationEvidence({
       industrialFeatures: industrial.features,
       industrialState: industrial.state,
@@ -697,6 +700,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     return {
       detectionId: input.detectionId, checkedAt, sourcesRunInParallel: true,
       firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
+      fsiForestContext,
       dayNightDetectionRatio: { state: detectionHistoryStatistics.state, dayDetections: detectionHistoryStatistics.dayDetections, nightDetections: detectionHistoryStatistics.nightDetections, ratio: detectionHistoryStatistics.dayToNightRatio, sampleCount: detectionHistoryStatistics.dayNightSampleCount },
       frpVariance: frpVarianceEvidence(detectionHistoryStatistics),
       seasonalAgriculturalBurning,
@@ -722,6 +726,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     detectionHistoryStatisticsReader(input.lat, input.lng),
     seasonalAgriculturalBurningReader(input.lat, input.lng, evaluatedMonth),
   ]);
+  const fsiForestContext = await fsiForestContextPromise;
   const mlResult = await classifyWithML(
     firmsCurrent.frpMw ?? 0,
     firmsCurrent.brightness ?? 0,
@@ -729,6 +734,10 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     firmsCurrent.confidence ?? 0,
     detectionHistoryStatistics.dayToNightRatio ?? 0,
     firmsHistory.detections,
+    {
+      pointForestStatus: fsiForestContext.pointForestStatus,
+      historicalForestFireDetections: fsiForestContext.historicalForestFireDetections,
+    },
   );
 
   const classification = classifyCorroborationEvidence({
@@ -777,6 +786,7 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
   return {
     detectionId: input.detectionId, checkedAt: nowIso(), sourcesRunInParallel: true,
     firmsCurrent, firmsHistory, firmsIndependentCurrent, industrial, weather, incidentEvidence, classification, longTermHistory,
+    fsiForestContext,
     ...(mlResult ? { mlPrediction: mlResult } : {}),
     dayNightDetectionRatio: { state: detectionHistoryStatistics.state, dayDetections: detectionHistoryStatistics.dayDetections, nightDetections: detectionHistoryStatistics.nightDetections, ratio: detectionHistoryStatistics.dayToNightRatio, sampleCount: detectionHistoryStatistics.dayNightSampleCount },
     frpVariance: frpVarianceEvidence(detectionHistoryStatistics),

@@ -35,4 +35,15 @@ describe("local Anaconda XGBoost inference", () => {
       expect(result?.wildfireProbability! + result!.industrialProbability + result!.agriculturalProbability + result!.miningProbability).toBeCloseTo(1, 5);
     }
   });
+
+  it("blocks wildfire outside an FSI forest point or without historical forest-fire evidence", async () => {
+    const outside = await classifyWithML(2, 310, 290, 80, 1.2, 1, { pointForestStatus: "outside", historicalForestFireDetections: 50 });
+    const unknown = await classifyWithML(2, 310, 290, 80, 1.2, 1, { pointForestStatus: "unknown", historicalForestFireDetections: 50 });
+    const noHistory = await classifyWithML(2, 310, 290, 80, 1.2, 1, { pointForestStatus: "inside", historicalForestFireDetections: 0 });
+    expect(outside?.wildfireGate).toBe("blocked");
+    expect(unknown?.wildfireGate).toBe("unknown");
+    expect(noHistory?.wildfireGate).toBe("unknown");
+    expect(outside?.classification).not.toBe("wildfire");
+    expect(unknown?.classification).not.toBe("wildfire");
+  });
 });

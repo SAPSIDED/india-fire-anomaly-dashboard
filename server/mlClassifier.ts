@@ -11,6 +11,13 @@ export type MLResult = {
   miningProbability: number;
   inference: "local-json-model" | "remote-service";
   modelVersion: string | null;
+  wildfireGate: "eligible" | "blocked" | "unknown";
+  wildfireGateReason: string;
+};
+
+export type WildfireGateInput = {
+  pointForestStatus: "inside" | "outside" | "unknown";
+  historicalForestFireDetections: number | null;
 };
 
 type XgbTree = {
@@ -85,7 +92,7 @@ function softmax(margins: number[]) {
   return exponents.map(value => value / total);
 }
 
-function localPredict(input: number[]): MLResult {
+function localPredict(input: number[], wildfireGate?: WildfireGateInput): MLResult {
   const artifact = loadArtifact();
   const learner = artifact.learner;
   const model = learner?.gradient_booster?.model;
@@ -101,7 +108,20 @@ function localPredict(input: number[]): MLResult {
     const classIndex = treeInfo[index] ?? index % numClasses;
     if (classIndex >= 0 && classIndex < numClasses) margins[classIndex] += treeContribution(tree, input);
   });
-  const probabilities = softmax(margins);
+  const rawProbabilities = softmax(margins);
+  const gate = !wildfireGate
+    ? "eligible" as const
+    : wildfireGate.pointForestStatus === "inside" && (wildfireGate.historicalForestFireDetections ?? 0) > 0
+    ? "eligible" as const
+    : wildfireGate?.pointForestStatus === "outside"
+      ? "blocked" as const
+      : "unknown" as const;
+  const probabilities = gate === "eligible" ? rawProbabilities : (() => {
+    const masked = [...rawProbabilities];
+    masked[0] = 0;
+    const total = masked.reduce((sum, value) => sum + value, 0) || 1;
+    return masked.map(value => value / total);
+  })();
   const prediction = probabilities.indexOf(Math.max(...probabilities));
   return {
     prediction,
@@ -112,6 +132,12 @@ function localPredict(input: number[]): MLResult {
     miningProbability: Number(probabilities[3].toFixed(6)),
     inference: "local-json-model",
     modelVersion: artifact.version?.join(".") ?? null,
+    wildfireGate: gate,
+    wildfireGateReason: gate === "eligible"
+      ? `Wildfire class permitted: FSI point forest gate is inside and ISFR historical forest-fire detections are ${wildfireGate?.historicalForestFireDetections}.`
+      : gate === "blocked"
+        ? "Wildfire class blocked: FSI point forest gate is outside forest."
+        : "Wildfire class withheld: point-level FSI forest membership or historical forest-fire evidence is unavailable.",
   };
 }
 
@@ -128,9 +154,10 @@ export async function classifyWithML(
   confidence: number,
   dayNightRatio: number,
   sevenDayDetectionCount: number,
+  wildfireGate?: WildfireGateInput,
 ): Promise<MLResult | null> {
   try {
-    return localPredict([frpMw, brightness, brightT31, confidence, dayNightRatio, sevenDayDetectionCount].map(featureValue));
+    return localPredict([frpMw, brightness, brightT31, confidence, dayNightRatio, sevenDayDetectionCount].map(featureValue), wildfireGate);
   } catch {
     return null;
   }
