@@ -3,11 +3,6 @@
   "buildCommand": "pnpm exec vite build && pnpm exec esbuild server/vercelTrpcHandler.ts --platform=node --packages=external --bundle --format=esm --outfile='api/trpc/[...path].js'",
   "installCommand": "pnpm install --frozen-lockfile",
   "outputDirectory": "dist/public",
-  "functions": {
-    "api/trpc/[...path].js": {
-      "includeFiles": "**/*.json"
-    }
-  },
   "rewrites": [
     {
       "source": "/maps-proxy/:path*",
