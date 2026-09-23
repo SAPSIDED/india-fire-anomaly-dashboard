@@ -1,8 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm exec vite build",
+  "buildCommand": "pnpm exec vite build && pnpm exec esbuild server/vercelTrpcHandler.ts --platform=node --packages=external --bundle --format=esm --outfile='api/trpc/[...path].js'",
   "installCommand": "pnpm install --frozen-lockfile",
   "outputDirectory": "dist/public",
+  "functions": {
+    "api/trpc/[...path].js": {
+      "includeFiles": ["ml/model/**", "server/data/**", "drizzle/**"]
+    }
+  },
   "rewrites": [
     {
       "source": "/maps-proxy/:path*",
