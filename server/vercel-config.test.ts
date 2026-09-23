@@ -20,15 +20,12 @@ describe("Vercel deployment contract", () => {
     expect(config.outputDirectory).toBe("dist/public");
   });
 
-  it("keeps the same-origin API function and applies only the map proxy plus SPA fallback", () => {
+  it("keeps the same-origin API function from being shadowed by rewrites", () => {
     expect(config.rewrites?.[0]).toEqual({
       source: "/maps-proxy/:path*",
       destination: "https://forge.butterfly-effect.dev/v1/maps/proxy/:path*",
     });
-    expect(config.rewrites?.[1]).toEqual({
-      source: "/:path*",
-      destination: "/index.html",
-    });
+    expect(config.rewrites).toHaveLength(1);
   });
 
   it("contains no private runtime secret values", () => {
