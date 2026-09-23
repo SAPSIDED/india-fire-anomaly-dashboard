@@ -5,7 +5,7 @@
   "outputDirectory": "dist/public",
   "functions": {
     "api/trpc/[...path].js": {
-      "includeFiles": ["ml/model/**", "server/data/**", "drizzle/**"]
+      "includeFiles": "**/*.json"
     }
   },
   "rewrites": [

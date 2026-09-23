@@ -20,11 +20,7 @@ describe("Vercel deployment contract", () => {
     expect(config.buildCommand).toContain("esbuild server/vercelTrpcHandler.ts");
     expect(config.installCommand).toBe("pnpm install --frozen-lockfile");
     expect(config.outputDirectory).toBe("dist/public");
-    expect(config.functions?.["api/trpc/[...path].js"]?.includeFiles).toEqual([
-      "ml/model/**",
-      "server/data/**",
-      "drizzle/**",
-    ]);
+    expect(config.functions?.["api/trpc/[...path].js"]?.includeFiles).toBe("**/*.json");
   });
 
   it("keeps the same-origin API function from being shadowed by rewrites", () => {
