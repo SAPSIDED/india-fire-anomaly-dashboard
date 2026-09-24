@@ -109,19 +109,25 @@ describe("Home marker verification response rendering", () => {
       { detectionId: "FIRMS-660079", lat: 32.88766, lng: 71.61832 },
       expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
     ));
-    expect(screen.getByRole("heading", { name: "GIS Spatial Verification" })).toBeTruthy();
-    expect(screen.getByRole("status").textContent).toContain("Retrieving source-backed spatial evidence");
-    expect(screen.getAllByText("CHECKING", { exact: true }).length).toBeGreaterThan(0);
+    expect(screen.getByText("Verifying selected hotspot…")).toBeTruthy();
+    expect(screen.getByText("LIVE CHECK IN PROGRESS")).toBeTruthy();
+    expect(screen.getByRole("status").textContent).toContain("Live source verification in progress");
+    expect(screen.getByLabelText("Selected anomaly analysis").getAttribute("aria-busy")).toBe("true");
 
     act(() => { testState.callbacks?.onSuccess(successfulResponse); });
+    expect(screen.getByText("Live source verification in progress")).toBeTruthy();
     await new Promise(resolve => setTimeout(resolve, 2_000));
-    expect(await screen.findByText("Thermal anomaly detected")).toBeTruthy();
-    expect(screen.getByText(/12\.34 MW/)).toBeTruthy();
-    expect(screen.getByText("No relevant OSM facility found within the analysis radius.")).toBeTruthy();
-    expect(screen.getByText("No relevant GPPD facility found within the analysis radius.")).toBeTruthy();
-    expect(screen.getByText(/17 stored detections/)).toBeTruthy();
-    expect(screen.getByText(/Bare Other/)).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Close GIS spatial verification" })).toBeTruthy();
+    expect(await screen.findByText("Industrial Thermal Source")).toBeTruthy();
+    expect(screen.getByText("HIGH CONFIDENCE.", { exact: false })).toBeTruthy();
+    expect(screen.queryByText("High", { exact: true })).toBeNull();
+    expect(screen.queryByText("RULE ENGINE CONFIDENCE", { exact: true })).toBeNull();
+    expect(screen.getByText("FRP (MW)", { exact: true })).toBeTruthy();
+    expect(screen.getByText("12.34", { exact: true })).toBeTruthy();
+    expect(screen.queryByText("BRIGHTNESS (K)", { exact: true })).toBeNull();
+    expect(screen.getByText(/2 live NASA FIRMS NOAA-20 detections/)).toBeTruthy();
+    expect(screen.getByText(/3 live nearby OSM industrial-context features/)).toBeTruthy();
+    expect(screen.getByText(/17 stored detections; 1 active month/)).toBeTruthy();
+    expect(screen.getByText(/bare other · Esri Sentinel-2 10m/)).toBeTruthy();
     expect(screen.getByText("LIVE HOTSPOTS — 1 hotspots detected")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Thermal" })).toBeNull();
     expect(screen.queryByRole("button", { name: "OSM context" })).toBeNull();
