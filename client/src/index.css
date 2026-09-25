@@ -191,6 +191,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .fireguard-hotspot-hover-preview img { display: block; width: 220px; height: 100px; margin: -2px 0 7px; object-fit: cover; border-radius: 2px; background: #dbe8e4; }
 .fireguard-hotspot-hover-preview strong { display: block; margin-bottom: 4px; font-family: var(--display-face); font-size: 12px; }
 .fireguard-hotspot-hover-preview span { display: block; color: #69736f; font-size: 8px; line-height: 1.35; }
+.fireguard-hotspot-hover-preview .fireguard-hover-verification-hint { margin: 5px 0 2px; color: #9b5548; font-weight: 600; }
 .fireguard-hotspot-hover-preview code { display: block; margin-top: 5px; color: #687571; font-size: 8px; }
 @media (max-width: 720px) { .map-fullscreen-button { top: 9px; left: 9px; padding: 7px 8px; font-size: 8px; } .fireguard-hotspot-hover-preview { width: 190px; } .fireguard-hotspot-hover-preview img { width: 190px; height: 88px; } }
 .ml-prediction-panel { margin-top: 18px; padding: 20px 22px; border: 1px solid rgba(226,229,220,.16); background: #181d1f; box-shadow: 0 12px 30px rgba(0,0,0,.16); }

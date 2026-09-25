@@ -13,6 +13,7 @@ describe("Vercel map fallback interaction contract", () => {
     expect(source).toContain("fireguard-provider-grid");
     expect(source).toContain("LIVE EVIDENCE · NASA FIRMS");
     expect(source).toContain("Run source verification");
+    expect(source).toContain("Click on the hotspot to run live verification check");
     expect(source).not.toContain("explorerIcon");
     expect(source).not.toContain("draggable");
     expect(source).not.toContain("Drag the field guide");

@@ -129,6 +129,7 @@ function HotspotHoverPreview({ hotspot }: { hotspot: FallbackMapHotspot }) {
   return <div className="fireguard-hotspot-hover-preview">
     <img src={satellitePreviewUrl(hotspot.location)} alt="Satellite preview around the current FIRMS location" loading="lazy" />
     <strong>{hotspot.title.replace(" — click to verify", "")}</strong>
+    <span className="fireguard-hover-verification-hint">Click on the hotspot to run live verification check</span>
     <span>Hover preview · public Esri World Imagery</span>
     <code>{hotspot.location.lat.toFixed(4)}°N · {hotspot.location.lng.toFixed(4)}°E</code>
   </div>;
