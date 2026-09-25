@@ -39,6 +39,9 @@ describe("HotspotVerificationRail", () => {
     expect(screen.getByText(/built up · public land-cover source/i)).toBeTruthy();
     expect(screen.getByText("Industrial Thermal Source")).toBeTruthy();
     expect(screen.getByText(/high confidence/i)).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /geographic context correlated/i })).toBeTruthy();
+    expect(screen.getByText(/GIS-BASED SPATIAL ANALYSIS/i)).toBeTruthy();
+    expect(screen.getByText(/4 detections · 2 active months/i)).toBeTruthy();
 
     rerender(<HotspotVerificationRail selected={selected} state="error" onVerify={onVerify} />);
     expect(screen.getByText(/no industrial-fire conclusion was issued/i)).toBeTruthy();
