@@ -34,10 +34,11 @@ describe("HotspotVerificationRail", () => {
     rerender(<HotspotVerificationRail selected={selected} state="complete" result={result} onVerify={onVerify} />);
     expect(screen.getByText(/2 nearby OSM industrial-context features/i)).toBeTruthy();
     expect(screen.getByText(/example works · man_made=works · refinery · 740 m/i)).toBeTruthy();
-    expect(screen.getByRole("link", { name: /open in openstreetmap/i }).getAttribute("href")).toBe("https://www.openstreetmap.org/way/123");
+    expect(screen.getAllByRole("link", { name: /open in openstreetmap/i })[0].getAttribute("href")).toBe("https://www.openstreetmap.org/way/123");
     expect(screen.getByText(/example thermal plant · coal · 450.5 mw · 1.25 km/i)).toBeTruthy();
-    expect(screen.getByText(/built up · public land-cover source/i)).toBeTruthy();
-    expect(screen.getByText("Industrial Thermal Source")).toBeTruthy();
+    expect(screen.getAllByText("Built Up").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("public land-cover source").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Industrial Thermal Source").length).toBeGreaterThan(0);
     expect(screen.getByText(/high confidence/i)).toBeTruthy();
     expect(screen.getByRole("heading", { name: /geographic context correlated/i })).toBeTruthy();
     expect(screen.getByText(/GIS-BASED SPATIAL ANALYSIS/i)).toBeTruthy();
@@ -60,9 +61,9 @@ describe("HotspotVerificationRail", () => {
     expect(onVerify).toHaveBeenCalledOnce();
 
     rerender(<HotspotVerificationRail selected={selected} state="complete" result={result} onVerify={onVerify} />);
-    expect(screen.getByText("Industrial Thermal Source")).toBeTruthy();
-    expect(screen.getByText(/public land-cover source/i)).toBeTruthy();
-    expect(screen.getByRole("link", { name: /open in openstreetmap/i })).toBeTruthy();
+    expect(screen.getAllByText("Industrial Thermal Source").length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/public land-cover source/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: /open in openstreetmap/i }).length).toBeGreaterThan(0);
   });
 
   it("does not render contextual facility cards or source links when neither optional reference is available", () => {

@@ -197,9 +197,9 @@ export function HotspotVerificationRail({
 
         <div className={`investigation-step ${activeStep === 0 ? "is-active" : ""}`} aria-current={activeStep === 0 ? "step" : undefined}>
           <b>01</b>
-          <span>
-            Thermal observation
-            <small>
+          <span className="step-content">
+            <strong>Thermal observation</strong>
+            <span className="step-detail">
               {loading
                 ? "Checking current NOAA-20 evidence…"
                 : failed
@@ -207,15 +207,15 @@ export function HotspotVerificationRail({
                   : complete
                     ? result.firmsCurrent.detail
                     : "Select this hotspot to query current FIRMS evidence."}
-            </small>
+            </span>
           </span>
         </div>
 
         <div className={`investigation-step ${activeStep === 1 ? "is-active" : ""}`} aria-current={activeStep === 1 ? "step" : undefined}>
           <b>02</b>
-          <span>
-            Geographic context
-            <small>
+          <span className="step-content">
+            <strong>Geographic context</strong>
+            <span className="step-detail">
               {loading
                 ? "Checking nearby industrial OSM context…"
                 : failed
@@ -223,7 +223,7 @@ export function HotspotVerificationRail({
                   : complete
                     ? result.industrial.detail
                     : "Industrial proximity not yet queried."}
-            </small>
+            </span>
 
             {complete &&
               (result.industrial.industrialFacilityType ||
@@ -293,9 +293,9 @@ export function HotspotVerificationRail({
 
         <div className={`investigation-step ${activeStep === 2 ? "is-active" : ""}`} aria-current={activeStep === 2 ? "step" : undefined}>
           <b>03</b>
-          <span>
-            Historical behaviour
-            <small>
+          <span className="step-content">
+            <strong>Historical behaviour</strong>
+            <span className="step-detail">
               {loading
                 ? "Checking seven-day and database persistence…"
                 : failed
@@ -303,15 +303,15 @@ export function HotspotVerificationRail({
                   : complete
                     ? `${result.firmsHistory.detail} ${persistence}`
                     : "Seven-day and long-term history not yet queried."}
-            </small>
+            </span>
           </span>
         </div>
 
         <div className={`investigation-step ${activeStep === 3 ? "is-active" : ""}`} aria-current={activeStep === 3 ? "step" : undefined}>
           <b>04</b>
-          <span>
-            Independent evidence
-            <small>
+          <span className="step-content">
+            <strong>Independent evidence</strong>
+            <span className="step-detail">
               {loading
                 ? "Checking land-cover and independent satellite context…"
                 : failed
@@ -319,18 +319,20 @@ export function HotspotVerificationRail({
                   : complete
                     ? result.landCover
                       ? (
-                        <span className="land-cover-evidence">
-                          <b>
-                            Land cover: {formatClassification(result.landCover.landCoverClass)}
-                          </b>
-                          <small>
-                            {result.landCover.landCoverClass.replaceAll("_", " ")} · {result.landCover.source}
-                          </small>
+                        <span className="land-cover-evidence" aria-label="Land-cover evidence">
+                          <span className="evidence-row">
+                            <b>LAND COVER</b>
+                            <strong>{formatClassification(result.landCover.landCoverClass)}</strong>
+                          </span>
+                          <span className="evidence-row">
+                            <b>SOURCE</b>
+                            <span>{result.landCover.source}</span>
+                          </span>
                         </span>
                       )
                       : "Land-cover evidence is unavailable; no substitute is shown."
                     : "Land-cover context not yet queried."}
-            </small>
+            </span>
           </span>
         </div>
       </div>
