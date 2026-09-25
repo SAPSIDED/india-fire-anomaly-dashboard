@@ -1,4 +1,6 @@
 import { getSourceEvidenceCache, saveSourceEvidenceCache } from "./db";
+import fs from "node:fs";
+import path from "node:path";
 
 const FOREST_COVER_DISTRICT_SERVICE = "https://livingatlas.esri.in/server1/rest/services/ForestSurvey/District_Wise_Forest_Cover_2023/MapServer/0";
 const FOREST_FIRE_DISTRICT_SERVICE = "https://livingatlas.esri.in/server1/rest/services/ForestSurvey/District_Wise_Forest_Fire/MapServer/0";
@@ -22,6 +24,9 @@ export type FsiForestContext = {
   districtFireDetections2022_23: number | null;
   districtFireDetections2023_24: number | null;
   historicalForestFireDetections: number | null;
+  researchForestCoverPct: number | null;
+  researchForestCoverYear: number | null;
+  researchForestCoverChangeSqKm: number | null;
   detail: string;
 };
 
@@ -79,7 +84,28 @@ function fireCount(attributes: Record<string, unknown>) {
 }
 
 function emptyContext(detail: string, state: EvidenceState = "unavailable"): FsiForestContext {
-  return { state, source: FSI_SOURCE, pointForestStatus: "unknown", pointForestClass: null, districtName: null, stateName: null, forestAreaSqKm: null, forestSharePct: null, districtFireDetections2022_23: null, districtFireDetections2023_24: null, historicalForestFireDetections: null, detail };
+  return { state, source: FSI_SOURCE, pointForestStatus: "unknown", pointForestClass: null, districtName: null, stateName: null, forestAreaSqKm: null, forestSharePct: null, districtFireDetections2022_23: null, districtFireDetections2023_24: null, historicalForestFireDetections: null, researchForestCoverPct: null, researchForestCoverYear: null, researchForestCoverChangeSqKm: null, detail };
+}
+
+type ResearchRow = { area: string; assessmentYear: number; forestCoverPctGeographicalArea: number | null; changeForestCoverSqKmVs2019: number | null };
+let researchRows: ResearchRow[] | undefined;
+function loadResearchRows() {
+  if (researchRows) return researchRows;
+  const candidates = [path.join(process.cwd(), "server/data/india_forest_cover_research.json"), path.join(process.cwd(), "dist/server/data/india_forest_cover_research.json")];
+  for (const candidate of candidates) {
+    try {
+      const payload = JSON.parse(fs.readFileSync(candidate, "utf8")) as { rows?: ResearchRow[] };
+      researchRows = payload.rows ?? [];
+      return researchRows;
+    } catch { /* Try the next deployment/source candidate. */ }
+  }
+  researchRows = [];
+  return researchRows;
+}
+function researchForState(stateName: string | null) {
+  if (!stateName) return undefined;
+  const normalized = stateName.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return loadResearchRows().find(row => row.area.toLowerCase().replace(/[^a-z0-9]/g, "") === normalized);
 }
 
 export function unavailableFsiForestContext(detail = "FSI/ISFR forest context was not available within the live evidence window.") {
@@ -122,13 +148,16 @@ export async function fetchFsiForestContext(lat: number, lng: number): Promise<F
         pointForestStatus = pointForestClass && ["very_dense_forest", "moderately_dense_forest", "open_forest"].includes(pointForestClass) ? "inside" : pointForestClass ? "outside" : "unknown";
       } catch { /* A missing point layer must remain unknown, never guessed. */ }
     }
+    const stateName = String(attr(forestAttributes, "statename") ?? attr(fireAttributes, "statename") ?? "") || null;
+    const research = researchForState(stateName);
     const result: FsiForestContext = {
       state: "available", source: FSI_SOURCE, pointForestStatus, pointForestClass,
       districtName: String(attr(forestAttributes, "districtname") ?? attr(fireAttributes, "districtname") ?? "") || null,
-      stateName: String(attr(forestAttributes, "statename") ?? attr(fireAttributes, "statename") ?? "") || null,
+      stateName,
       forestAreaSqKm: forestArea, forestSharePct: forestArea !== null && districtArea ? Number((forestArea / districtArea * 100).toFixed(2)) : numeric(attr(forestAttributes, "percalarea")),
       districtFireDetections2022_23: f2022, districtFireDetections2023_24: f2023, historicalForestFireDetections: historical,
-      detail: pointForestStatus === "unknown" ? "FSI/ISFR 2023 confirms district forest cover and historical forest-fire detections, but no point-level FSI forest polygon was configured; wildfire eligibility remains withheld rather than inferred from a district total." : `FSI point forest gate is ${pointForestStatus}; ISFR 2023 historical forest-fire detections in the district: ${historical ?? "unavailable"}.`,
+      researchForestCoverPct: research?.forestCoverPctGeographicalArea ?? null, researchForestCoverYear: research?.assessmentYear ?? null, researchForestCoverChangeSqKm: research?.changeForestCoverSqKmVs2019 ?? null,
+      detail: pointForestStatus === "unknown" ? `FSI/ISFR confirms district forest cover and historical forest-fire detections${research ? `; uploaded state research reports ${research.forestCoverPctGeographicalArea ?? "—"}% forest cover for ${stateName} (${research.assessmentYear})` : ""}, but no point-level FSI forest polygon was configured; wildfire eligibility remains withheld rather than inferred from a district total.` : `FSI point forest gate is ${pointForestStatus}; ISFR historical forest-fire detections in the district: ${historical ?? "unavailable"}${research ? `; uploaded state research reports ${research.forestCoverPctGeographicalArea ?? "—"}% forest cover for ${stateName} (${research.assessmentYear})` : ""}.`,
     };
     const fetchedAt = new Date();
     try { await cacheWriter({ cacheKey: key, provider: "fsi-isfr-2023", payload: JSON.stringify(result), fetchedAt, expiresAt: new Date(fetchedAt.getTime() + CACHE_TTL_MS) }); } catch { /* preserve live result */ }

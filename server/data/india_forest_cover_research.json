@@ -1,0 +1,367 @@
+{
+  "schemaVersion": 1,
+  "sourceFile": "india_forest_cover_research.csv",
+  "coverage": "Indian states and union territories; latest row per area",
+  "rows": [
+    {
+      "area": "Andaman & Nicobar Islands",
+      "unitType": "UT",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 8249.0,
+      "forestCoverSqKm": 6744.0,
+      "forestCoverPctGeographicalArea": 81.76,
+      "changeForestCoverSqKmVs2019": 1.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Andhra Pradesh",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 162968.0,
+      "forestCoverSqKm": 29784.0,
+      "forestCoverPctGeographicalArea": 18.27,
+      "changeForestCoverSqKmVs2019": 647.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Arunachal Pradesh",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 83743.0,
+      "forestCoverSqKm": 66431.0,
+      "forestCoverPctGeographicalArea": 79.33,
+      "changeForestCoverSqKmVs2019": -257.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Assam",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 78438.0,
+      "forestCoverSqKm": 28312.0,
+      "forestCoverPctGeographicalArea": 36.09,
+      "changeForestCoverSqKmVs2019": -15.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Bihar",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 94163.0,
+      "forestCoverSqKm": 7381.0,
+      "forestCoverPctGeographicalArea": 7.84,
+      "changeForestCoverSqKmVs2019": 75.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Chandigarh",
+      "unitType": "UT",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 114.0,
+      "forestCoverSqKm": 35.0,
+      "forestCoverPctGeographicalArea": 30.7,
+      "changeForestCoverSqKmVs2019": 0.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Chhattisgarh",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 135192.0,
+      "forestCoverSqKm": 55717.0,
+      "forestCoverPctGeographicalArea": 41.21,
+      "changeForestCoverSqKmVs2019": 106.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Dadra & Nagar Haveli and Daman & Diu",
+      "unitType": "UT",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 603.0,
+      "forestCoverSqKm": 228.0,
+      "forestCoverPctGeographicalArea": 37.81,
+      "changeForestCoverSqKmVs2019": 1.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Delhi",
+      "unitType": "UT",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 1483.0,
+      "forestCoverSqKm": 195.0,
+      "forestCoverPctGeographicalArea": 13.15,
+      "changeForestCoverSqKmVs2019": 0.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Goa",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 3702.0,
+      "forestCoverSqKm": 2244.0,
+      "forestCoverPctGeographicalArea": 60.61,
+      "changeForestCoverSqKmVs2019": 7.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Gujarat",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 196244.0,
+      "forestCoverSqKm": 14926.0,
+      "forestCoverPctGeographicalArea": 7.61,
+      "changeForestCoverSqKmVs2019": 69.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Haryana",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 44212.0,
+      "forestCoverSqKm": 1603.0,
+      "forestCoverPctGeographicalArea": 3.63,
+      "changeForestCoverSqKmVs2019": 1.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Himachal Pradesh",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 55673.0,
+      "forestCoverSqKm": 15443.0,
+      "forestCoverPctGeographicalArea": 27.74,
+      "changeForestCoverSqKmVs2019": 9.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Jammu & Kashmir",
+      "unitType": "UT",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 42241.0,
+      "forestCoverSqKm": 21387.0,
+      "forestCoverPctGeographicalArea": 50.63,
+      "changeForestCoverSqKmVs2019": -2225.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Jharkhand",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 79716.0,
+      "forestCoverSqKm": 23721.0,
+      "forestCoverPctGeographicalArea": 29.76,
+      "changeForestCoverSqKmVs2019": 110.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Karnataka",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 191791.0,
+      "forestCoverSqKm": 38730.0,
+      "forestCoverPctGeographicalArea": 20.2,
+      "changeForestCoverSqKmVs2019": 155.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Kerala",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 38863.0,
+      "forestCoverSqKm": 21253.0,
+      "forestCoverPctGeographicalArea": 54.69,
+      "changeForestCoverSqKmVs2019": 109.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Ladakh",
+      "unitType": "UT",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 59146.0,
+      "forestCoverSqKm": 2272.0,
+      "forestCoverPctGeographicalArea": 3.84,
+      "changeForestCoverSqKmVs2019": 2272.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Lakshadweep",
+      "unitType": "UT",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 30.0,
+      "forestCoverSqKm": 27.0,
+      "forestCoverPctGeographicalArea": 90.0,
+      "changeForestCoverSqKmVs2019": 0.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Madhya Pradesh",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 308252.0,
+      "forestCoverSqKm": 77493.0,
+      "forestCoverPctGeographicalArea": 25.14,
+      "changeForestCoverSqKmVs2019": 11.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Maharashtra",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 307713.0,
+      "forestCoverSqKm": 50798.0,
+      "forestCoverPctGeographicalArea": 16.51,
+      "changeForestCoverSqKmVs2019": 20.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Manipur",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 22327.0,
+      "forestCoverSqKm": 16598.0,
+      "forestCoverPctGeographicalArea": 74.34,
+      "changeForestCoverSqKmVs2019": -249.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Meghalaya",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 22429.0,
+      "forestCoverSqKm": 17046.0,
+      "forestCoverPctGeographicalArea": 76.0,
+      "changeForestCoverSqKmVs2019": -73.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Mizoram",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 21081.0,
+      "forestCoverSqKm": 17820.0,
+      "forestCoverPctGeographicalArea": 84.53,
+      "changeForestCoverSqKmVs2019": -186.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Nagaland",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 16579.0,
+      "forestCoverSqKm": 12251.0,
+      "forestCoverPctGeographicalArea": 73.9,
+      "changeForestCoverSqKmVs2019": -235.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Odisha",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 155707.0,
+      "forestCoverSqKm": 52156.0,
+      "forestCoverPctGeographicalArea": 33.5,
+      "changeForestCoverSqKmVs2019": 537.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Puducherry",
+      "unitType": "UT",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 490.0,
+      "forestCoverSqKm": 53.0,
+      "forestCoverPctGeographicalArea": 10.82,
+      "changeForestCoverSqKmVs2019": 1.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Punjab",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 50362.0,
+      "forestCoverSqKm": 1847.0,
+      "forestCoverPctGeographicalArea": 3.67,
+      "changeForestCoverSqKmVs2019": -2.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Rajasthan",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 342239.0,
+      "forestCoverSqKm": 16655.0,
+      "forestCoverPctGeographicalArea": 4.87,
+      "changeForestCoverSqKmVs2019": 25.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Sikkim",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 7096.0,
+      "forestCoverSqKm": 3341.0,
+      "forestCoverPctGeographicalArea": 47.08,
+      "changeForestCoverSqKmVs2019": -1.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Tamil Nadu",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 130060.0,
+      "forestCoverSqKm": 26419.0,
+      "forestCoverPctGeographicalArea": 20.31,
+      "changeForestCoverSqKmVs2019": 55.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Telangana",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 112077.0,
+      "forestCoverSqKm": 21214.0,
+      "forestCoverPctGeographicalArea": 18.93,
+      "changeForestCoverSqKmVs2019": 632.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Tripura",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 10486.0,
+      "forestCoverSqKm": 7722.0,
+      "forestCoverPctGeographicalArea": 73.64,
+      "changeForestCoverSqKmVs2019": -4.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Uttar Pradesh",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 240928.0,
+      "forestCoverSqKm": 14818.0,
+      "forestCoverPctGeographicalArea": 6.15,
+      "changeForestCoverSqKmVs2019": 12.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "Uttarakhand",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 53483.0,
+      "forestCoverSqKm": 24305.0,
+      "forestCoverPctGeographicalArea": 45.45,
+      "changeForestCoverSqKmVs2019": 2.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    },
+    {
+      "area": "West Bengal",
+      "unitType": "State",
+      "assessmentYear": 2021,
+      "geographicalAreaSqKm": 88752.0,
+      "forestCoverSqKm": 16832.0,
+      "forestCoverPctGeographicalArea": 18.96,
+      "changeForestCoverSqKmVs2019": -70.0,
+      "source": "User-supplied CSV derived from FSI/ISFR forest-cover research"
+    }
+  ]
+}
