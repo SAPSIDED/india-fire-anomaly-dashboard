@@ -63,10 +63,11 @@ const REQUEST_TIMEOUT_MS = 12_000;
 const RETRY_DELAYS_MS = [0, 300];
 const FIRMS_DETECTION_PREFERENCE_MS = 6_000;
 const FACILITY_SIGNAL_BUDGET_MS = 750;
-// Keep the response below the approximately 25-second production gateway limit.
+// Keep the response below the observed approximately 12-second production
+// runtime ceiling as well as the browser gateway limit.
 // Delayed upstream sources are returned as explicitly pending evidence instead
 // of allowing the browser request to be terminated with 0 bytes.
-let liveEvidenceWindowMs = 18_000;
+let liveEvidenceWindowMs = 8_000;
 const memoryCache = new Map<string, CacheRecord<unknown>>();
 let persistEvidenceCacheWrites = process.env.VITEST !== "true";
 let authorityEvidenceTestOverride: AuthorityIncidentSummary[] | undefined;
@@ -692,11 +693,11 @@ export async function evaluateCorroboration(input: { lat: number; lng: number; d
     const unavailableDetectionHistoryStatistics: DetectionHistoryStatistics = { state: "unavailable", dayDetections: 0, nightDetections: 0, dayToNightRatio: null, dayNightSampleCount: 0, frpSampleCount: 0, frpVarianceGroups: [] };
     const unavailableSeasonalAgriculturalBurning: Awaited<ReturnType<typeof seasonalAgriculturalBurningReader>> = { state: "unavailable", geographicState: null, month: evaluatedMonth, calendarState: "unavailable", season: null, contextLevel: null, source: "India seasonal agricultural-burning calendar", detail: "The local seasonal agricultural-burning calendar is unavailable; no agricultural interpretation has been inferred." };
     const unavailableIncidentEvidence: AuthorityIncidentEvidence = { state: "unavailable", records: [], provider: "fireguard-incident-ledger", checkedAt, detail: "The controlled authority/facility incident ledger did not respond within the bounded pending-response budget. No confirmed-incident verdict can be issued." };
-    const incidentEvidence = await resolveWithin(authorityIncidentEvidence, unavailableIncidentEvidence, 750);
+    const incidentEvidence = await resolveWithin(authorityIncidentEvidence, unavailableIncidentEvidence, 300);
     const [longTermHistory, detectionHistoryStatistics, seasonalAgriculturalBurning] = await Promise.all([
-      resolveWithin(longTermPersistenceReader(input.lat, input.lng), unavailableLongTermHistory, 750),
-      resolveWithin(detectionHistoryStatisticsReader(input.lat, input.lng), unavailableDetectionHistoryStatistics, 750),
-      resolveWithin(seasonalAgriculturalBurningReader(input.lat, input.lng, evaluatedMonth), unavailableSeasonalAgriculturalBurning, 750),
+      resolveWithin(longTermPersistenceReader(input.lat, input.lng), unavailableLongTermHistory, 300),
+      resolveWithin(detectionHistoryStatisticsReader(input.lat, input.lng), unavailableDetectionHistoryStatistics, 300),
+      resolveWithin(seasonalAgriculturalBurningReader(input.lat, input.lng, evaluatedMonth), unavailableSeasonalAgriculturalBurning, 300),
     ]);
     const fsiForestContext = unavailableFsiForestContext();
     const classification = classifyCorroborationEvidence({
@@ -828,7 +829,7 @@ export function clearEvidenceCacheForTests() {
   memoryCache.clear();
 }
 
-/** Deterministic test-only hook; production starts with the bounded 18-second evidence window. */
+/** Deterministic test-only hook; production starts with the bounded 8-second evidence window. */
 export function setLiveEvidenceWindowForTests(windowMs = 27_000) {
   liveEvidenceWindowMs = windowMs;
 }
