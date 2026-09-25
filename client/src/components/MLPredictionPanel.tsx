@@ -1,9 +1,27 @@
-import React from "react";
+import type { CSSProperties } from "react";
+import { predictWithNativeXgb, type NativeMLFeatures } from "@/lib/nativeXgbPredictor";
 
-type Props = { prediction: { classification: "wildfire" | "industrial_facility" | "agricultural_burning" | "mining"; wildfireProbability: number; industrialProbability: number; agriculturalProbability: number; miningProbability: number; inference?: string; modelVersion?: string | null; wildfireGate?: "eligible" | "blocked" | "unknown"; wildfireGateReason?: string } | null };
+type MLPrediction = {
+  classification: "wildfire" | "industrial_facility" | "agricultural_burning" | "mining";
+  wildfireProbability: number;
+  industrialProbability: number;
+  agriculturalProbability: number;
+  miningProbability: number;
+  inference?: "local-json-model" | "remote-service";
+  modelVersion?: string | null;
+  wildfireGate?: "eligible" | "blocked" | "unknown";
+  wildfireGateReason?: string;
+};
 
-export function MLPredictionPanel({ prediction }: Props) {
-  if (!prediction) {
+type Props = {
+  prediction: MLPrediction | null | undefined;
+  features?: NativeMLFeatures;
+};
+
+export function MLPredictionPanel({ prediction, features }: Props) {
+  const effectivePrediction: MLPrediction | null = prediction ?? (features ? predictWithNativeXgb(features) : null);
+
+  if (!effectivePrediction) {
     return (
       <div className="ml-prediction-panel ml-prediction-empty">
         <p className="eyebrow">AI SCREENING SIGNAL</p>
@@ -15,10 +33,10 @@ export function MLPredictionPanel({ prediction }: Props) {
   }
 
   const probabilities = [
-    { label: "Wildfire", value: prediction.wildfireProbability },
-    { label: "Industrial facility", value: prediction.industrialProbability },
-    { label: "Agricultural burning", value: prediction.agriculturalProbability },
-    { label: "Mining", value: prediction.miningProbability },
+    { label: "Wildfire", value: effectivePrediction.wildfireProbability },
+    { label: "Industrial facility", value: effectivePrediction.industrialProbability },
+    { label: "Agricultural burning", value: effectivePrediction.agriculturalProbability },
+    { label: "Mining", value: effectivePrediction.miningProbability },
   ];
 
   const confidence = Math.max(...probabilities.map(item => item.value)) * 100;
@@ -27,7 +45,7 @@ export function MLPredictionPanel({ prediction }: Props) {
     industrial_facility: "Likely industrial facility",
     agricultural_burning: "Likely agricultural burning",
     mining: "Likely mining activity",
-  }[prediction.classification];
+  }[effectivePrediction.classification];
 
   return (
     <div className="ml-prediction-panel">
@@ -38,16 +56,16 @@ export function MLPredictionPanel({ prediction }: Props) {
         <strong>{classificationLabel}</strong>
         <span>Model confidence: {confidence.toFixed(1)}%</span>
       </div>
-      {prediction.wildfireGate && <div className="ml-independence-note">FSI wildfire gate: <strong>{prediction.wildfireGate}</strong>{prediction.wildfireGateReason ? ` · ${prediction.wildfireGateReason}` : ""}</div>}
+      {effectivePrediction.wildfireGate && <div className="ml-independence-note">FSI wildfire gate: <strong>{effectivePrediction.wildfireGate}</strong>{effectivePrediction.wildfireGateReason ? ` · ${effectivePrediction.wildfireGateReason}` : ""}</div>}
       <div className="ml-probabilities">
         {probabilities.map(item => (
-          <div key={item.label} style={{ "--probability": `${item.value * 100}` } as React.CSSProperties}>
+          <div key={item.label} style={{ "--probability": `${item.value * 100}` } as CSSProperties}>
             <span>{item.label}</span>
             <b>{(item.value * 100).toFixed(1)}%</b>
           </div>
         ))}
       </div>
-      <small>Four-class XGBoost screening signal from thermal intensity and temporal behaviour. This prediction supports screening and does not replace source-backed corroboration.{prediction.modelVersion ? ` Model ${prediction.modelVersion}.` : ""}</small>
+      <small>Four-class XGBoost screening signal from thermal intensity and temporal behaviour. This prediction supports screening and does not replace source-backed corroboration.{effectivePrediction.modelVersion ? ` Model ${effectivePrediction.modelVersion}.` : ""}</small>
     </div>
   );
 }
