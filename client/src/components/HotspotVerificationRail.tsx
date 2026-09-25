@@ -336,6 +336,62 @@ export function HotspotVerificationRail({
       </div>
 
       <div className="verdict-cards">
+        <section
+          className={`gis-spatial-card ${complete ? "is-complete" : ""}`}
+          aria-labelledby="gis-spatial-analysis-title"
+        >
+          <span className="gis-spatial-eyebrow">GIS-BASED SPATIAL ANALYSIS</span>
+          <h4 id="gis-spatial-analysis-title">
+            {loading
+              ? "Spatial check in progress"
+              : failed
+                ? "Spatial context unavailable"
+                : complete
+                  ? "Geographic context correlated"
+                  : "Spatial evidence layer"}
+          </h4>
+          <p>
+            {loading
+              ? "Correlating this coordinate with nearby infrastructure, land cover, and persistence."
+              : failed
+                ? "No spatial conclusion was issued because source verification did not complete."
+                : complete
+                  ? "GIS shows what surrounds the anomaly and how its location behaves over time."
+                  : "See the geographic evidence gathered for this hotspot after verification."}
+          </p>
+
+          <dl className="gis-spatial-facts">
+            <div>
+              <dt>LOCATION</dt>
+              <dd>{selected.coords}</dd>
+            </div>
+            <div>
+              <dt>FACILITY CONTEXT</dt>
+              <dd>
+                {complete
+                  ? result.industrial.industrialFacilityName
+                    ? `${result.industrial.industrialFacilityName}${result.industrial.industrialFacilityDistanceM != null ? ` · ${formatDistance(result.industrial.industrialFacilityDistanceM)}` : ""}`
+                    : result.gppdReference
+                      ? `${result.gppdReference.name} · ${result.gppdReference.distanceKm.toFixed(2)} km`
+                      : "No named facility in radius"
+                  : "Awaiting spatial verification"}
+              </dd>
+            </div>
+            <div>
+              <dt>LAND COVER</dt>
+              <dd>{complete ? result.landCover ? formatClassification(result.landCover.landCoverClass) : "Unavailable" : "Awaiting spatial verification"}</dd>
+            </div>
+            <div>
+              <dt>PERSISTENCE</dt>
+              <dd>{complete && result.longTermHistory ? `${result.longTermHistory.totalDetectionCount} detections · ${result.longTermHistory.activeMonths} active months` : "Awaiting history"}</dd>
+            </div>
+          </dl>
+
+          <small className="gis-spatial-note">
+            Geographic evidence supports interpretation; it is not incident proof by itself.
+          </small>
+        </section>
+
         <div
           className={`screening-callout ${
             complete ? "has-classification" : ""
@@ -392,62 +448,6 @@ export function HotspotVerificationRail({
         </div>
 
         <MLPredictionPanel prediction={lastMLPrediction} />
-
-        <section
-          className={`gis-spatial-card ${complete ? "is-complete" : ""}`}
-          aria-labelledby="gis-spatial-analysis-title"
-        >
-          <span className="gis-spatial-eyebrow">GIS-BASED SPATIAL ANALYSIS</span>
-          <h4 id="gis-spatial-analysis-title">
-            {loading
-              ? "Spatial check in progress"
-              : failed
-                ? "Spatial context unavailable"
-                : complete
-                  ? "Geographic context correlated"
-                  : "Spatial evidence layer"}
-          </h4>
-          <p>
-            {loading
-              ? "Correlating this coordinate with nearby infrastructure, land cover, and persistence."
-              : failed
-                ? "No spatial conclusion was issued because source verification did not complete."
-                : complete
-                  ? "GIS shows what surrounds the anomaly and how its location behaves over time."
-                  : "See the geographic evidence gathered for this hotspot after verification."}
-          </p>
-
-          <dl className="gis-spatial-facts">
-            <div>
-              <dt>LOCATION</dt>
-              <dd>{selected.coords}</dd>
-            </div>
-            <div>
-              <dt>FACILITY CONTEXT</dt>
-              <dd>
-                {complete
-                  ? result.industrial.industrialFacilityName
-                    ? `${result.industrial.industrialFacilityName}${result.industrial.industrialFacilityDistanceM != null ? ` · ${formatDistance(result.industrial.industrialFacilityDistanceM)}` : ""}`
-                    : result.gppdReference
-                      ? `${result.gppdReference.name} · ${result.gppdReference.distanceKm.toFixed(2)} km`
-                      : "No named facility in radius"
-                  : "Awaiting spatial verification"}
-              </dd>
-            </div>
-            <div>
-              <dt>LAND COVER</dt>
-              <dd>{complete ? result.landCover ? formatClassification(result.landCover.landCoverClass) : "Unavailable" : "Awaiting spatial verification"}</dd>
-            </div>
-            <div>
-              <dt>PERSISTENCE</dt>
-              <dd>{complete && result.longTermHistory ? `${result.longTermHistory.totalDetectionCount} detections · ${result.longTermHistory.activeMonths} active months` : "Awaiting history"}</dd>
-            </div>
-          </dl>
-
-          <small className="gis-spatial-note">
-            Geographic evidence supports interpretation; it is not incident proof by itself.
-          </small>
-        </section>
       </div>
     </aside>
   );
