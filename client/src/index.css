@@ -56,6 +56,12 @@ button { cursor: pointer; }
 .fireguard-factory-marker { background: transparent; border: 0; }
 .fireguard-factory-marker span { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid color-mix(in srgb, var(--marker-color) 78%, white); border-radius: 9px; background: color-mix(in srgb, var(--marker-color) 16%, transparent); box-shadow: 0 4px 10px rgba(21,27,29,.22); }
 .fireguard-factory-marker svg { width: 28px; height: 28px; }
+.fireguard-marker-focused { z-index: 1000 !important; animation: fireguard-hotspot-focus-blink .46s ease-in-out 5; }
+@keyframes fireguard-hotspot-focus-blink {
+  0%, 100% { filter: brightness(1); transform: scale(1); }
+  50% { filter: brightness(1.75) saturate(1.15); transform: scale(1.28); }
+}
+@media (prefers-reduced-motion: reduce) { .fireguard-marker-focused { animation: none; filter: brightness(1.45); } }
 .live-count-badge { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; padding: 6px 9px; border: 1px solid rgba(217,151,66,.42); border-radius: 999px; color: #f4e9d8; background: linear-gradient(145deg, rgba(224,172,104,.22), rgba(20,25,27,.84)); box-shadow: 0 3px 0 rgba(9,12,13,.48), 0 8px 16px rgba(9,12,13,.16), inset 0 1px rgba(255,255,255,.12); font: 9px "IBM Plex Mono", monospace; letter-spacing: .04em; }
 .map-layer-legend { display: inline-flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-top: 7px; font: 8px "IBM Plex Mono", monospace; color: #64716e; }
 .map-layer-legend .legend-sample { display: inline-flex; align-items: center; gap: 3px; }

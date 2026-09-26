@@ -179,6 +179,7 @@ export default function Home() {
   const [lastMLPrediction, setLastMLPrediction] = useState<{ classification: "wildfire" | "industrial_facility" | "agricultural_burning" | "mining"; wildfireProbability: number; industrialProbability: number; agriculturalProbability: number; miningProbability: number } | null>(null);
   const [verifiedMapContext, setVerifiedMapContext] = useState<Record<string, { frpMw: number | null; namedFacilityMatch: boolean; activeMonths: number | null }>>({});
   const thermalFieldRef = useRef<HTMLDivElement>(null);
+  const analysisFieldRef = useRef<HTMLElement>(null);
   const { user, isAuthenticated } = useAuth();
   const corroboration = trpc.corroboration.run.useMutation();
   const authorityRecord = trpc.incidentEvidence.record.useMutation();
@@ -240,7 +241,7 @@ export default function Home() {
     setSelected(target);
     setHasInteractedWithMap(true);
     setVerifierOpen(false);
-    thermalFieldRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    analysisFieldRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     setFocusedHotspot({ id: target.id, location: target.location, token: Date.now() });
     map?.panTo(target.location);
     map?.setZoom(Math.max(map.getZoom?.() ?? 5, 8));
@@ -440,7 +441,7 @@ export default function Home() {
           <InteractiveEarth />
         </section>
 
-        <section id="workbench" className="analysis-field" aria-label="Thermal anomaly analysis workbench">
+        <section ref={analysisFieldRef} id="workbench" className="analysis-field" aria-label="Thermal anomaly analysis workbench">
           <div className="section-cap analysis-field-cap"><div><h2 className="bungee-inline-regular">ACTIVE ANALYSIS FIELD</h2><p className="analysis-observation-line limelight-observation">Current India-wide thermal observation</p></div><div className="analysis-field-meta"><p className="bungee-inline-regular analysis-subtitle">From thermal signal to an evidence-backed screen.</p><ClimateClock timezone={liveWeather.data?.timezone ?? null} /></div></div>
           <div className={`workbench-shell ${verifierOpen ? "verification-open" : "verification-idle"}`}>
             <div className="map-workbench">

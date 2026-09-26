@@ -91,17 +91,17 @@ interface MapViewProps {
   wind?: MapWind;
 }
 
-function hotspotIcon(color: string, variant: "thermal" | "factory" = "thermal", size = 30, opacity = 0.82) {
+function hotspotIcon(color: string, variant: "thermal" | "factory" = "thermal", size = 30, opacity = 0.82, focused = false) {
   if (variant === "factory") {
     return L.divIcon({
-      className: "fireguard-factory-marker",
+      className: cn("fireguard-factory-marker", focused && "fireguard-marker-focused"),
       html: `<span style="--marker-color:${color};--marker-opacity:${opacity}" aria-label="Confirmed nearby OSM industrial facility"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 27V14l7 4v-8l7 4V7l10 6v14H4Z" fill="var(--marker-color)" fill-opacity=".92" stroke="#f2eee6" stroke-width="1.7"/><path d="M8 27v-6h4v6m5 0v-6h4v6m5 0v-6h3v6" fill="none" stroke="#f2eee6" stroke-width="1.5"/></svg></span>`,
       iconSize: [34, 34],
       iconAnchor: [17, 17],
     });
   }
   return L.divIcon({
-    className: "fireguard-leaflet-marker",
+    className: cn("fireguard-leaflet-marker", focused && "fireguard-marker-focused"),
     html: `<span style="--marker-color:${color};--marker-size:${size}px;--marker-opacity:${opacity}"><i></i></span>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
@@ -187,7 +187,8 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radar
         const scale = activeLayer === "Thermal" ? thermalScale(hotspot, hotspots) : { size: 30, opacity: 0.82 };
         const rings = activeLayer === "Persistence" ? persistenceRings(hotspot) : 0;
         const iconVariant = activeLayer === "OSM context" && hotspot.namedFacilityMatch ? "factory" : "thermal";
-        return <Fragment key={hotspot.id}>
+        const isFocused = focusHotspot?.id === hotspot.id;
+        return <Fragment key={`${hotspot.id}-${isFocused ? focusHotspot?.token : "stable"}`}>
           <LeafletCircle
             center={[hotspot.location.lat, hotspot.location.lng]}
             radius={layerRadius(hotspot, activeLayer)}
@@ -199,7 +200,7 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radar
             </LeafletPopup>
           </LeafletCircle>
           {Array.from({ length: rings }, (_, index) => <LeafletCircle key={`${hotspot.id}-ring-${index}`} center={[hotspot.location.lat, hotspot.location.lng]} radius={layerRadius(hotspot, activeLayer) + (index + 1) * 2_500} pathOptions={{ color: "#786aa8", weight: 1.2, opacity: 0.7 - index * 0.12, fillOpacity: 0, dashArray: "4 7" }} />)}
-          <LeafletMarker ref={marker => { markerRefs.current[hotspot.id] = marker; }} position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(color, iconVariant, scale.size, scale.opacity)} eventHandlers={{ click: () => { hotspot.onSelect?.(); } }}>
+          <LeafletMarker ref={marker => { markerRefs.current[hotspot.id] = marker; }} position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(color, iconVariant, scale.size, scale.opacity, isFocused)} eventHandlers={{ click: () => { hotspot.onSelect?.(); } }}>
             <LeafletTooltip direction="top" offset={[0, -12]} opacity={1} interactive>
               <HotspotHoverPreview hotspot={hotspot} />
             </LeafletTooltip>
