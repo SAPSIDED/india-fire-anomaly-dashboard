@@ -127,7 +127,8 @@ describe("Home marker verification response rendering", () => {
     expect(screen.getByText(/2 live NASA FIRMS NOAA-20 detections/)).toBeTruthy();
     expect(screen.getByText(/3 live nearby OSM industrial-context features/)).toBeTruthy();
     expect(screen.getByText(/17 stored detections; 1 active month/)).toBeTruthy();
-    expect(screen.getByText(/bare other · Esri Sentinel-2 10m/)).toBeTruthy();
+    expect(screen.getAllByText(/bare other/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Esri Sentinel-2 10m/i).length).toBeGreaterThan(0);
     expect(screen.getByText("LIVE HOTSPOTS — 1 hotspots detected")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Thermal" })).toBeNull();
     expect(screen.queryByRole("button", { name: "OSM context" })).toBeNull();

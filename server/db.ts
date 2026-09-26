@@ -278,6 +278,14 @@ function distanceKmForAlert(latA: number, lngA: number, latB: number, lngB: numb
   return 6371 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
 }
 
+/** Stable FIRMS location cell at roughly 1.1 km latitude resolution. FIRMS
+ * geolocation can move slightly between passes; this joins only the same
+ * small cell and prevents an 8 km radius from copying one region's counts
+ * across multiple unrelated snapshot points. */
+export function persistenceCoordinateKey(latitude: number, longitude: number) {
+  return `${latitude.toFixed(2)},${longitude.toFixed(2)}`;
+}
+
 /** Builds a lightweight, read-only alert feed from the current FIRMS snapshot and stored history. */
 export async function getPersistentHotspotAlerts() {
   const db = await getDb();
@@ -288,13 +296,30 @@ export async function getPersistentHotspotAlerts() {
       db.select({ latitude: detectionHistory.latitude, longitude: detectionHistory.longitude, detectionDate: detectionHistory.detectionDate }).from(detectionHistory),
       db.select({ name: gppdReference.name, primaryFuel: gppdReference.primaryFuel, capacityMw: gppdReference.capacityMw, latitude: gppdReference.latitude, longitude: gppdReference.longitude }).from(gppdReference),
     ]);
+    const historyByLocation = new Map<string, Set<string>>();
+    for (const item of historyRows) {
+      const latitude = Number(item.latitude);
+      const longitude = Number(item.longitude);
+      const date = new Date(item.detectionDate);
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Number.isNaN(date.getTime())) continue;
+      const key = persistenceCoordinateKey(latitude, longitude);
+      const dates = historyByLocation.get(key) ?? new Set<string>();
+      dates.add(date.toISOString().slice(0, 10));
+      historyByLocation.set(key, dates);
+    }
+    const seenLocations = new Set<string>();
     return snapshotRows.flatMap(row => {
       const lat = Number(row.latitude);
       const lng = Number(row.longitude);
-      const nearbyHistory = historyRows.filter(item => distanceKmForAlert(lat, lng, Number(item.latitude), Number(item.longitude)) <= 8);
-      const dates = new Set(nearbyHistory.map(item => new Date(item.detectionDate).toISOString().slice(0, 10)));
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return [];
+      const locationKey = persistenceCoordinateKey(lat, lng);
+      if (seenLocations.has(locationKey)) return [];
+      seenLocations.add(locationKey);
+      const dates = historyByLocation.get(locationKey) ?? new Set<string>();
       const months = new Set(Array.from(dates, date => date.slice(0, 7)));
-      if (dates.size < 3 && months.size < 2) return [];
+      // Alert threshold: at least 3 distinct observation dates spanning at
+      // least 2 calendar months at this exact FIRMS coordinate group.
+      if (dates.size < 3 || months.size < 2) return [];
       const nearestPlant = plants.map(plant => ({ plant, distanceKm: distanceKmForAlert(lat, lng, Number(plant.latitude), Number(plant.longitude)) }))
         .filter(candidate => candidate.distanceKm <= 10).sort((a, b) => a.distanceKm - b.distanceKm)[0];
       return [{
@@ -302,7 +327,7 @@ export async function getPersistentHotspotAlerts() {
         persistenceDetections: dates.size, activeMonths: months.size,
         facility: nearestPlant ? { name: nearestPlant.plant.name, fuelType: nearestPlant.plant.primaryFuel, capacityMw: nearestPlant.plant.capacityMw === null ? null : Number(nearestPlant.plant.capacityMw), distanceKm: Number(nearestPlant.distanceKm.toFixed(2)) } : null,
       }];
-    }).sort((a, b) => b.persistenceDetections - a.persistenceDetections);
+    }).sort((a, b) => b.persistenceDetections - a.persistenceDetections || b.activeMonths - a.activeMonths || a.hotspotId - b.hotspotId);
   } catch {
     return [];
   }

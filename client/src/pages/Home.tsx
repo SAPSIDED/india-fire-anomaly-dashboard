@@ -4,7 +4,7 @@
  */
 import React, { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { MapView, thermalMarkerColor } from "@/components/Map";
-import { ClimateClock, LiveClimateDashboard } from "@/components/LiveClimateDashboard";
+import { ClimateClock, LiveClimateDashboard, type PersistenceAlert } from "@/components/LiveClimateDashboard";
 import { InteractiveEarth } from "@/components/InteractiveEarth";
 import { HotspotVerificationRail, type VerificationRailResult } from "@/components/HotspotVerificationRail";
 import { MLPredictionPanel } from "@/components/MLPredictionPanel";
@@ -230,6 +230,17 @@ export default function Home() {
     onClick: () => { setHasInteractedWithMap(true); setVerifierOpen(true); selectAndVerify(hotspot); },
     onSelect: () => setHasInteractedWithMap(true),
   }));
+  const selectPersistenceAlert = (alert: PersistenceAlert) => {
+    const target = (snapshotTargets.length > 0 ? snapshotTargets : hotspots).find(hotspot =>
+      Math.abs(hotspot.location.lat - alert.latitude) < 0.0002 &&
+      Math.abs(hotspot.location.lng - alert.longitude) < 0.0002,
+    );
+    if (!target) return;
+    setSelected(target);
+    setHasInteractedWithMap(true);
+    map?.panTo(target.location);
+    map?.setZoom(Math.max(map.getZoom?.() ?? 5, 8));
+  };
 
   useEffect(() => {
     if (snapshotTargets.length > 0 && selected.id === hotspots[0].id) setSelected(snapshotTargets[0]);
@@ -434,7 +445,7 @@ export default function Home() {
             </div>
             {verifierOpen && <div id="verification-results" className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} liveHotspotCount={snapshotTargets.length} /></div>}
           </div>
-          <LiveClimateDashboard weather={liveWeather.data} alerts={persistenceAlerts.data ?? []} loading={persistenceAlerts.isLoading} />
+          <LiveClimateDashboard weather={liveWeather.data} alerts={persistenceAlerts.data ?? []} loading={persistenceAlerts.isLoading} onSelectAlert={selectPersistenceAlert} />
         </section>
 
         <section id="pipeline" className="investigation-section" aria-label="Thermal investigation method"><div className="section-cap"><div><p className="eyebrow">INVESTIGATION PIPELINE</p><h2>A thermal anomaly does not explain itself.</h2></div><p>Every assessment keeps acquisition, context and corroboration separate so the conclusion can be reviewed rather than merely accepted.</p></div><ol className="investigation-flow"><li><b>01</b><div><h3>Thermal signal</h3><p>Something unusual was observed.</p></div></li><li><b>02</b><div><h3>Location context</h3><p>What exists around the coordinate?</p></div></li><li><b>03</b><div><h3>Temporal behaviour</h3><p>Does the signal recur in place?</p></div></li><li><b>04</b><div><h3>Satellite evidence</h3><p>Does a second source agree?</p></div></li><li><b>05</b><div><h3>Screened outcome</h3><p>What can responsibly be said?</p></div></li></ol></section>
