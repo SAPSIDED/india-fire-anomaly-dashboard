@@ -160,7 +160,13 @@ function LeafletHotspotFocus({ focusHotspot, markerRefs }: { focusHotspot?: Focu
   useEffect(() => {
     if (!focusHotspot) return;
     map.flyTo([focusHotspot.location.lat, focusHotspot.location.lng], Math.max(map.getZoom(), 8), { duration: 0.65 });
-    markerRefs.current[focusHotspot.id]?.openPopup();
+    const openFocusedPopup = () => markerRefs.current[focusHotspot.id]?.openPopup();
+    const animationFrame = window.requestAnimationFrame(openFocusedPopup);
+    const delayedOpen = window.setTimeout(openFocusedPopup, 760);
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.clearTimeout(delayedOpen);
+    };
   }, [focusHotspot?.token, map, markerRefs]);
   return null;
 }
