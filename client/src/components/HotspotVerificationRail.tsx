@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import type { HotspotVerificationState } from "@/lib/hotspotVerification";
 import { MLPredictionPanel } from "@/components/MLPredictionPanel";
+import { FinalAssessmentPanel } from "@/components/FinalAssessmentPanel";
+import type { ConclusionAiClassification, ConclusionRuleBasedResult } from "@shared/conclusion";
 import "./HotspotVerificationRail.css";
 
 export type VerificationRailTarget = {
@@ -46,19 +48,11 @@ export type VerificationRailResult = {
     distanceKm: number;
     source: string;
   };
-  classification: {
-    classification: string;
-    confidence: string;
-    reason: string;
-  };
+  classification: ConclusionRuleBasedResult;
 };
 
 type MLPrediction = {
-  classification:
-    | "wildfire"
-    | "industrial_facility"
-    | "agricultural_burning"
-    | "mining";
+  classification: ConclusionAiClassification;
   wildfireProbability: number;
   industrialProbability: number;
   agriculturalProbability: number;
@@ -197,9 +191,9 @@ export function HotspotVerificationRail({
 
         <div className={`investigation-step ${activeStep === 0 ? "is-active" : ""}`} aria-current={activeStep === 0 ? "step" : undefined}>
           <b>01</b>
-          <span className="step-content">
-            <strong>Thermal observation</strong>
-            <span className="step-detail">
+          <span>
+            Thermal observation
+            <small>
               {loading
                 ? "Checking current NOAA-20 evidence…"
                 : failed
@@ -207,15 +201,15 @@ export function HotspotVerificationRail({
                   : complete
                     ? result.firmsCurrent.detail
                     : "Select this hotspot to query current FIRMS evidence."}
-            </span>
+            </small>
           </span>
         </div>
 
         <div className={`investigation-step ${activeStep === 1 ? "is-active" : ""}`} aria-current={activeStep === 1 ? "step" : undefined}>
           <b>02</b>
-          <span className="step-content">
-            <strong>Geographic context</strong>
-            <span className="step-detail">
+          <span>
+            Geographic context
+            <small>
               {loading
                 ? "Checking nearby industrial OSM context…"
                 : failed
@@ -223,7 +217,7 @@ export function HotspotVerificationRail({
                   : complete
                     ? result.industrial.detail
                     : "Industrial proximity not yet queried."}
-            </span>
+            </small>
 
             {complete &&
               (result.industrial.industrialFacilityType ||
@@ -293,9 +287,9 @@ export function HotspotVerificationRail({
 
         <div className={`investigation-step ${activeStep === 2 ? "is-active" : ""}`} aria-current={activeStep === 2 ? "step" : undefined}>
           <b>03</b>
-          <span className="step-content">
-            <strong>Historical behaviour</strong>
-            <span className="step-detail">
+          <span>
+            Historical behaviour
+            <small>
               {loading
                 ? "Checking seven-day and database persistence…"
                 : failed
@@ -303,15 +297,15 @@ export function HotspotVerificationRail({
                   : complete
                     ? `${result.firmsHistory.detail} ${persistence}`
                     : "Seven-day and long-term history not yet queried."}
-            </span>
+            </small>
           </span>
         </div>
 
         <div className={`investigation-step ${activeStep === 3 ? "is-active" : ""}`} aria-current={activeStep === 3 ? "step" : undefined}>
           <b>04</b>
-          <span className="step-content">
-            <strong>Independent evidence</strong>
-            <span className="step-detail">
+          <span>
+            Independent evidence
+            <small>
               {loading
                 ? "Checking land-cover and independent satellite context…"
                 : failed
@@ -319,81 +313,32 @@ export function HotspotVerificationRail({
                   : complete
                     ? result.landCover
                       ? (
-                        <span className="land-cover-evidence" aria-label="Land-cover evidence">
-                          <span className="evidence-row">
-                            <b>LAND COVER</b>
-                            <strong>{formatClassification(result.landCover.landCoverClass)}</strong>
-                          </span>
-                          <span className="evidence-row">
-                            <b>SOURCE</b>
-                            <span>{result.landCover.source}</span>
-                          </span>
+                        <span className="land-cover-evidence">
+                          <b>
+                            Land cover: {formatClassification(result.landCover.landCoverClass)}
+                          </b>
+                          <small>
+                            {result.landCover.landCoverClass.replaceAll("_", " ")} · {result.landCover.source}
+                          </small>
                         </span>
                       )
                       : "Land-cover evidence is unavailable; no substitute is shown."
                     : "Land-cover context not yet queried."}
-            </span>
+            </small>
           </span>
         </div>
       </div>
 
       <div className="verdict-cards">
-        <section
-          className={`gis-spatial-card ${complete ? "is-complete" : ""}`}
-          aria-labelledby="gis-spatial-analysis-title"
-        >
-          <span className="gis-spatial-eyebrow">GIS-BASED SPATIAL ANALYSIS</span>
-          <h4 id="gis-spatial-analysis-title">
-            {loading
-              ? "Spatial check in progress"
-              : failed
-                ? "Spatial context unavailable"
-                : complete
-                  ? "Geographic context correlated"
-                  : "Spatial evidence layer"}
-          </h4>
-          <p>
-            {loading
-              ? "Correlating this coordinate with nearby infrastructure, land cover, and persistence."
-              : failed
-                ? "No spatial conclusion was issued because source verification did not complete."
-                : complete
-                  ? "GIS shows what surrounds the anomaly and how its location behaves over time."
-                  : "See the geographic evidence gathered for this hotspot after verification."}
-          </p>
-
-          <dl className="gis-spatial-facts">
-            <div>
-              <dt>LOCATION</dt>
-              <dd>{selected.coords}</dd>
-            </div>
-            <div>
-              <dt>FACILITY CONTEXT</dt>
-              <dd>
-                {complete
-                  ? result.industrial.industrialFacilityName
-                    ? `${result.industrial.industrialFacilityName}${result.industrial.industrialFacilityDistanceM != null ? ` · ${formatDistance(result.industrial.industrialFacilityDistanceM)}` : ""}`
-                    : result.gppdReference
-                      ? `${result.gppdReference.name} · ${result.gppdReference.distanceKm.toFixed(2)} km`
-                      : "No named facility in radius"
-                  : "Awaiting spatial verification"}
-              </dd>
-            </div>
-            <div>
-              <dt>LAND COVER</dt>
-              <dd>{complete ? result.landCover ? formatClassification(result.landCover.landCoverClass) : "Unavailable" : "Awaiting spatial verification"}</dd>
-            </div>
-            <div>
-              <dt>PERSISTENCE</dt>
-              <dd>{complete && result.longTermHistory ? `${result.longTermHistory.totalDetectionCount} detections · ${result.longTermHistory.activeMonths} active months` : "Awaiting history"}</dd>
-            </div>
-          </dl>
-
-          <small className="gis-spatial-note">
-            Geographic evidence supports interpretation; it is not incident proof by itself.
-          </small>
-        </section>
-
+        {complete && lastMLPrediction && (
+          <FinalAssessmentPanel
+            ruleBasedResult={result.classification}
+            mlResult={lastMLPrediction}
+            namedFacilityMatch={Boolean(
+              result.gppdReference?.name || result.industrial.industrialFacilityName,
+            )}
+          />
+        )}
         <div
           className={`screening-callout ${
             complete ? "has-classification" : ""
