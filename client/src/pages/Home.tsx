@@ -174,6 +174,7 @@ export default function Home() {
   const verificationRequestSequence = useRef(0);
   const revealTimer = useRef<number | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [focusedHotspot, setFocusedHotspot] = useState<{ id: string; location: { lat: number; lng: number }; token: number } | null>(null);
   const [verificationPresentation, setVerificationPresentation] = useState<HotspotVerificationPresentation<VerificationRailResult>>(initialHotspotVerificationPresentation);
   const [lastMLPrediction, setLastMLPrediction] = useState<{ classification: "wildfire" | "industrial_facility" | "agricultural_burning" | "mining"; wildfireProbability: number; industrialProbability: number; agriculturalProbability: number; miningProbability: number } | null>(null);
   const [verifiedMapContext, setVerifiedMapContext] = useState<Record<string, { frpMw: number | null; namedFacilityMatch: boolean; activeMonths: number | null }>>({});
@@ -238,6 +239,9 @@ export default function Home() {
     if (!target) return;
     setSelected(target);
     setHasInteractedWithMap(true);
+    setVerifierOpen(false);
+    thermalFieldRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setFocusedHotspot({ id: target.id, location: target.location, token: Date.now() });
     map?.panTo(target.location);
     map?.setZoom(Math.max(map.getZoom?.() ?? 5, 8));
   };
@@ -441,7 +445,7 @@ export default function Home() {
           <div className={`workbench-shell ${verifierOpen ? "verification-open" : "verification-idle"}`}>
             <div className="map-workbench">
               <div className="gis-visualization-label"><div><p className="eyebrow">GIS-BASED VISUALIZATION</p><p>Geolocated thermal detections rendered as a live map overlay, color-coded by fire radiative power.</p></div></div>
-              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span><div className="thermal-gradient-legend" aria-label="Low to high thermal intensity, based on FRP in megawatts"><span>THERMAL INTENSITY · FRP (MW)</span><i aria-hidden="true" /><small><span>LOW</span><span>HIGH</span></small></div>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
+              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} focusHotspot={focusedHotspot} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span><div className="thermal-gradient-legend" aria-label="Low to high thermal intensity, based on FRP in megawatts"><span>THERMAL INTENSITY · FRP (MW)</span><i aria-hidden="true" /><small><span>LOW</span><span>HIGH</span></small></div>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
             </div>
             {verifierOpen && <div id="verification-results" className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} liveHotspotCount={snapshotTargets.length} /></div>}
           </div>

@@ -19,6 +19,13 @@ describe("Vercel map fallback interaction contract", () => {
     expect(source).not.toContain("Drag the field guide");
   });
 
+  it("supports list-driven focus, centering, and popup opening", () => {
+    expect(source).toContain("FocusedHotspot");
+    expect(source).toContain("map.flyTo");
+    expect(source).toContain("openPopup");
+    expect(source).toContain("focusHotspot={focusHotspot}");
+  });
+
   it("encodes the three meaningful analytic layers from existing hotspot fields", () => {
     expect(source).toContain("frpMw?: number | null");
     expect(source).toContain("namedFacilityMatch?: boolean");

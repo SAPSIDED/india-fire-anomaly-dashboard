@@ -1,7 +1,7 @@
 /// <reference types="@types/google.maps" />
 
-import { Fragment, useEffect, useRef, useState } from "react";
-import { Circle as LeafletCircle, LayersControl, MapContainer as LeafletMapContainer, Marker as LeafletMarker, Popup as LeafletPopup, TileLayer as LeafletTileLayer, Tooltip as LeafletTooltip } from "react-leaflet";
+import { Fragment, useEffect, useRef, useState, type MutableRefObject } from "react";
+import { Circle as LeafletCircle, LayersControl, MapContainer as LeafletMapContainer, Marker as LeafletMarker, Popup as LeafletPopup, TileLayer as LeafletTileLayer, Tooltip as LeafletTooltip, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { usePersistFn } from "@/hooks/usePersistFn";
@@ -60,6 +60,8 @@ export type MapWind = {
   forecast?: Array<{ time: string; windSpeedKmh: number | null; windDirectionDeg: number | null }>;
 };
 
+export type FocusedHotspot = { id: string; location: { lat: number; lng: number }; token: number };
+
 /** Preserve the muted thermal palette for the pre-verification map view. */
 export function thermalMarkerColor(_value: number | null | undefined, _allValues: Array<number | null | undefined>) {
   return "#b86751";
@@ -85,6 +87,7 @@ interface MapViewProps {
   fallbackHotspots?: FallbackMapHotspot[];
   activeLayer?: string;
   onFirstHotspotClick?: () => void;
+  focusHotspot?: FocusedHotspot | null;
   wind?: MapWind;
 }
 
@@ -152,9 +155,21 @@ function HotspotProviderPopup({ hotspot, activeLayer }: { hotspot: FallbackMapHo
   </div>;
 }
 
-function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radarActive }: { center: google.maps.LatLngLiteral; zoom: number; hotspots: FallbackMapHotspot[]; className?: string; activeLayer: string; radarActive: boolean }) {
+function LeafletHotspotFocus({ focusHotspot, markerRefs }: { focusHotspot?: FocusedHotspot | null; markerRefs: MutableRefObject<Record<string, L.Marker | null>> }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!focusHotspot) return;
+    map.flyTo([focusHotspot.location.lat, focusHotspot.location.lng], Math.max(map.getZoom(), 8), { duration: 0.65 });
+    markerRefs.current[focusHotspot.id]?.openPopup();
+  }, [focusHotspot?.token, map, markerRefs]);
+  return null;
+}
+
+function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radarActive, focusHotspot }: { center: google.maps.LatLngLiteral; zoom: number; hotspots: FallbackMapHotspot[]; className?: string; activeLayer: string; radarActive: boolean; focusHotspot?: FocusedHotspot | null }) {
+  const markerRefs = useRef<Record<string, L.Marker | null>>({});
   return (
     <LeafletMapContainer key={activeLayer} center={[center.lat, center.lng]} zoom={zoom} className={cn("h-full w-full", className)} scrollWheelZoom zoomControl><div className={cn("map-radar-sweep", radarActive && "map-radar-sweep-active")} aria-hidden="true" />
+      <LeafletHotspotFocus focusHotspot={focusHotspot} markerRefs={markerRefs} />
       <LayersControl position="topright" collapsed={false}>
         <LayersControl.BaseLayer checked={activeLayer !== "Persistence"} name="Map">
           <LeafletTileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -184,7 +199,7 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radar
             </LeafletPopup>
           </LeafletCircle>
           {Array.from({ length: rings }, (_, index) => <LeafletCircle key={`${hotspot.id}-ring-${index}`} center={[hotspot.location.lat, hotspot.location.lng]} radius={layerRadius(hotspot, activeLayer) + (index + 1) * 2_500} pathOptions={{ color: "#786aa8", weight: 1.2, opacity: 0.7 - index * 0.12, fillOpacity: 0, dashArray: "4 7" }} />)}
-          <LeafletMarker position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(color, iconVariant, scale.size, scale.opacity)} eventHandlers={{ click: () => { hotspot.onSelect?.(); } }}>
+          <LeafletMarker ref={marker => { markerRefs.current[hotspot.id] = marker; }} position={[hotspot.location.lat, hotspot.location.lng]} icon={hotspotIcon(color, iconVariant, scale.size, scale.opacity)} eventHandlers={{ click: () => { hotspot.onSelect?.(); } }}>
             <LeafletTooltip direction="top" offset={[0, -12]} opacity={1} interactive>
               <HotspotHoverPreview hotspot={hotspot} />
             </LeafletTooltip>
@@ -198,7 +213,7 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radar
   );
 }
 
-export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4194 }, initialZoom = 12, onMapReady, fallbackHotspots = [], activeLayer = "Thermal", onFirstHotspotClick, wind }: MapViewProps) {
+export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4194 }, initialZoom = 12, onMapReady, fallbackHotspots = [], activeLayer = "Thermal", onFirstHotspotClick, focusHotspot, wind }: MapViewProps) {
   const mapShell = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -288,6 +303,12 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
     return () => document.removeEventListener("fullscreenchange", syncFullscreen);
   }, [init]);
 
+  useEffect(() => {
+    if (!focusHotspot || !map.current || useLeaflet) return;
+    map.current.panTo(focusHotspot.location);
+    map.current.setZoom(Math.max(map.current.getZoom() ?? 5, 8));
+  }, [focusHotspot?.token, useLeaflet]);
+
   const toggleFullscreen = () => {
     if (document.fullscreenElement) {
       void document.exitFullscreen();
@@ -311,7 +332,7 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
   const windToggle = <button type="button" className={cn("wind-toggle-button", showWind && "active")} onClick={() => setShowWind(value => !value)} aria-pressed={showWind} aria-label={showWind ? "Hide live wind overlay" : "Show live wind overlay"}>{showWind ? "Wind on" : "Wind"}</button>;
 
   if (useLeaflet) {
-    return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots.map(hotspot => ({ ...hotspot, onSelect: () => { onFirstHotspotClick?.(); hotspot.onSelect?.(); } }))} activeLayer={activeLayer} radarActive={radarActive} />{showWind && windOverlay}{windToggle}{fullscreenButton}</div>;
+    return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots.map(hotspot => ({ ...hotspot, onSelect: () => { onFirstHotspotClick?.(); hotspot.onSelect?.(); } }))} activeLayer={activeLayer} radarActive={radarActive} focusHotspot={focusHotspot} />{showWind && windOverlay}{windToggle}{fullscreenButton}</div>;
   }
 
   return <div ref={mapShell} className={shellClassName}><div ref={mapContainer} className="relative w-full h-full"><div className={cn("map-radar-sweep", radarActive && "map-radar-sweep-active")} aria-hidden="true" /><div className="map-loading-label">Loading base map…</div></div>{showWind && windOverlay}{windToggle}{fullscreenButton}</div>;
