@@ -332,15 +332,6 @@ export function HotspotVerificationRail({
       </div>
 
       <div className="verdict-cards">
-        {complete && lastMLPrediction && (
-          <FinalAssessmentPanel
-            ruleBasedResult={result.classification}
-            mlResult={lastMLPrediction}
-            namedFacilityMatch={Boolean(
-              result.gppdReference?.name || result.industrial.industrialFacilityName,
-            )}
-          />
-        )}
         <section
           className={`gis-spatial-card ${complete ? "is-complete" : ""}`}
           aria-labelledby="gis-spatial-analysis-title"
@@ -453,6 +444,16 @@ export function HotspotVerificationRail({
         </div>
 
         <MLPredictionPanel prediction={lastMLPrediction} />
+
+        {complete && lastMLPrediction && (
+          <FinalAssessmentPanel
+            ruleBasedResult={result.classification}
+            mlResult={lastMLPrediction}
+            namedFacilityMatch={Boolean(
+              result.gppdReference?.name || result.industrial.industrialFacilityName,
+            )}
+          />
+        )}
       </div>
     </aside>
   );
