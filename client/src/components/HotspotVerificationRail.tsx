@@ -4,6 +4,7 @@ import type { HotspotVerificationState } from "@/lib/hotspotVerification";
 import { MLPredictionPanel } from "@/components/MLPredictionPanel";
 import { FinalAssessmentPanel } from "@/components/FinalAssessmentPanel";
 import type { ConclusionAiClassification, ConclusionRuleBasedResult } from "@shared/conclusion";
+import type { NativeMLFeatures } from "@/lib/nativeXgbPredictor";
 import "./HotspotVerificationRail.css";
 
 export type VerificationRailTarget = {
@@ -21,6 +22,9 @@ type SourceEvidence = {
   state: "available" | "cached" | "unavailable";
   detail: string;
   frpMw?: number | null;
+  brightness?: number | null;
+  brightT31?: number | null;
+  confidence?: number | null;
 };
 
 export type VerificationRailResult = {
@@ -65,6 +69,7 @@ type Props = {
   result?: VerificationRailResult;
   onVerify: () => void;
   lastMLPrediction?: MLPrediction | null;
+  mlFeatures?: NativeMLFeatures | null;
   liveHotspotCount?: number;
 };
 
@@ -89,6 +94,7 @@ export function HotspotVerificationRail({
   result,
   onVerify,
   lastMLPrediction = null,
+  mlFeatures = null,
   liveHotspotCount = 0,
 }: Props) {
   const loading = state === "loading";
@@ -443,7 +449,7 @@ export function HotspotVerificationRail({
           </button>
         </div>
 
-        <MLPredictionPanel prediction={lastMLPrediction} />
+        <MLPredictionPanel prediction={lastMLPrediction} features={mlFeatures ?? undefined} />
 
         {complete && lastMLPrediction && (
           <FinalAssessmentPanel

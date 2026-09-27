@@ -9,6 +9,7 @@ import { InteractiveEarth } from "@/components/InteractiveEarth";
 import { HotspotVerificationRail, type VerificationRailResult } from "@/components/HotspotVerificationRail";
 import { MLPredictionPanel } from "@/components/MLPredictionPanel";
 import { trpc } from "@/lib/trpc";
+import type { NativeMLFeatures } from "@/lib/nativeXgbPredictor";
 import { beginHotspotVerification, completeHotspotVerification, failHotspotVerification, initialHotspotVerificationPresentation, selectHotspotForVerification, type HotspotVerificationPresentation } from "@/lib/hotspotVerification";
 import { startLogin } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -177,6 +178,7 @@ export default function Home() {
   const [focusedHotspot, setFocusedHotspot] = useState<{ id: string; location: { lat: number; lng: number }; token: number } | null>(null);
   const [verificationPresentation, setVerificationPresentation] = useState<HotspotVerificationPresentation<VerificationRailResult>>(initialHotspotVerificationPresentation);
   const [lastMLPrediction, setLastMLPrediction] = useState<{ classification: "wildfire" | "industrial_facility" | "agricultural_burning" | "mining"; wildfireProbability: number; industrialProbability: number; agriculturalProbability: number; miningProbability: number } | null>(null);
+  const [lastMLFeatures, setLastMLFeatures] = useState<NativeMLFeatures | null>(null);
   const [verifiedMapContext, setVerifiedMapContext] = useState<Record<string, { frpMw: number | null; namedFacilityMatch: boolean; activeMonths: number | null }>>({});
   const thermalFieldRef = useRef<HTMLDivElement>(null);
   const analysisFieldRef = useRef<HTMLElement>(null);
@@ -273,6 +275,19 @@ export default function Home() {
         if (typeof response === "object" && response !== null) {
           const evidence = response as { mlPrediction?: typeof lastMLPrediction extends infer T ? T : never; firmsCurrent?: { frpMw?: number | null }; industrial?: { industrialFacilityName?: string | null; industrialFacilityCategory?: string | null }; longTermHistory?: { activeMonths?: number | null } };
           if (evidence.mlPrediction) setLastMLPrediction(evidence.mlPrediction as NonNullable<typeof lastMLPrediction>);
+          const modelEvidence = response as {
+            firmsCurrent?: { frpMw?: number | null; brightness?: number | null; brightT31?: number | null; confidence?: number | null };
+            firmsHistory?: { detections?: number | null };
+            dayNightDetectionRatio?: { ratio?: number | null };
+          };
+          setLastMLFeatures({
+            frpMw: Number(modelEvidence.firmsCurrent?.frpMw ?? 0),
+            brightness: Number(modelEvidence.firmsCurrent?.brightness ?? 0),
+            brightT31: Number(modelEvidence.firmsCurrent?.brightT31 ?? 0),
+            confidence: Number(modelEvidence.firmsCurrent?.confidence ?? 0),
+            dayNightRatio: Number(modelEvidence.dayNightDetectionRatio?.ratio ?? 0),
+            sevenDayDetectionCount: Number(modelEvidence.firmsHistory?.detections ?? 0),
+          });
           setVerifiedMapContext(current => ({
             ...current,
             [selectedTarget.id]: {
@@ -448,14 +463,14 @@ export default function Home() {
               <div className="gis-visualization-label"><div><p className="eyebrow">GIS-BASED VISUALIZATION</p><p>Geolocated thermal detections rendered as a live map overlay, color-coded by fire radiative power.</p></div></div>
               <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} focusHotspot={focusedHotspot} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span><div className="thermal-gradient-legend" aria-label="Low to high thermal intensity, based on FRP in megawatts"><span>THERMAL INTENSITY · FRP (MW)</span><i aria-hidden="true" /><small><span>LOW</span><span>HIGH</span></small></div>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
             </div>
-            {verifierOpen && <div id="verification-results" className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} liveHotspotCount={snapshotTargets.length} /></div>}
+            {verifierOpen && <div id="verification-results" className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} mlFeatures={lastMLFeatures} liveHotspotCount={snapshotTargets.length} /></div>}
           </div>
           <LiveClimateDashboard weather={liveWeather.data} alerts={persistenceAlerts.data ?? []} loading={persistenceAlerts.isLoading} onSelectAlert={selectPersistenceAlert} />
         </section>
 
         <section id="pipeline" className="investigation-section" aria-label="Thermal investigation method"><div className="section-cap"><div><p className="eyebrow">INVESTIGATION PIPELINE</p><h2>A thermal anomaly does not explain itself.</h2></div><p>Every assessment keeps acquisition, context and corroboration separate so the conclusion can be reviewed rather than merely accepted.</p></div><ol className="investigation-flow"><li><b>01</b><div><h3>Thermal signal</h3><p>Something unusual was observed.</p></div></li><li><b>02</b><div><h3>Location context</h3><p>What exists around the coordinate?</p></div></li><li><b>03</b><div><h3>Temporal behaviour</h3><p>Does the signal recur in place?</p></div></li><li><b>04</b><div><h3>Satellite evidence</h3><p>Does a second source agree?</p></div></li><li><b>05</b><div><h3>Screened outcome</h3><p>What can responsibly be said?</p></div></li></ol></section>
 
-        <section className="evidence-board" aria-label="Data, spatial, and historical analysis"><div className="source-flow"><p className="eyebrow">EVIDENCE INPUTS</p><div><span>NASA FIRMS<small>Thermal detection</small></span><i /><span>OPENSTREETMAP<small>Location context</small></span><i /><span>HISTORICAL OBSERVATIONS<small>Temporal behaviour</small></span><i /><span>WEATHER CONTEXT<small>Environmental conditions</small></span></div><b>CONCURRENT SCREENING</b></div><div className="evidence-grid"><article className="classification-panel"><p className="eyebrow">CLASSIFICATION INTERFACE</p><h2>Observed heat is not its source.</h2><div className="classification-state"><span>SCREENING CLASS</span><strong>INDUSTRIAL / FIRE / OTHER / UNCERTAIN</strong><small>Demonstration of evidence categories. Live verifier results remain source-backed.</small></div><ul><li><i /> Industrial setting nearby</li><li><i /> Recurrence assessed over time</li><li><i /> Cross-platform check recorded</li><li><i /> Authority evidence required for confirmation</li></ul></article><MLPredictionPanel prediction={lastMLPrediction} /><HistoricalAnalysis selected={selected} history={corroboration.data?.detectionId === selected.id ? corroboration.data.firmsHistory : undefined} /><article className="spatial-panel"><p className="eyebrow">SPATIAL RELATIONSHIP</p><div className="spatial-link"><b>THERMAL<br />ANOMALY</b><i /><span>LOCAL<br />CONTEXT</span><i /><strong>INDUSTRIAL<br />ASSET</strong></div><p>Map context helps establish proximity, not causation. The verifier retains the location and source state for review.</p></article></div></section>
+        <section className="evidence-board" aria-label="Data, spatial, and historical analysis"><div className="source-flow"><p className="eyebrow">EVIDENCE INPUTS</p><div><span>NASA FIRMS<small>Thermal detection</small></span><i /><span>OPENSTREETMAP<small>Location context</small></span><i /><span>HISTORICAL OBSERVATIONS<small>Temporal behaviour</small></span><i /><span>WEATHER CONTEXT<small>Environmental conditions</small></span></div><b>CONCURRENT SCREENING</b></div><div className="evidence-grid"><article className="classification-panel"><p className="eyebrow">CLASSIFICATION INTERFACE</p><h2>Observed heat is not its source.</h2><div className="classification-state"><span>SCREENING CLASS</span><strong>INDUSTRIAL / FIRE / OTHER / UNCERTAIN</strong><small>Demonstration of evidence categories. Live verifier results remain source-backed.</small></div><ul><li><i /> Industrial setting nearby</li><li><i /> Recurrence assessed over time</li><li><i /> Cross-platform check recorded</li><li><i /> Authority evidence required for confirmation</li></ul></article><MLPredictionPanel prediction={lastMLPrediction} features={lastMLFeatures ?? undefined} /><HistoricalAnalysis selected={selected} history={corroboration.data?.detectionId === selected.id ? corroboration.data.firmsHistory : undefined} /><article className="spatial-panel"><p className="eyebrow">SPATIAL RELATIONSHIP</p><div className="spatial-link"><b>THERMAL<br />ANOMALY</b><i /><span>LOCAL<br />CONTEXT</span><i /><strong>INDUSTRIAL<br />ASSET</strong></div><p>Map context helps establish proximity, not causation. The verifier retains the location and source state for review.</p></article></div></section>
 
         <section id="conditions" className="conditions-section"><div className="section-cap"><div><p className="eyebrow">SCREENING CONDITIONS</p><h2>Conditions before escalation.</h2></div><p>This catalogue makes the uncertainty surface visible. Thresholds must remain calibrated against verified outcomes and facility-specific behaviour.</p></div><div className="condition-register">{conditionFamilies.map(family => <article key={family.number}><b>{family.number}</b><div><h3>{family.title}</h3><p>{family.conditions}</p></div></article>)}</div></section>
 
