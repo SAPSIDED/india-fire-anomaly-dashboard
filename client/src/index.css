@@ -374,3 +374,43 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
   .interactive-earth { min-height: 420px; }
   .interactive-earth canvas { min-height: 420px; }
 }
+
+.thermal-gradient-legend {
+  position: absolute;
+  z-index: 8;
+  right: 18px;
+  bottom: 18px;
+  width: 190px;
+  padding: 10px 11px 9px;
+  border: 1px solid rgba(246, 239, 224, .28);
+  border-radius: 4px;
+  color: #f8f0e4;
+  background: rgba(18, 23, 24, .82);
+  box-shadow: 0 5px 18px rgba(8, 11, 12, .22);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+.thermal-legend-title {
+  display: block;
+  margin-bottom: 7px;
+  color: #f0c28e;
+  font: 700 8px "IBM Plex Mono", monospace;
+  letter-spacing: .08em;
+}
+.thermal-legend-scale {
+  height: 7px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f4d35e 0%, #f28c28 50%, #c92828 100%);
+  box-shadow: 0 0 8px rgba(242, 140, 40, .28);
+}
+.thermal-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 6px;
+  color: #d9d1c3;
+  font: 7px/1.25 "IBM Plex Mono", monospace;
+  letter-spacing: .025em;
+}
+.thermal-legend-labels span:nth-child(2) { text-align: center; }
+.thermal-legend-labels span:last-child { text-align: right; }

@@ -63,8 +63,18 @@ export type MapWind = {
 export type FocusedHotspot = { id: string; location: { lat: number; lng: number }; token: number };
 
 /** Preserve the muted thermal palette for the pre-verification map view. */
-export function thermalMarkerColor(_value: number | null | undefined, _allValues: Array<number | null | undefined>) {
-  return "#b86751";
+export function thermalMarkerColor(value: number | null | undefined, allValues: Array<number | null | undefined>) {
+  const values = allValues.filter((item): item is number => typeof item === "number" && Number.isFinite(item));
+  if (typeof value !== "number" || !Number.isFinite(value) || values.length < 2) return "#b86751";
+
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const ratio = max === min ? 0.5 : Math.max(0, Math.min(1, (value - min) / (max - min)));
+  const stops = ratio <= 0.5
+    ? { from: [244, 211, 94], to: [242, 140, 40], progress: ratio * 2 }
+    : { from: [242, 140, 40], to: [201, 40, 40], progress: (ratio - 0.5) * 2 };
+  const rgb = stops.from.map((channel, index) => Math.round(channel + (stops.to[index] - channel) * stops.progress));
+  return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
 }
 
 function layerColor(hotspot: FallbackMapHotspot, activeLayer: string) {
@@ -189,7 +199,9 @@ function LeafletFallback({ center, zoom, hotspots, className, activeLayer, radar
       </LayersControl>
 
       {hotspots.map(hotspot => {
-        const color = layerColor(hotspot, activeLayer);
+        const color = activeLayer === "Thermal"
+          ? thermalMarkerColor(hotspot.frpMw, hotspots.map(item => item.frpMw))
+          : layerColor(hotspot, activeLayer);
         const scale = activeLayer === "Thermal" ? thermalScale(hotspot, hotspots) : { size: 30, opacity: 0.82 };
         const rings = activeLayer === "Persistence" ? persistenceRings(hotspot) : 0;
         const iconVariant = activeLayer === "OSM context" && hotspot.namedFacilityMatch ? "factory" : "thermal";
@@ -337,10 +349,11 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
   const playbackLabel = forecastPoint?.time ? new Date(forecastPoint.time).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) : "NOW";
   const windOverlay = <>{windField}<div className="wind-overlay" aria-label={displaySpeed == null ? "Live wind unavailable" : `Wind forecast ${displaySpeed.toFixed(1)} kilometers per hour toward ${windAngle.toFixed(0)} degrees`}><span className="wind-overlay-kicker">WIND / FIRE-SPREAD VECTOR</span><strong>{displaySpeed == null ? "—" : `${displaySpeed.toFixed(1)} km/h`}</strong><span className="wind-arrow" style={{ transform: `rotate(${windAngle}deg)` }}>↑</span><small>{displayDirection == null ? "Awaiting Open-Meteo" : `${forecastPoint ? `forecast ${playbackLabel}` : "live now"} · toward ${windAngle.toFixed(0)}°`}</small><div className="wind-intensity-legend" aria-label="Wind speed intensity legend"><span>CALM</span><i aria-hidden="true" /><span>STRONG</span></div>{forecast.length > 1 && <div className="wind-playback"><button type="button" onClick={() => setForecastPlaying(value => !value)}>{forecastPlaying ? "Pause" : "Play forecast"}</button><input type="range" min={0} max={forecast.length - 1} value={forecastIndex} onChange={event => { setForecastPlaying(false); setForecastIndex(Number(event.target.value)); }} aria-label="Forecast time" /><span>{playbackLabel}</span></div>}</div></>;
   const windToggle = <button type="button" className={cn("wind-toggle-button", showWind && "active")} onClick={() => setShowWind(value => !value)} aria-pressed={showWind} aria-label={showWind ? "Hide live wind overlay" : "Show live wind overlay"}>{showWind ? "Wind on" : "Wind"}</button>;
+  const thermalLegend = <div className="thermal-gradient-legend" aria-label="Hotspot color legend"><span className="thermal-legend-title">FRP THERMAL INTENSITY</span><div className="thermal-legend-scale" aria-hidden="true" /><div className="thermal-legend-labels"><span>YELLOW · LOW</span><span>ORANGE · MEDIUM</span><span>RED · HIGH</span></div></div>;
 
   if (useLeaflet) {
-    return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots.map(hotspot => ({ ...hotspot, onSelect: () => { onFirstHotspotClick?.(); hotspot.onSelect?.(); } }))} activeLayer={activeLayer} radarActive={radarActive} focusHotspot={focusHotspot} />{showWind && windOverlay}{windToggle}{fullscreenButton}</div>;
+    return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots.map(hotspot => ({ ...hotspot, onSelect: () => { onFirstHotspotClick?.(); hotspot.onSelect?.(); } }))} activeLayer={activeLayer} radarActive={radarActive} focusHotspot={focusHotspot} />{thermalLegend}{showWind && windOverlay}{windToggle}{fullscreenButton}</div>;
   }
 
-  return <div ref={mapShell} className={shellClassName}><div ref={mapContainer} className="relative w-full h-full"><div className={cn("map-radar-sweep", radarActive && "map-radar-sweep-active")} aria-hidden="true" /><div className="map-loading-label">Loading base map…</div></div>{showWind && windOverlay}{windToggle}{fullscreenButton}</div>;
+  return <div ref={mapShell} className={shellClassName}><div ref={mapContainer} className="relative w-full h-full"><div className={cn("map-radar-sweep", radarActive && "map-radar-sweep-active")} aria-hidden="true" /><div className="map-loading-label">Loading base map…</div></div>{thermalLegend}{showWind && windOverlay}{windToggle}{fullscreenButton}</div>;
 }
