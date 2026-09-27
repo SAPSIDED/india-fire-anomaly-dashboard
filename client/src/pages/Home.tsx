@@ -42,7 +42,7 @@ type IndiaSnapshotHotspot = {
   acquiredTime: string | null;
   source: "firms-country" | "firms-wfs-india-fallback";
   fetchedAt: Date | string;
-  frpMw?: number | null;
+  frpMw?: number | string | null;
 };
 
 const snapshotSourceLabel = (source?: IndiaSnapshotHotspot["source"]) => source === "firms-country"
@@ -210,18 +210,21 @@ export default function Home() {
     const latitude = Number(row.latitude);
     const longitude = Number(row.longitude);
     const context = verifiedMapContext[`FIRMS-${row.id}`];
+    const rawFrpMw = context?.frpMw ?? row.frpMw;
+    const parsedFrpMw = rawFrpMw == null ? NaN : Number(rawFrpMw);
+    const frpMw = Number.isFinite(parsedFrpMw) ? parsedFrpMw : null;
     return {
       id: `FIRMS-${row.id}`,
       facility: `NASA FIRMS detection ${row.id}`,
       place: `Live NASA FIRMS detection ${row.id}`,
       coords: `${latitude.toFixed(4)}°N · ${longitude.toFixed(4)}°E`,
-      frp: row.brightness ? `${Number(row.brightness).toFixed(1)} K` : "—",
+      frp: frpMw !== null ? `${frpMw.toFixed(1)} MW` : "—",
       confidence: row.confidence ?? "—",
       recency: `${String(row.acquiredDate).slice(0, 10)} ${row.acquiredTime ?? ""} UTC`.trim(),
       score: 55,
       outcome: "Requires source verification",
       location: { lat: latitude, lng: longitude },
-      frpMw: context?.frpMw ?? row.frpMw ?? null,
+      frpMw,
       namedFacilityMatch: context?.namedFacilityMatch ?? false,
       activeMonths: context?.activeMonths ?? null,
     };
@@ -467,7 +470,7 @@ export default function Home() {
           <div className={`workbench-shell ${verifierOpen ? "verification-open" : "verification-idle"}`}>
             <div className="map-workbench">
               <div className="gis-visualization-label"><div><p className="eyebrow">GIS-BASED VISUALIZATION</p><p>Geolocated thermal detections rendered as a live map overlay, color-coded by fire radiative power.</p></div></div>
-              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} focusHotspot={focusedHotspot} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span><div className="thermal-gradient-legend" aria-label="Low to high thermal intensity, based on FRP in megawatts"><span>THERMAL INTENSITY · FRP (MW)</span><i aria-hidden="true" /><small><span>LOW</span><span>HIGH</span></small></div>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
+              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} focusHotspot={focusedHotspot} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span><aside className="thermal-gradient-legend" aria-label="Hotspot color key by FIRMS fire radiative power in megawatts"><span className="thermal-legend-title">FIRE RADIATIVE POWER · MW</span><div className="thermal-legend-items"><div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-low" aria-hidden="true" /><span>YELLOW <b>LOW</b></span></div><div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-medium" aria-hidden="true" /><span>ORANGE <b>MEDIUM</b></span></div><div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-high" aria-hidden="true" /><span>RED <b>HIGH / MAX</b></span></div><div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-unavailable" aria-hidden="true" /><span>GRAY <b>NO FRP DATA</b></span></div></div><small className="thermal-legend-note">Levels are ranked against visible hotspot FRP.</small></aside>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
             </div>
             {verifierOpen && <div id="verification-results" className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} mlFeatures={lastMLFeatures} liveHotspotCount={snapshotTargets.length} /></div>}
           </div>

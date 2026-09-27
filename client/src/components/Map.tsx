@@ -335,16 +335,8 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
   const playbackLabel = forecastPoint?.time ? new Date(forecastPoint.time).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) : "NOW";
   const windOverlay = <>{windField}<div className="wind-overlay" aria-label={displaySpeed == null ? "Live wind unavailable" : `Wind forecast ${displaySpeed.toFixed(1)} kilometers per hour toward ${windAngle.toFixed(0)} degrees`}><span className="wind-overlay-kicker">WIND / FIRE-SPREAD VECTOR</span><strong>{displaySpeed == null ? "—" : `${displaySpeed.toFixed(1)} km/h`}</strong><span className="wind-arrow" style={{ transform: `rotate(${windAngle}deg)` }}>↑</span><small>{displayDirection == null ? "Awaiting Open-Meteo" : `${forecastPoint ? `forecast ${playbackLabel}` : "live now"} · toward ${windAngle.toFixed(0)}°`}</small><div className="wind-intensity-legend" aria-label="Wind speed intensity legend"><span>CALM</span><i aria-hidden="true" /><span>STRONG</span></div>{forecast.length > 1 && <div className="wind-playback"><button type="button" onClick={() => setForecastPlaying(value => !value)}>{forecastPlaying ? "Pause" : "Play forecast"}</button><input type="range" min={0} max={forecast.length - 1} value={forecastIndex} onChange={event => { setForecastPlaying(false); setForecastIndex(Number(event.target.value)); }} aria-label="Forecast time" /><span>{playbackLabel}</span></div>}</div></>;
   const windToggle = <button type="button" className={cn("wind-toggle-button", showWind && "active")} onClick={() => setShowWind(value => !value)} aria-pressed={showWind} aria-label={showWind ? "Hide live wind overlay" : "Show live wind overlay"}>{showWind ? "Wind on" : "Wind"}</button>;
-  const thermalLegend = <aside className="thermal-gradient-legend" aria-label="Hotspot color legend by fire radiative power">
-    <span className="thermal-legend-title">HOTSPOT FRP · MW</span>
-    <div className="thermal-legend-items">
-      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-low" aria-hidden="true" /><span>YELLOW <b>LOW</b></span></div>
-      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-medium" aria-hidden="true" /><span>ORANGE <b>MEDIUM</b></span></div>
-      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-high" aria-hidden="true" /><span>RED <b>HIGH / MAX</b></span></div>
-      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-unavailable" aria-hidden="true" /><span>GRAY <b>FRP UNAVAILABLE</b></span></div>
-    </div>
-    <small className="thermal-legend-note">Levels are ranked against the visible hotspot FRP range.</small>
-  </aside>;
+  // Home owns the single FRP legend overlay so it aligns with the full map stage.
+  const thermalLegend = null;
 
   if (useLeaflet) {
     return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots.map(hotspot => ({ ...hotspot, onSelect: () => { onFirstHotspotClick?.(); hotspot.onSelect?.(); } }))} activeLayer={activeLayer} radarActive={radarActive} focusHotspot={focusHotspot} />{thermalLegend}{showWind && windOverlay}{windToggle}{fullscreenButton}</div>;
