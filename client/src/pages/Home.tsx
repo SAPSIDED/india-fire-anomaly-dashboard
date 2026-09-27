@@ -3,7 +3,8 @@
  * intentionally remain unchanged; this file only reshapes how that information is presented.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
-import { MapView, thermalMarkerColor } from "@/components/Map";
+import { MapView } from "@/components/Map";
+import { thermalMarkerColor } from "@/lib/frpColor";
 import { ClimateClock, LiveClimateDashboard, type PersistenceAlert } from "@/components/LiveClimateDashboard";
 import { InteractiveEarth } from "@/components/InteractiveEarth";
 import { HotspotVerificationRail, type VerificationRailResult } from "@/components/HotspotVerificationRail";
@@ -225,12 +226,17 @@ export default function Home() {
       activeMonths: context?.activeMonths ?? null,
     };
   }).filter(target => Number.isFinite(target.location.lat) && Number.isFinite(target.location.lng));
-  const fallbackHotspots = (snapshotTargets.length > 0 ? snapshotTargets : hotspots).map(hotspot => ({
+  const mapTargets = snapshotTargets.length > 0 ? snapshotTargets : hotspots;
+  const mapFrpValues = mapTargets.map(hotspot => hotspot.frpMw);
+  const fallbackHotspots = mapTargets.map(hotspot => ({
     id: hotspot.id,
     location: hotspot.location,
     title: `${hotspot.place} — click to verify`,
-    color: thermalMarkerColor(hotspot.frpMw, snapshotTargets.map(item => item.frpMw)),
+    color: thermalMarkerColor(hotspot.frpMw, mapFrpValues),
     radiusM: hotspot.score > 70 ? 9_000 : 6_000,
+    frpMw: hotspot.frpMw,
+    namedFacilityMatch: hotspot.namedFacilityMatch,
+    activeMonths: hotspot.activeMonths,
     onClick: () => { setHasInteractedWithMap(true); setVerifierOpen(true); selectAndVerify(hotspot); },
     onSelect: () => setHasInteractedWithMap(true),
   }));
@@ -405,11 +411,11 @@ export default function Home() {
       anchor: new google.maps.Point(size / 2, size / 2),
     });
     const targets = snapshotTargets.length > 0 ? snapshotTargets : hotspots;
+    const thermalValues = targets.map(item => item.frpMw).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+    const thermalMin = thermalValues.length ? Math.min(...thermalValues) : 0;
+    const thermalMax = thermalValues.length ? Math.max(...thermalValues) : 1;
     targets.forEach(hotspot => {
-      const thermalColor = hotspot.score > 70 ? "#d46b63" : "#e0ac68";
-      const thermalValues = targets.map(item => item.frpMw).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
-      const thermalMin = thermalValues.length ? Math.min(...thermalValues) : 0;
-      const thermalMax = thermalValues.length ? Math.max(...thermalValues) : 1;
+      const thermalColor = thermalMarkerColor(hotspot.frpMw, thermalValues);
       const thermalRatio = typeof hotspot.frpMw === "number" && thermalMax !== thermalMin ? (hotspot.frpMw - thermalMin) / (thermalMax - thermalMin) : 0.5;
       const thermalSize = 30 + Math.round(thermalRatio * 18);
       const thermalOpacity = 0.58 + thermalRatio * 0.36;

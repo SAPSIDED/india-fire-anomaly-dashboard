@@ -5,6 +5,7 @@ import { Circle as LeafletCircle, LayersControl, MapContainer as LeafletMapConta
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { usePersistFn } from "@/hooks/usePersistFn";
+import { thermalMarkerColor } from "@/lib/frpColor";
 import { cn } from "@/lib/utils";
 
 declare global {
@@ -61,21 +62,6 @@ export type MapWind = {
 };
 
 export type FocusedHotspot = { id: string; location: { lat: number; lng: number }; token: number };
-
-/** Preserve the muted thermal palette for the pre-verification map view. */
-export function thermalMarkerColor(value: number | null | undefined, allValues: Array<number | null | undefined>) {
-  const values = allValues.filter((item): item is number => typeof item === "number" && Number.isFinite(item));
-  if (typeof value !== "number" || !Number.isFinite(value) || values.length < 2) return "#b86751";
-
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const ratio = max === min ? 0.5 : Math.max(0, Math.min(1, (value - min) / (max - min)));
-  const stops = ratio <= 0.5
-    ? { from: [244, 211, 94], to: [242, 140, 40], progress: ratio * 2 }
-    : { from: [242, 140, 40], to: [201, 40, 40], progress: (ratio - 0.5) * 2 };
-  const rgb = stops.from.map((channel, index) => Math.round(channel + (stops.to[index] - channel) * stops.progress));
-  return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-}
 
 function layerColor(hotspot: FallbackMapHotspot, activeLayer: string) {
   if (activeLayer === "OSM context") return "#668a78";
@@ -349,7 +335,16 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
   const playbackLabel = forecastPoint?.time ? new Date(forecastPoint.time).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }) : "NOW";
   const windOverlay = <>{windField}<div className="wind-overlay" aria-label={displaySpeed == null ? "Live wind unavailable" : `Wind forecast ${displaySpeed.toFixed(1)} kilometers per hour toward ${windAngle.toFixed(0)} degrees`}><span className="wind-overlay-kicker">WIND / FIRE-SPREAD VECTOR</span><strong>{displaySpeed == null ? "—" : `${displaySpeed.toFixed(1)} km/h`}</strong><span className="wind-arrow" style={{ transform: `rotate(${windAngle}deg)` }}>↑</span><small>{displayDirection == null ? "Awaiting Open-Meteo" : `${forecastPoint ? `forecast ${playbackLabel}` : "live now"} · toward ${windAngle.toFixed(0)}°`}</small><div className="wind-intensity-legend" aria-label="Wind speed intensity legend"><span>CALM</span><i aria-hidden="true" /><span>STRONG</span></div>{forecast.length > 1 && <div className="wind-playback"><button type="button" onClick={() => setForecastPlaying(value => !value)}>{forecastPlaying ? "Pause" : "Play forecast"}</button><input type="range" min={0} max={forecast.length - 1} value={forecastIndex} onChange={event => { setForecastPlaying(false); setForecastIndex(Number(event.target.value)); }} aria-label="Forecast time" /><span>{playbackLabel}</span></div>}</div></>;
   const windToggle = <button type="button" className={cn("wind-toggle-button", showWind && "active")} onClick={() => setShowWind(value => !value)} aria-pressed={showWind} aria-label={showWind ? "Hide live wind overlay" : "Show live wind overlay"}>{showWind ? "Wind on" : "Wind"}</button>;
-  const thermalLegend = <div className="thermal-gradient-legend" aria-label="Hotspot color legend"><span className="thermal-legend-title">FRP THERMAL INTENSITY</span><div className="thermal-legend-scale" aria-hidden="true" /><div className="thermal-legend-labels"><span>YELLOW · LOW</span><span>ORANGE · MEDIUM</span><span>RED · HIGH</span></div></div>;
+  const thermalLegend = <aside className="thermal-gradient-legend" aria-label="Hotspot color legend by fire radiative power">
+    <span className="thermal-legend-title">HOTSPOT FRP · MW</span>
+    <div className="thermal-legend-items">
+      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-low" aria-hidden="true" /><span>YELLOW <b>LOW</b></span></div>
+      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-medium" aria-hidden="true" /><span>ORANGE <b>MEDIUM</b></span></div>
+      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-high" aria-hidden="true" /><span>RED <b>HIGH / MAX</b></span></div>
+      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-unavailable" aria-hidden="true" /><span>GRAY <b>FRP UNAVAILABLE</b></span></div>
+    </div>
+    <small className="thermal-legend-note">Levels are ranked against the visible hotspot FRP range.</small>
+  </aside>;
 
   if (useLeaflet) {
     return <div ref={mapShell} className={cn(shellClassName, "overflow-hidden")}><LeafletFallback center={initialCenter} zoom={initialZoom} hotspots={fallbackHotspots.map(hotspot => ({ ...hotspot, onSelect: () => { onFirstHotspotClick?.(); hotspot.onSelect?.(); } }))} activeLayer={activeLayer} radarActive={radarActive} focusHotspot={focusHotspot} />{thermalLegend}{showWind && windOverlay}{windToggle}{fullscreenButton}</div>;
