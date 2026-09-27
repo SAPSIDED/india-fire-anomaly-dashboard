@@ -78,18 +78,19 @@ describe("HotspotVerificationRail", () => {
     expect(container.querySelector("a[href*='openstreetmap.org']")).toBeNull();
   });
 
-  it("renders the fourth Final Assessment card when source verification and AI screening are complete", () => {
+  it("renders Final Assessment from feature-derived AI when no stored prediction exists", () => {
     const { container } = render(
       <HotspotVerificationRail
         selected={selected}
         state="complete"
         result={result}
-        lastMLPrediction={{
-          classification: "wildfire",
-          wildfireProbability: 0.653,
-          industrialProbability: 0.242,
-          agriculturalProbability: 0.094,
-          miningProbability: 0.011,
+        mlFeatures={{
+          frpMw: 336.4,
+          brightness: 330.2,
+          brightT31: 312.1,
+          confidence: 0.9,
+          dayNightRatio: 0.8,
+          sevenDayDetectionCount: 3,
         }}
         onVerify={vi.fn()}
       />,

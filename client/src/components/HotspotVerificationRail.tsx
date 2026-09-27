@@ -4,7 +4,7 @@ import type { HotspotVerificationState } from "@/lib/hotspotVerification";
 import { MLPredictionPanel } from "@/components/MLPredictionPanel";
 import { FinalAssessmentPanel } from "@/components/FinalAssessmentPanel";
 import type { ConclusionAiClassification, ConclusionRuleBasedResult } from "@shared/conclusion";
-import type { NativeMLFeatures } from "@/lib/nativeXgbPredictor";
+import { predictWithNativeXgb, type NativeMLFeatures } from "@/lib/nativeXgbPredictor";
 import "./HotspotVerificationRail.css";
 
 export type VerificationRailTarget = {
@@ -100,6 +100,7 @@ export function HotspotVerificationRail({
   const loading = state === "loading";
   const failed = state === "error";
   const complete = state === "complete" && result;
+  const effectiveMLPrediction = lastMLPrediction ?? (mlFeatures ? predictWithNativeXgb(mlFeatures) : null);
   const [activeStep, setActiveStep] = useState<number | null>(null);
 
   useEffect(() => {
@@ -449,12 +450,12 @@ export function HotspotVerificationRail({
           </button>
         </div>
 
-        <MLPredictionPanel prediction={lastMLPrediction} features={mlFeatures ?? undefined} />
+        <MLPredictionPanel prediction={effectiveMLPrediction} />
 
-        {complete && lastMLPrediction && (
+        {complete && effectiveMLPrediction && (
           <FinalAssessmentPanel
             ruleBasedResult={result.classification}
-            mlResult={lastMLPrediction}
+            mlResult={effectiveMLPrediction}
             namedFacilityMatch={Boolean(
               result.gppdReference?.name || result.industrial.industrialFacilityName,
             )}
