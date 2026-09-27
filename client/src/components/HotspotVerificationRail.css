@@ -563,3 +563,73 @@
 .final-assessment-signals dt { color: #9eaaa1; font: 700 9px/1.4 "IBM Plex Mono", monospace; letter-spacing: .05em; text-transform: uppercase; }
 .final-assessment-signals dd { margin: 0; color: #e8eee8; font: 10px/1.4 "IBM Plex Mono", monospace; text-align: right; text-transform: capitalize; }
 @media (max-width: 760px) { .final-assessment-panel { padding: 16px; } .final-assessment-signals div { display: grid; gap: 3px; } .final-assessment-signals dd { text-align: left; } }
+
+/* Requested dashboard palette — presentation-only overrides. */
+.analysis-rail {
+  background: #550000;
+  border-color: rgba(253, 251, 212, .28);
+  color: #fdfbd4;
+}
+
+.verdict-cards .gis-spatial-card {
+  background: #4d4d4d;
+  border-color: rgba(253, 251, 212, .42);
+  border-top-color: #fdfbd4;
+  color: #fdfbd4;
+}
+.verdict-cards .gis-spatial-card h4,
+.verdict-cards .gis-spatial-card dd { color: #fdfbd4; }
+.verdict-cards .gis-spatial-card > p,
+.verdict-cards .gis-spatial-note { color: #e9e7c7; }
+.verdict-cards .gis-spatial-eyebrow,
+.verdict-cards .gis-spatial-facts dt { color: #fdfbd4; }
+.verdict-cards .gis-spatial-facts,
+.verdict-cards .gis-spatial-facts div { border-color: rgba(253, 251, 212, .24); }
+
+.verdict-cards .screening-callout {
+  background: #fdfbd4;
+  border-color: rgba(85, 0, 0, .35);
+  border-top-color: #550000;
+  color: #550000;
+}
+.verdict-cards .screening-callout > span,
+.verdict-cards .screening-callout strong,
+.verdict-cards .screening-callout p,
+.verdict-cards .screening-callout.has-classification p,
+.verdict-cards .screening-callout.has-classification strong { color: #550000 !important; }
+.verdict-cards .screening-callout p b,
+.verdict-cards .screening-callout.has-classification p b { color: #7a1e1e !important; }
+.verdict-cards .screening-callout button { color: #fdfbd4; background: #550000; border-color: #550000; }
+
+.verdict-cards .ml-prediction-panel {
+  background: #5e2548;
+  border-color: rgba(253, 251, 212, .34);
+  border-top-color: #fdfbd4;
+  color: #fdfbd4;
+}
+.verdict-cards .ml-prediction-panel .eyebrow,
+.verdict-cards .ml-prediction-panel h3,
+.verdict-cards .ml-prediction-panel p,
+.verdict-cards .ml-prediction-panel small,
+.verdict-cards .ml-prediction-panel .ml-classification strong,
+.verdict-cards .ml-prediction-panel .ml-classification span,
+.verdict-cards .ml-prediction-panel .ml-probabilities > div span,
+.verdict-cards .ml-prediction-panel .ml-probabilities > div b { color: #fdfbd4; }
+.verdict-cards .ml-prediction-panel .ml-independence-note { color: #f5eaa7 !important; }
+.verdict-cards .ml-prediction-panel .ml-classification,
+.verdict-cards .ml-prediction-panel .ml-probabilities > div { border-color: rgba(253, 251, 212, .22); }
+.verdict-cards .ml-prediction-panel .ml-probabilities > div::after { background: #fdfbd4; }
+
+.verdict-cards .final-assessment-panel {
+  background: #212b54;
+  border-color: rgba(253, 251, 212, .38);
+  border-top-color: #fdfbd4;
+  color: #fdfbd4;
+}
+.verdict-cards .final-assessment-panel .eyebrow,
+.verdict-cards .final-assessment-panel h3,
+.verdict-cards .final-assessment-panel .final-assessment-state,
+.verdict-cards .final-assessment-panel .final-assessment-explanation,
+.verdict-cards .final-assessment-panel .final-assessment-signals dt,
+.verdict-cards .final-assessment-panel .final-assessment-signals dd { color: #fdfbd4; }
+.verdict-cards .final-assessment-panel .final-assessment-signals { border-color: rgba(253, 251, 212, .24); }
