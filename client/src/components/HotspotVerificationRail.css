@@ -264,6 +264,12 @@
   font: 13px/1.45 "IBM Plex Mono", monospace;
   overflow-wrap: anywhere;
 }
+.instrument-support-source {
+  display: block;
+  margin-top: 4px;
+  color: #aab6af;
+  font: 8px/1.45 "IBM Plex Sans", sans-serif;
+}
 .evidence-summary { display: none; }
 .screening-ladder {
   position: relative;

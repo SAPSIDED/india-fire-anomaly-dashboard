@@ -509,8 +509,14 @@ async function fetchFirms(lat: number, lng: number, days: number, sensor: FirmsS
       // Persistence must not block the existing live corroboration response.
     }
     await writeCached(key, provider, evidence, days === 1 ? 20 * 60_000 : 6 * 60 * 60_000);
+    const frpMw = evidence.historyRows.reduce<number | null>((maximum, row) => {
+      if (row.frp === null) return maximum;
+      const value = Number(row.frp);
+      if (!Number.isFinite(value)) return maximum;
+      return maximum === null ? value : Math.max(maximum, value);
+    }, null);
     return {
-      state: "available", detections: evidence.detections, dailyDetections: evidence.dailyDetections, frpMw: evidence.historyRows.reduce((max, d) => Math.max(max, Number(d.frp) || 0), 0) || null,
+      state: "available", detections: evidence.detections, dailyDetections: evidence.dailyDetections, frpMw,
       brightness: evidence.historyRows.reduce((max, d) => Math.max(max, Number(d.brightness) || 0), 0) || null,
       brightT31: evidence.historyRows.reduce((max, d) => Math.max(max, Number(d.brightT31) || 0), 0) || null,
       confidence: evidence.historyRows.reduce((max, d) => Math.max(max, Number(d.confidence) || 0), 0) || null,

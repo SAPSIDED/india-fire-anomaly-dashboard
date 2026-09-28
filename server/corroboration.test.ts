@@ -93,7 +93,7 @@ describe("evaluateCorroboration", () => {
     const snapshot = await fetchIndiaCountryFirmsSnapshot();
 
     expect(snapshot.source).toBe("firms-wfs-india-fallback");
-    expect(snapshot.rows).toEqual([{ latitude: "15.389280", longitude: "75.222850", brightness: "331.45", confidence: "n", acquiredDate: "2026-08-25", acquiredTime: "841" }]);
+    expect(snapshot.rows).toEqual([{ latitude: "15.389280", longitude: "75.222850", brightness: "331.45", frp: null, confidence: "n", acquiredDate: "2026-08-25", acquiredTime: "841" }]);
     expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("/api/country/"), expect.any(Object));
     expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("ms:fires_noaa20_24hrs"), expect.any(Object));
   });
@@ -216,6 +216,22 @@ describe("evaluateCorroboration", () => {
       expect.objectContaining({ latitude: "27.131000", frp: null, platform: "MODIS" }),
       expect.objectContaining({ latitude: "27.132000", frp: null, platform: "MODIS" }),
     ]));
+  });
+
+  it("preserves a valid zero FRP reading from the live FIRMS source", async () => {
+    process.env.NASA_FIRMS_MAP_KEY = "test-key";
+    global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("fireguard-firms-relay")) {
+        return new Response("latitude,longitude,acq_date,frp\n27.13,73.33,2026-08-25,0\n", { status: 200 });
+      }
+      if (url.includes("overpass")) return new Response(JSON.stringify({ elements: [] }), { status: 200 });
+      return new Response(JSON.stringify({ current: { temperature_2m: 39, wind_speed_10m: 14, wind_direction_10m: 220, precipitation: 0 } }), { status: 200 });
+    }) as typeof fetch;
+
+    const result = await evaluateCorroboration({ lat: 27.13, lng: 73.33, detectionId: "zero-frp" });
+
+    expect(result.firmsCurrent.frpMw).toBe(0);
   });
 
   it("exposes populated stored day/night, FRP, and seasonal context as additive evidence without changing Stage 1", async () => {

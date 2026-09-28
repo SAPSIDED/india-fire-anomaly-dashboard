@@ -13,6 +13,7 @@ export type VerificationRailTarget = {
   place: string;
   coords: string;
   frp: string;
+  frpMw?: number | null;
   confidence: string;
   recency: string;
   score: number;
@@ -100,6 +101,24 @@ export function HotspotVerificationRail({
   const loading = state === "loading";
   const failed = state === "error";
   const complete = state === "complete" && result;
+  const verifiedFrpMw = state === "complete" && result
+    && typeof result.firmsCurrent.frpMw === "number"
+    && Number.isFinite(result.firmsCurrent.frpMw)
+    ? result.firmsCurrent.frpMw
+    : null;
+  const snapshotFrpMw = typeof selected.frpMw === "number" && Number.isFinite(selected.frpMw)
+    ? selected.frpMw
+    : null;
+  const displayedFrpMw = verifiedFrpMw ?? snapshotFrpMw;
+  const frpSource = verifiedFrpMw !== null
+    ? "Live FIRMS verification"
+    : snapshotFrpMw !== null
+      ? state === "complete"
+        ? "NASA FIRMS snapshot · live FRP unavailable"
+        : loading
+          ? "NASA FIRMS snapshot · verification in progress"
+          : "NASA FIRMS hotspot snapshot"
+      : null;
   const effectiveMLPrediction = lastMLPrediction ?? (mlFeatures ? predictWithNativeXgb(mlFeatures) : null);
   const [activeStep, setActiveStep] = useState<number | null>(null);
 
@@ -143,9 +162,8 @@ export function HotspotVerificationRail({
           <div>
             <dt>FRP (MW)</dt>
             <dd>
-              {complete && typeof result.firmsCurrent.frpMw === "number" && Number.isFinite(result.firmsCurrent.frpMw)
-                ? result.firmsCurrent.frpMw.toFixed(2)
-                : "Unavailable"}
+              {displayedFrpMw !== null ? displayedFrpMw.toFixed(2) : "Unavailable"}
+              {frpSource && <small className="instrument-support-source">{frpSource}</small>}
             </dd>
           </div>
           <div>

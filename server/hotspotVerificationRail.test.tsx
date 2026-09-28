@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { HotspotVerificationRail, type VerificationRailResult } from "../client/src/components/HotspotVerificationRail";
 
-const selected = { id: "FIRMS-120001", facility: "Current NASA FIRMS hotspot", place: "Current India-wide thermal observation", coords: "15.3893°N · 75.2229°E", frp: "336.4 K", confidence: "n", recency: "2026-08-25 822 UTC", score: 55 };
+const selected = { id: "FIRMS-120001", facility: "Current NASA FIRMS hotspot", place: "Current India-wide thermal observation", coords: "15.3893°N · 75.2229°E", frp: "336.4 MW", frpMw: 336.4, confidence: "n", recency: "2026-08-25 822 UTC", score: 55 };
 const result: VerificationRailResult = {
   firmsCurrent: { state: "available", detail: "1 live NASA FIRMS detection." },
   industrial: {
@@ -30,8 +30,12 @@ describe("HotspotVerificationRail", () => {
     rerender(<HotspotVerificationRail selected={selected} state="loading" onVerify={onVerify} />);
     expect(screen.getByText(/checking current noaa-20 evidence/i)).toBeTruthy();
     expect(screen.getByRole("button", { name: /verification running/i }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByText("336.40")).toBeTruthy();
+    expect(screen.getByText("NASA FIRMS snapshot · verification in progress")).toBeTruthy();
 
     rerender(<HotspotVerificationRail selected={selected} state="complete" result={result} onVerify={onVerify} />);
+    expect(screen.getByText("336.40")).toBeTruthy();
+    expect(screen.getByText("NASA FIRMS snapshot · live FRP unavailable")).toBeTruthy();
     expect(screen.getByText(/2 nearby OSM industrial-context features/i)).toBeTruthy();
     expect(screen.getByText(/example works · man_made=works · refinery · 740 m/i)).toBeTruthy();
     expect(screen.getAllByRole("link", { name: /open in openstreetmap/i })[0].getAttribute("href")).toBe("https://www.openstreetmap.org/way/123");
@@ -48,6 +52,17 @@ describe("HotspotVerificationRail", () => {
     expect(screen.getByText(/no industrial-fire conclusion was issued/i)).toBeTruthy();
     await user.click(screen.getByRole("button", { name: /retry source verification/i }));
     expect(onVerify).toHaveBeenCalledTimes(2);
+  });
+
+  it("prefers a verified zero FRP over a nonzero snapshot value", () => {
+    const liveZeroResult: VerificationRailResult = {
+      ...result,
+      firmsCurrent: { ...result.firmsCurrent, frpMw: 0 },
+    };
+    render(<HotspotVerificationRail selected={selected} state="complete" result={liveZeroResult} onVerify={vi.fn()} />);
+
+    expect(screen.getByText("0.00")).toBeTruthy();
+    expect(screen.getByText("Live FIRMS verification")).toBeTruthy();
   });
 
   it("supports marker-triggered verification presentation at the 375 px mobile breakpoint", async () => {
