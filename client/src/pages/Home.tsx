@@ -3,7 +3,8 @@
  * intentionally remain unchanged; this file only reshapes how that information is presented.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
-import { MapView, thermalMarkerColor } from "@/components/Map";
+import { MapView } from "@/components/Map";
+import { thermalMarkerColor } from "@/lib/frpColor";
 import { ClimateClock, LiveClimateDashboard, type PersistenceAlert } from "@/components/LiveClimateDashboard";
 import { InteractiveEarth } from "@/components/InteractiveEarth";
 import { HotspotVerificationRail, type VerificationRailResult } from "@/components/HotspotVerificationRail";
@@ -42,7 +43,7 @@ type IndiaSnapshotHotspot = {
   acquiredTime: string | null;
   source: "firms-country" | "firms-wfs-india-fallback";
   fetchedAt: Date | string;
-  frpMw?: number | null;
+  frpMw?: number | string | null;
 };
 
 const snapshotSourceLabel = (source?: IndiaSnapshotHotspot["source"]) => source === "firms-country"
@@ -210,28 +211,36 @@ export default function Home() {
     const latitude = Number(row.latitude);
     const longitude = Number(row.longitude);
     const context = verifiedMapContext[`FIRMS-${row.id}`];
+    const rawFrpMw = context?.frpMw ?? row.frpMw;
+    const parsedFrpMw = rawFrpMw == null ? NaN : Number(rawFrpMw);
+    const frpMw = Number.isFinite(parsedFrpMw) ? parsedFrpMw : null;
     return {
       id: `FIRMS-${row.id}`,
       facility: `NASA FIRMS detection ${row.id}`,
       place: `Live NASA FIRMS detection ${row.id}`,
       coords: `${latitude.toFixed(4)}°N · ${longitude.toFixed(4)}°E`,
-      frp: row.brightness ? `${Number(row.brightness).toFixed(1)} K` : "—",
+      frp: frpMw !== null ? `${frpMw.toFixed(1)} MW` : "—",
       confidence: row.confidence ?? "—",
       recency: `${String(row.acquiredDate).slice(0, 10)} ${row.acquiredTime ?? ""} UTC`.trim(),
       score: 55,
       outcome: "Requires source verification",
       location: { lat: latitude, lng: longitude },
-      frpMw: context?.frpMw ?? (row.frp !== null && Number.isFinite(Number(row.frp)) ? Number(row.frp) : null),
+      frpMw: context?.frpMw ?? frpMw,
       namedFacilityMatch: context?.namedFacilityMatch ?? false,
       activeMonths: context?.activeMonths ?? null,
     };
   }).filter(target => Number.isFinite(target.location.lat) && Number.isFinite(target.location.lng));
-  const fallbackHotspots = (snapshotTargets.length > 0 ? snapshotTargets : hotspots).map(hotspot => ({
+  const mapTargets = snapshotTargets.length > 0 ? snapshotTargets : hotspots;
+  const mapFrpValues = mapTargets.map(hotspot => hotspot.frpMw);
+  const fallbackHotspots = mapTargets.map(hotspot => ({
     id: hotspot.id,
     location: hotspot.location,
     title: `${hotspot.place} — click to verify`,
-    color: thermalMarkerColor(hotspot.frpMw, snapshotTargets.map(item => item.frpMw)),
+    color: thermalMarkerColor(hotspot.frpMw, mapFrpValues),
     radiusM: hotspot.score > 70 ? 9_000 : 6_000,
+    frpMw: hotspot.frpMw,
+    namedFacilityMatch: hotspot.namedFacilityMatch,
+    activeMonths: hotspot.activeMonths,
     onClick: () => { setHasInteractedWithMap(true); setVerifierOpen(true); selectAndVerify(hotspot); },
     onSelect: () => setHasInteractedWithMap(true),
   }));
@@ -406,11 +415,11 @@ export default function Home() {
       anchor: new google.maps.Point(size / 2, size / 2),
     });
     const targets = snapshotTargets.length > 0 ? snapshotTargets : hotspots;
+    const thermalValues = targets.map(item => item.frpMw).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+    const thermalMin = thermalValues.length ? Math.min(...thermalValues) : 0;
+    const thermalMax = thermalValues.length ? Math.max(...thermalValues) : 1;
     targets.forEach(hotspot => {
-      const thermalColor = hotspot.score > 70 ? "#d46b63" : "#e0ac68";
-      const thermalValues = targets.map(item => item.frpMw).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
-      const thermalMin = thermalValues.length ? Math.min(...thermalValues) : 0;
-      const thermalMax = thermalValues.length ? Math.max(...thermalValues) : 1;
+      const thermalColor = thermalMarkerColor(hotspot.frpMw, thermalValues);
       const thermalRatio = typeof hotspot.frpMw === "number" && thermalMax !== thermalMin ? (hotspot.frpMw - thermalMin) / (thermalMax - thermalMin) : 0.5;
       const thermalSize = 30 + Math.round(thermalRatio * 18);
       const thermalOpacity = 0.58 + thermalRatio * 0.36;
@@ -461,8 +470,8 @@ export default function Home() {
           <div className="section-cap analysis-field-cap"><div><h2 className="bungee-inline-regular">ACTIVE ANALYSIS FIELD</h2><p className="analysis-observation-line limelight-observation">Current India-wide thermal observation</p></div><div className="analysis-field-meta"><p className="bungee-inline-regular analysis-subtitle">From thermal signal to an evidence-backed screen.</p><ClimateClock timezone={liveWeather.data?.timezone ?? null} /></div></div>
           <div className={`workbench-shell ${verifierOpen ? "verification-open" : "verification-idle"}`}>
             <div className="map-workbench">
-              <div className="gis-visualization-label"><div><p className="eyebrow">GIS-BASED VISUALIZATION</p><p>Geolocated thermal detections rendered as a live map overlay, color-coded by fire radiative power.</p></div></div>
-              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} focusHotspot={focusedHotspot} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span><div className="thermal-gradient-legend" aria-label="Low to high thermal intensity, based on FRP in megawatts"><span>THERMAL INTENSITY · FRP (MW)</span><i aria-hidden="true" /><small><span>LOW</span><span>HIGH</span></small></div>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
+              <div className="gis-visualization-label"><div><p className="eyebrow">GIS-BASED VISUALIZATION</p><p>Geolocated thermal detections shown as red hotspot markers on a live map.</p></div></div>
+              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} focusHotspot={focusedHotspot} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
             </div>
             {verifierOpen && <div id="verification-results" className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} mlFeatures={lastMLFeatures} liveHotspotCount={snapshotTargets.length} /></div>}
           </div>

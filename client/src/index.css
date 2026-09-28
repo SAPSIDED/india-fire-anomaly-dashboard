@@ -414,3 +414,38 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 }
 .thermal-legend-labels span:nth-child(2) { text-align: center; }
 .thermal-legend-labels span:last-child { text-align: right; }
+
+/* Keep a visible, literal key for the discrete FRP marker colors. */
+.thermal-gradient-legend {
+  top: 92px;
+  right: auto;
+  bottom: auto;
+  left: 14px;
+  z-index: 20;
+  display: grid;
+  gap: 8px;
+  width: 205px;
+  padding: 11px 12px;
+  pointer-events: none;
+}
+.thermal-legend-items { display: grid; gap: 7px; }
+.thermal-legend-item { display: flex; align-items: center; gap: 8px; color: #f8f0e4; font: 9px/1.25 "IBM Plex Mono", monospace; }
+.thermal-gradient-legend .thermal-legend-swatch {
+  display: block;
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(255, 248, 235, .75);
+  border-radius: 50%;
+  box-shadow: 0 0 7px currentColor;
+}
+.thermal-gradient-legend .thermal-low { color: #f4d35e; background: #f4d35e; }
+.thermal-gradient-legend .thermal-medium { color: #f28c28; background: #f28c28; }
+.thermal-gradient-legend .thermal-high { color: #c92828; background: #c92828; }
+.thermal-gradient-legend .thermal-unavailable { color: #89918f; background: #89918f; }
+.thermal-legend-item span { display: flex; flex: 1; justify-content: space-between; gap: 8px; }
+.thermal-legend-item b { color: #fff8ec; font-weight: 600; }
+.thermal-legend-note { margin: 2px 0 0; color: #d9d1c3; font: 8px/1.35 "IBM Plex Mono", monospace; }
+@media (max-width: 760px) {
+  .thermal-gradient-legend { top: 92px; left: 10px; width: min(190px, calc(100% - 20px)); }
+}

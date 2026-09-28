@@ -77,4 +77,26 @@ describe("HotspotVerificationRail", () => {
     expect(container.querySelector("[aria-label='Nearest facility context']")).toBeNull();
     expect(container.querySelector("a[href*='openstreetmap.org']")).toBeNull();
   });
+
+  it("renders Final Assessment from feature-derived AI when no stored prediction exists", () => {
+    const { container } = render(
+      <HotspotVerificationRail
+        selected={selected}
+        state="complete"
+        result={result}
+        mlFeatures={{
+          frpMw: 336.4,
+          brightness: 330.2,
+          brightT31: 312.1,
+          confidence: 0.9,
+          dayNightRatio: 0.8,
+          sevenDayDetectionCount: 3,
+        }}
+        onVerify={vi.fn()}
+      />,
+    );
+
+    expect(container.querySelectorAll(".verdict-cards > *")).toHaveLength(4);
+    expect(screen.getByText("FINAL ASSESSMENT")).toBeTruthy();
+  });
 });
