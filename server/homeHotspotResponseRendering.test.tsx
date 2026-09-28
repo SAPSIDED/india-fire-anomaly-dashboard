@@ -165,6 +165,11 @@ describe("Home marker verification response rendering", () => {
     ];
     render(<Home />);
 
+    const conditionsSection = screen.getByRole("region", { name: "Conditions that move the risk." });
+    const persistenceSection = screen.getByRole("region", { name: /PERSISTING THERMAL REGIONS/i });
+    expect(conditionsSection.contains(persistenceSection)).toBe(false);
+    expect(screen.getByRole("heading", { name: "PERSISTING THERMAL REGIONS" })).toBeTruthy();
+    expect(persistenceSection.querySelector("h2")?.textContent).toContain("⚠️");
     expect(screen.getByText("No hotspot selected")).toBeTruthy();
     expect(screen.getByText("Select a hotspot to see local wind conditions")).toBeTruthy();
     expect(testState.weatherCalls.every(call => !call.enabled)).toBe(true);
