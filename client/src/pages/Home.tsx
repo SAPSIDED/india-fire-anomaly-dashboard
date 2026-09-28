@@ -470,7 +470,7 @@ export default function Home() {
       <div ref={thermalFieldRef} className="thermal-field" aria-hidden="true"><i /><i /><i /></div>
       <header className="mission-header">
         <a className="brand-lockup" href="#top" aria-label="FireGuard India home"><img src="/manus-storage/sentinel-contour-mark_ba2d7e8a.png" alt="FireGuard contour mark" /><span>FIREGUARD / INDIA<small>THERMAL INTELLIGENCE</small></span></a>
-        <nav className="mission-nav" aria-label="Primary navigation"><a href="#workbench">Analysis field</a><a href="#pipeline">Method</a><a href="#conditions">Conditions</a><a href="#sources">Sources</a></nav>
+        <nav className="mission-nav" aria-label="Primary navigation"><a href="#workbench">Analysis field</a><a href="#pipeline">Method</a><a href="#conditions">Conditions</a><a href="#preparedness">Preparedness</a><a href="#sources">Sources</a></nav>
         <div className="mission-actions"><button onClick={copyLink}>{copied ? "Link copied" : "Share brief"}</button><button onClick={() => window.print()}>Print brief</button><span><i /> RESEARCH PROTOTYPE</span></div>
       </header>
 
@@ -489,7 +489,7 @@ export default function Home() {
             </div>
             {verifierOpen && <div id="verification-results" className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} mlFeatures={lastMLFeatures} liveHotspotCount={snapshotTargets.length} /></div>}
           </div>
-          <LiveClimateDashboard weather={liveWeather.data} selectedHotspot={hasSelectedHotspot ? selected : undefined} weatherLoading={hasSelectedHotspot && liveWeatherQuery.isFetching} alerts={persistenceAlerts.data ?? []} loading={persistenceAlerts.isLoading} onSelectAlert={selectPersistenceAlert} />
+          <LiveClimateDashboard weather={liveWeather.data} selectedHotspot={hasSelectedHotspot ? selected : undefined} weatherLoading={hasSelectedHotspot && liveWeatherQuery.isFetching} alerts={persistenceAlerts.data ?? []} loading={persistenceAlerts.isLoading} onSelectAlert={selectPersistenceAlert} classification={selectedVerificationState === "complete" ? selectedVerification?.mlPrediction?.classification ?? null : null} />
         </section>
 
         <section id="pipeline" className="investigation-section" aria-label="Thermal investigation method"><div className="section-cap"><div><p className="eyebrow">INVESTIGATION PIPELINE</p><h2>A thermal anomaly does not explain itself.</h2></div><p>Every assessment keeps acquisition, context and corroboration separate so the conclusion can be reviewed rather than merely accepted.</p></div><ol className="investigation-flow"><li><b>01</b><div><h3>Thermal signal</h3><p>Something unusual was observed.</p></div></li><li><b>02</b><div><h3>Location context</h3><p>What exists around the coordinate?</p></div></li><li><b>03</b><div><h3>Temporal behaviour</h3><p>Does the signal recur in place?</p></div></li><li><b>04</b><div><h3>Satellite evidence</h3><p>Does a second source agree?</p></div></li><li><b>05</b><div><h3>Screened outcome</h3><p>What can responsibly be said?</p></div></li></ol></section>

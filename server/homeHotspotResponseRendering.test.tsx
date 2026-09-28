@@ -155,6 +155,8 @@ describe("Home marker verification response rendering", () => {
     expect(screen.getAllByText("Likely industrial facility").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Model confidence: 81.0%", { exact: false }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Industrial facility").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole("row", { name: /INDUSTRIAL FIRE/ })).toBeTruthy();
+    expect(screen.getByText("Conduct regular inspection and maintenance of electrical, mechanical, and process equipment.")).toBeTruthy();
   });
 
   it("starts idle and keeps hotspot identity, local wind, and spread vector synchronized across regions", () => {
@@ -166,12 +168,17 @@ describe("Home marker verification response rendering", () => {
     render(<Home />);
 
     const conditionsSection = screen.getByRole("region", { name: "Conditions that move the risk." });
+    const preparednessSection = screen.getByRole("region", { name: "PREVENTIVE MEASURES BY FIRE TYPE" });
     const persistenceSection = screen.getByRole("region", { name: /PERSISTING THERMAL REGIONS/i });
     expect(conditionsSection.contains(persistenceSection)).toBe(false);
+    expect(conditionsSection.compareDocumentPosition(preparednessSection) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(preparednessSection.compareDocumentPosition(persistenceSection) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(preparednessSection.contains(persistenceSection)).toBe(false);
     expect(screen.getByRole("heading", { name: "PERSISTING THERMAL REGIONS" })).toBeTruthy();
     expect(persistenceSection.querySelector("h2")?.textContent).toContain("⚠️");
     expect(screen.getByText("No hotspot selected")).toBeTruthy();
     expect(screen.getByText("Select a hotspot to see local wind conditions")).toBeTruthy();
+    expect(screen.getByText("Preventive measures unavailable for this classification")).toBeTruthy();
     expect(testState.weatherCalls.every(call => !call.enabled)).toBe(true);
     expect(screen.queryByLabelText("Map wind data")).toBeNull();
     expect(screen.queryByText("TEMPERATURE", { exact: true })).toBeNull();

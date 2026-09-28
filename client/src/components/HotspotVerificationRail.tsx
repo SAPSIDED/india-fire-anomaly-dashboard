@@ -53,6 +53,7 @@ export type VerificationRailResult = {
     distanceKm: number;
     source: string;
   };
+  mlPrediction?: MLPrediction;
   classification: ConclusionRuleBasedResult;
 };
 

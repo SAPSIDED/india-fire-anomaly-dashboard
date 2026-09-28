@@ -470,3 +470,48 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 @media (max-width: 760px) {
   .thermal-gradient-legend { top: auto !important; right: auto !important; bottom: 96px !important; left: 10px !important; width: min(190px, calc(100% - 20px)); }
 }
+
+
+/* Preventive measures — documentation keyed to the selected hotspot's existing classification. */
+.preparedness-section { padding: clamp(42px, 5vw, 72px) clamp(18px, 7vw, 96px); border-top: 1px solid rgba(0,255,0,.45); border-bottom: 1px solid rgba(0,255,0,.22); background: #14191b; scroll-margin-top: 76px; }
+.preparedness-section .section-cap { margin-bottom: 26px; }
+.preparedness-section .section-cap h2 { max-width: 760px; color: #eceee9; }
+.preparedness-section .section-cap > p { color: #aab3b0; }
+.preparedness-section .eyebrow { color: #00FF00; }
+.preparedness-safety-note { display: flex; align-items: flex-start; gap: 11px; max-width: 1280px; margin: 0 auto 18px; padding: 14px 16px; border: 1px solid rgba(217,151,66,.26); border-left: 3px solid #d99742; background: rgba(217,151,66,.07); color: #c1c8c3; font-size: 11px; line-height: 1.65; }
+.preparedness-safety-note svg { flex: 0 0 auto; margin-top: 1px; color: #e0ac68; }
+.preparedness-safety-note p { margin: 0; }
+.preparedness-safety-note strong { color: #f0c28e; }
+.preparedness-table-wrap { max-width: 1280px; margin: 0 auto; overflow: hidden; border: 1px solid rgba(0,255,0,.32); background: #171d1f; }
+.preparedness-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.preparedness-table th, .preparedness-table td { padding: 18px 17px; border-right: 1px solid rgba(226,229,221,.12); border-bottom: 1px solid rgba(226,229,221,.12); text-align: left; vertical-align: top; }
+.preparedness-table tr:last-child > * { border-bottom: 0; }
+.preparedness-table tr > *:last-child { border-right: 0; }
+.preparedness-table thead th { color: #00FF00; background: rgba(0,255,0,.06); font: 600 9px/1.5 "IBM Plex Mono", monospace; letter-spacing: .09em; text-transform: uppercase; }
+.preparedness-table thead th:first-child { width: 25%; }
+.preparedness-table thead th:nth-child(2) { width: 75%; }
+.preparedness-table tbody th { color: #00FF00; font-size: 13px; font-weight: 700; line-height: 1.35; }
+.preparedness-source-name { display: block; }
+.preparedness-source-note { display: block; margin-top: 8px; color: #d7b078; font: 8px/1.5 "IBM Plex Mono", monospace; letter-spacing: .025em; }
+.preparedness-resources, .preparedness-measures { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.preparedness-resources li { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 7px; color: #c1c8c3; font-size: 10px; line-height: 1.45; }
+.preparedness-resources code { padding: 2px 5px; border: 1px solid rgba(167,195,201,.17); background: rgba(167,195,201,.07); color: #b6cbd0; font: 8px/1.4 "IBM Plex Mono", monospace; overflow-wrap: anywhere; }
+.preparedness-measures li { position: relative; padding-left: 12px; color: #c1c8c3; font-size: 10px; line-height: 1.65; }
+.preparedness-measures li::before { position: absolute; top: .55em; left: 0; width: 4px; height: 4px; border-radius: 50%; background: #00FF00; content: ""; }
+.preparedness-unavailable { margin: 0; color: #c1c8c3; font-size: 11px; line-height: 1.6; }
+.preparedness-footnote { max-width: 1280px; margin: 11px auto 0; color: #8e9995; font: 8px/1.55 "IBM Plex Mono", monospace; }
+@media (max-width: 760px) {
+  .preparedness-section { padding: 54px 18px; }
+  .preparedness-section .section-cap { grid-template-columns: 1fr; gap: 12px; margin-bottom: 22px; }
+  .preparedness-section .section-cap h2 { font-size: clamp(30px, 8vw, 42px); line-height: 1.02; }
+  .preparedness-table-wrap { overflow: visible; border: 0; background: transparent; }
+  .preparedness-table, .preparedness-table tbody { display: block; width: 100%; }
+  .preparedness-table thead { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+  .preparedness-table tr { display: block; margin-bottom: 11px; border: 1px solid rgba(0,255,0,.25); background: #171d1f; }
+  .preparedness-table tbody th { display: block; padding: 15px 15px 12px; border-right: 0; border-bottom: 1px solid rgba(226,229,221,.12); font-size: 14px; }
+  .preparedness-table td { display: block; padding: 12px 15px; border: 0; }
+  .preparedness-table td + td { border-top: 1px solid rgba(226,229,221,.1); }
+  .preparedness-table td::before { display: block; margin-bottom: 8px; color: #00FF00; content: attr(data-label); font: 600 9px/1.5 "IBM Plex Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+  .preparedness-resources li, .preparedness-measures li { font-size: 11px; }
+  .preparedness-footnote { margin-top: 9px; }
+}
