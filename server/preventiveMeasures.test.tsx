@@ -5,10 +5,10 @@ import { describe, expect, it } from "vitest";
 import { PreventiveMeasures } from "../client/src/components/PreventiveMeasures";
 
 const expectedLinks = [
-  ["INDUSTRIAL FIRE", "https://peso.gov.in/web/en/contact"],
-  ["WILDFIRE", "https://fsiforestfire.gov.in/"],
-  ["AGRICULTURAL BURNING", "https://cpcb.gov.in/query-form1.php"],
-  ["MINING FIRE", "https://www.labour.gov.in/en/lodge-your-complaint"],
+  ["INDUSTRIAL FIRE", "PESO · Contact", "https://peso.gov.in/web/en/contact"],
+  ["WILDFIRE", "Forest Survey of India · Forest Fire", "https://fsiforestfire.gov.in/"],
+  ["AGRICULTURAL BURNING", "CPCB · Query Form", "https://cpcb.gov.in/query-form1.php"],
+  ["MINING FIRE", "Ministry of Labour & Employment · Lodge Your Complaint", "https://www.labour.gov.in/en/lodge-your-complaint"],
 ] as const;
 
 describe("PreventiveMeasures", () => {
@@ -18,10 +18,10 @@ describe("PreventiveMeasures", () => {
     expect(within(table).getByRole("columnheader", { name: "FIRE TYPE" })).toBeTruthy();
     expect(within(table).getByRole("columnheader", { name: "PREVENTIVE MEASURES" })).toBeTruthy();
 
-    for (const [type, url] of expectedLinks) {
+    for (const [type, sourceName, url] of expectedLinks) {
       const row = within(table).getByRole("row", { name: new RegExp(type) });
       expect(row).toBeTruthy();
-      expect(within(row).getByRole("link", { name: `${type} official website` }).getAttribute("href")).toBe(url);
+      expect(within(row).getByRole("link", { name: `${type}: ${sourceName}` }).getAttribute("href")).toBe(url);
     }
     expect(within(table).getAllByRole("row")).toHaveLength(5);
     expect(within(table).getAllByRole("listitem").length).toBe(24);
