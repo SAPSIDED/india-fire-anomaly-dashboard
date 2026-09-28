@@ -1,0 +1,1 @@
+ALTER TABLE `india_hotspot_snapshot` ADD `frp` decimal(12,4);

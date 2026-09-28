@@ -118,6 +118,8 @@ export const indiaHotspotSnapshot = mysqlTable("india_hotspot_snapshot", {
   latitude: decimal("latitude", { precision: 9, scale: 6 }).notNull(),
   longitude: decimal("longitude", { precision: 9, scale: 6 }).notNull(),
   brightness: decimal("brightness", { precision: 10, scale: 3 }),
+  /** NASA FIRMS fire radiative power in megawatts; nullable when the source omits it. */
+  frp: decimal("frp", { precision: 12, scale: 4 }),
   confidence: varchar("confidence", { length: 32 }),
   acquiredDate: date("acquiredDate").notNull(),
   acquiredTime: varchar("acquiredTime", { length: 8 }),

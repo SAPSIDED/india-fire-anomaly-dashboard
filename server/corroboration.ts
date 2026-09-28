@@ -335,6 +335,7 @@ function parseIndiaHotspotSnapshotRows(csv: string): IndiaHotspotSnapshotInput[]
   const acquiredDateIndex = header.indexOf("acq_date");
   const acquiredTimeIndex = header.indexOf("acq_time");
   const brightnessIndex = ["bright_ti4", "brightness", "bright_t31"].map(field => header.indexOf(field)).find(index => index >= 0) ?? -1;
+  const frpIndex = header.indexOf("frp");
   const confidenceIndex = header.indexOf("confidence");
   if (latitudeIndex < 0 || longitudeIndex < 0 || acquiredDateIndex < 0) return [];
   return lines.slice(1).flatMap(line => {
@@ -345,9 +346,11 @@ function parseIndiaHotspotSnapshotRows(csv: string): IndiaHotspotSnapshotInput[]
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !acquiredDate) return [];
     const rawBrightness = brightnessIndex >= 0 ? values[brightnessIndex]?.trim() : undefined;
     const brightness = rawBrightness && Number.isFinite(Number(rawBrightness)) ? rawBrightness : null;
+    const rawFrp = frpIndex >= 0 ? values[frpIndex]?.trim() : undefined;
+    const frp = rawFrp && Number.isFinite(Number(rawFrp)) ? rawFrp : null;
     const confidence = confidenceIndex >= 0 ? values[confidenceIndex]?.trim() || null : null;
     const acquiredTime = acquiredTimeIndex >= 0 ? values[acquiredTimeIndex]?.trim() || null : null;
-    return [{ latitude: latitude.toFixed(6), longitude: longitude.toFixed(6), brightness, confidence, acquiredDate, acquiredTime }];
+    return [{ latitude: latitude.toFixed(6), longitude: longitude.toFixed(6), brightness, frp, confidence, acquiredDate, acquiredTime }];
   });
 }
 
@@ -506,8 +509,14 @@ async function fetchFirms(lat: number, lng: number, days: number, sensor: FirmsS
       // Persistence must not block the existing live corroboration response.
     }
     await writeCached(key, provider, evidence, days === 1 ? 20 * 60_000 : 6 * 60 * 60_000);
+    const frpMw = evidence.historyRows.reduce<number | null>((maximum, row) => {
+      if (row.frp === null) return maximum;
+      const value = Number(row.frp);
+      if (!Number.isFinite(value)) return maximum;
+      return maximum === null ? value : Math.max(maximum, value);
+    }, null);
     return {
-      state: "available", detections: evidence.detections, dailyDetections: evidence.dailyDetections, frpMw: evidence.historyRows.reduce((max, d) => Math.max(max, Number(d.frp) || 0), 0) || null,
+      state: "available", detections: evidence.detections, dailyDetections: evidence.dailyDetections, frpMw,
       brightness: evidence.historyRows.reduce((max, d) => Math.max(max, Number(d.brightness) || 0), 0) || null,
       brightT31: evidence.historyRows.reduce((max, d) => Math.max(max, Number(d.brightT31) || 0), 0) || null,
       confidence: evidence.historyRows.reduce((max, d) => Math.max(max, Number(d.confidence) || 0), 0) || null,

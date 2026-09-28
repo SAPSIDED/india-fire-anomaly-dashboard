@@ -238,6 +238,7 @@ export type IndiaHotspotSnapshotInput = {
   latitude: string;
   longitude: string;
   brightness: string | null;
+  frp?: string | null;
   confidence: string | null;
   acquiredDate: string;
   acquiredTime: string | null;

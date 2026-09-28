@@ -1,10 +1,13 @@
 /** @vitest-environment jsdom */
 import React from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const testState = vi.hoisted(() => ({
   markerClickHandlers: [] as Array<() => void>,
+  hotspotRows: [] as Array<Record<string, unknown>>,
+  weatherCalls: [] as Array<{ input: { lat: number; lng: number }; enabled: boolean }>,
+  forceStaleWeather: false,
   reset: vi.fn(),
   mutate: vi.fn(),
   callbacks: undefined as undefined | { onSuccess: (response: unknown) => void },
@@ -14,9 +17,9 @@ vi.mock("../client/src/components/Map", async () => {
   const ReactModule = await import("react");
   return {
     thermalMarkerColor: () => "#b86751",
-    MapView: ({ onMapReady, fallbackHotspots = [] }: { onMapReady: (map: unknown) => void; fallbackHotspots?: Array<{ onClick: () => void }> }) => {
+    MapView: ({ onMapReady, fallbackHotspots = [], wind }: { onMapReady: (map: unknown) => void; fallbackHotspots?: Array<{ id: string; onClick?: () => void; onSelect?: () => void }>; wind?: { windSpeedKmh: number | null; windDirectionDeg: number | null } }) => {
       ReactModule.useEffect(() => { onMapReady(new (globalThis as any).google.maps.Map()); }, []);
-      return <div aria-label="Mocked Google Map"><button type="button" aria-label="Run source verification" onClick={() => fallbackHotspots[0]?.onClick()}>Run source verification</button></div>;
+      return <div aria-label="Mocked Google Map">{fallbackHotspots.map(hotspot => <button key={hotspot.id} type="button" aria-label={`Select ${hotspot.id}`} onClick={() => hotspot.onSelect?.()}>{`Select ${hotspot.id}`}</button>)}{wind && <output aria-label="Map wind data">{`${wind.windSpeedKmh ?? "—"} km/h / ${wind.windDirectionDeg ?? "—"}°`}</output>}<button type="button" aria-label="Run source verification" onClick={() => fallbackHotspots[0]?.onClick?.()}>Run source verification</button></div>;
     },
   };
 });
@@ -30,21 +33,21 @@ vi.mock("../client/src/lib/trpc", () => ({
     },
     incidentEvidence: { record: { useMutation: () => ({ isError: false, isPending: false, mutate: vi.fn() }) } },
     getIndiaHotspots: {
-      useQuery: () => ({
-        data: [{
-          id: 660079,
-          latitude: "32.88766",
-          longitude: "71.61832",
-          brightness: "336.4",
-          confidence: "l",
-          acquiredDate: "2026-08-26",
-          acquiredTime: "0828",
-          source: "firms-wfs-india-fallback",
-          fetchedAt: "2026-08-27T03:00:00.000Z",
-        }],
-      }),
+      useQuery: () => ({ data: testState.hotspotRows }),
     },
-    getLiveWeather: { useQuery: () => ({ data: { state: "available", temperatureC: 31, windSpeedKmh: 12, windDirectionDeg: 220, timezone: "Asia/Kolkata", checkedAt: "2026-08-27T03:00:00.000Z" } }) },
+    getLiveWeather: {
+      useQuery: (input: { lat: number; lng: number }, options?: { enabled?: boolean }) => {
+        const enabled = Boolean(options?.enabled);
+        testState.weatherCalls.push({ input, enabled });
+        const readings = [
+          { lat: 25.72082, lng: 72.59474, speed: 12.7, direction: 224 },
+          { lat: 20.78609, lng: 85.26402, speed: 8.9, direction: 320 },
+          { lat: 28.04852, lng: 95.5482, speed: 2.1, direction: 59 },
+        ];
+        const reading = enabled ? (testState.forceStaleWeather ? readings[0] : readings.find(point => point.lat === input.lat)) : undefined;
+        return { data: reading ? { state: "available", latitude: reading.lat, longitude: reading.lng, temperatureC: 31, windSpeedKmh: reading.speed, windDirectionDeg: reading.direction, timezone: "Asia/Kolkata", checkedAt: "2026-08-27T03:00:00.000Z" } : undefined, isFetching: enabled && testState.forceStaleWeather, isPending: enabled && !reading };
+      },
+    },
     getPersistentHotspotAlerts: { useQuery: () => ({ data: [], isLoading: false }) },
   },
 }));
@@ -91,7 +94,21 @@ const successfulResponse = {
 
 describe("Home marker verification response rendering", () => {
   beforeEach(() => {
+    cleanup();
     testState.markerClickHandlers.length = 0;
+    testState.hotspotRows = [{
+      id: 660079,
+      latitude: "32.88766",
+      longitude: "71.61832",
+      brightness: "336.4",
+      confidence: "l",
+      acquiredDate: "2026-08-26",
+      acquiredTime: "0828",
+      source: "firms-wfs-india-fallback",
+      fetchedAt: "2026-08-27T03:00:00.000Z",
+    }];
+    testState.weatherCalls.length = 0;
+    testState.forceStaleWeather = false;
     testState.reset.mockReset();
     testState.mutate.mockReset();
     testState.callbacks = undefined;
@@ -138,5 +155,76 @@ describe("Home marker verification response rendering", () => {
     expect(screen.getAllByText("Likely industrial facility").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Model confidence: 81.0%", { exact: false }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Industrial facility").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole("row", { name: /INDUSTRIAL FIRE/ })).toBeTruthy();
+    expect(screen.getByText("Conduct regular inspection and maintenance of electrical, mechanical, and process equipment.")).toBeTruthy();
+  });
+
+  it("starts idle and keeps hotspot identity, local wind, and spread vector synchronized across regions", () => {
+    testState.hotspotRows = [
+      { id: 44850177, latitude: "25.72082", longitude: "72.59474", brightness: "336.3", confidence: "n", acquiredDate: "2026-09-27", acquiredTime: "0826", source: "firms-country", fetchedAt: "2026-09-28T09:00:00.000Z" },
+      { id: 44850175, latitude: "20.78609", longitude: "85.26402", brightness: "330.1", confidence: "n", acquiredDate: "2026-09-27", acquiredTime: "0826", source: "firms-country", fetchedAt: "2026-09-28T09:00:00.000Z" },
+      { id: 44850038, latitude: "28.04852", longitude: "95.5482", brightness: "331.2", confidence: "n", acquiredDate: "2026-09-27", acquiredTime: "0646", source: "firms-country", fetchedAt: "2026-09-28T09:00:00.000Z" },
+    ];
+    render(<Home />);
+
+    const conditionsSection = screen.getByRole("region", { name: "Conditions that move the risk." });
+    const preparednessSection = screen.getByRole("region", { name: "PREVENTIVE MEASURES BY FIRE TYPE" });
+    const persistenceSection = screen.getByRole("region", { name: /PERSISTING THERMAL REGIONS/i });
+    expect(conditionsSection.contains(persistenceSection)).toBe(false);
+    expect(conditionsSection.compareDocumentPosition(preparednessSection) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(preparednessSection.compareDocumentPosition(persistenceSection) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(preparednessSection.contains(persistenceSection)).toBe(false);
+    expect(screen.getByRole("heading", { name: "PERSISTING THERMAL REGIONS" })).toBeTruthy();
+    expect(persistenceSection.querySelector("h2")?.textContent).toContain("⚠️");
+    expect(screen.getByText("No hotspot selected")).toBeTruthy();
+    expect(screen.getByText("Select a hotspot to see local wind conditions")).toBeTruthy();
+    expect(screen.getByRole("row", { name: /INDUSTRIAL FIRE/ })).toBeTruthy();
+    expect(screen.getByRole("row", { name: /WILDFIRE/ })).toBeTruthy();
+    expect(screen.getByRole("row", { name: /AGRICULTURAL BURNING/ })).toBeTruthy();
+    expect(screen.getByRole("row", { name: /MINING FIRE/ })).toBeTruthy();
+    expect(testState.weatherCalls.every(call => !call.enabled)).toBe(true);
+    expect(screen.queryByLabelText("Map wind data")).toBeNull();
+    expect(screen.queryByText("TEMPERATURE", { exact: true })).toBeNull();
+    expect(screen.getByText(/This is an operational alert screen, not a fire-spread forecast\./)).toBeTruthy();
+
+    const choose = (id: number) => act(() => { screen.getByRole("button", { name: `Select FIRMS-${id}` }).click(); });
+    const selectedDetails = () => screen.getByLabelText("Selected hotspot details").textContent ?? "";
+
+    choose(44850177);
+    expect(selectedDetails()).toContain("FIRMS-44850177");
+    expect(selectedDetails()).toContain("25.721°N · 72.595°E");
+    expect(selectedDetails()).toContain("Open-Meteo · live response");
+    expect(screen.getByText("12.7 km/h")).toBeTruthy();
+    expect(screen.getByText("SW · from 224°")).toBeTruthy();
+    expect(screen.getByText("Likely spread direction from this hotspot · NE · toward 44°")).toBeTruthy();
+    expect(screen.getByLabelText("Map wind data").textContent).toBe("12.7 km/h / 224°");
+    expect(testState.weatherCalls.at(-1)).toEqual({ input: { lat: 25.72082, lng: 72.59474 }, enabled: true });
+
+    testState.forceStaleWeather = true;
+    choose(44850175);
+    expect(selectedDetails()).toContain("FIRMS-44850175");
+    expect(selectedDetails()).toContain("20.786°N · 85.264°E");
+    expect(selectedDetails()).toContain("Loading local weather…");
+    expect(screen.queryByText("12.7 km/h")).toBeNull();
+    expect(screen.queryByLabelText("Map wind data")).toBeNull();
+    expect(screen.getByText("Direction unavailable")).toBeTruthy();
+    expect(screen.getByText("Awaiting live wind")).toBeTruthy();
+
+    testState.forceStaleWeather = false;
+    choose(44850175);
+    expect(screen.getByText("8.9 km/h")).toBeTruthy();
+    expect(screen.getByText("NW · from 320°")).toBeTruthy();
+    expect(screen.getByText("Likely spread direction from this hotspot · SE · toward 140°")).toBeTruthy();
+    expect(screen.getByLabelText("Map wind data").textContent).toBe("8.9 km/h / 320°");
+    expect(testState.weatherCalls.at(-1)).toEqual({ input: { lat: 20.78609, lng: 85.26402 }, enabled: true });
+
+    choose(44850038);
+    expect(selectedDetails()).toContain("FIRMS-44850038");
+    expect(selectedDetails()).toContain("28.049°N · 95.548°E");
+    expect(screen.getByText("2.1 km/h")).toBeTruthy();
+    expect(screen.getByText("ENE · from 59°")).toBeTruthy();
+    expect(screen.getByText("Likely spread direction from this hotspot · WSW · toward 239°")).toBeTruthy();
+    expect(screen.getByLabelText("Map wind data").textContent).toBe("2.1 km/h / 59°");
+    expect(testState.weatherCalls.at(-1)).toEqual({ input: { lat: 28.04852, lng: 95.5482 }, enabled: true });
   });
 });

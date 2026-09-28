@@ -3,7 +3,8 @@
  * intentionally remain unchanged; this file only reshapes how that information is presented.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
-import { MapView, thermalMarkerColor } from "@/components/Map";
+import { MapView } from "@/components/Map";
+import { thermalMarkerColor } from "@/lib/frpColor";
 import { ClimateClock, LiveClimateDashboard, type PersistenceAlert } from "@/components/LiveClimateDashboard";
 import { InteractiveEarth } from "@/components/InteractiveEarth";
 import { HotspotVerificationRail, type VerificationRailResult } from "@/components/HotspotVerificationRail";
@@ -36,12 +37,13 @@ type IndiaSnapshotHotspot = {
   latitude: string;
   longitude: string;
   brightness: string | null;
+  frp: string | null;
   confidence: string | null;
   acquiredDate: Date | string;
   acquiredTime: string | null;
   source: "firms-country" | "firms-wfs-india-fallback";
   fetchedAt: Date | string;
-  frpMw?: number | null;
+  frpMw?: number | string | null;
 };
 
 const snapshotSourceLabel = (source?: IndiaSnapshotHotspot["source"]) => source === "firms-country"
@@ -100,52 +102,6 @@ const conditionFamilies = [
   { number: "08", title: "Corroboration governance", conditions: "Second-satellite agreement, image review, authority input, human analyst review, timestamps, provenance, uncertainty and abstention rules." },
 ];
 
-const preventiveMeasuresByFireType = [
-  {
-    fireType: "INDUSTRIAL FIRE",
-    measures: [
-      "Conduct regular inspection and maintenance of electrical, mechanical, and process equipment.",
-      "Maintain appropriate fire detection, alarm, sprinkler, and suppression systems.",
-      "Strictly control the storage and handling of flammable chemicals, fuels, gases, and other combustible materials.",
-      "Use hot-work permit procedures for welding, cutting, and other ignition-producing activities.",
-      "Keep emergency exits, fire lanes, hydrants, and firefighting equipment accessible at all times.",
-      "Conduct periodic fire drills and train workers in fire-prevention and emergency procedures.",
-    ],
-  },
-  {
-    fireType: "WILDFIRE",
-    measures: [
-      "Maintain vegetation clearance and firebreaks around vulnerable infrastructure and settlements.",
-      "Remove accumulated dry vegetation and other combustible fuel near high-risk areas.",
-      "Restrict unnecessary open flames and outdoor burning during periods of high fire risk.",
-      "Maintain roads and access routes for firefighting and emergency vehicles.",
-      "Monitor high-risk forest areas during periods of extreme heat, drought, and strong winds.",
-      "Maintain early-warning and fire-detection systems where available.",
-    ],
-  },
-  {
-    fireType: "AGRICULTURAL BURNING",
-    measures: [
-      "Prefer crop-residue management alternatives such as mulching, incorporation into soil, composting, or suitable residue-management equipment instead of open burning.",
-      "Avoid burning during strong winds or other conditions that can allow flames to spread rapidly.",
-      "Maintain cleared boundaries or firebreaks around areas where burning is legally permitted.",
-      "Keep water, firefighting tools, and personnel available whenever controlled burning is undertaken.",
-      "Monitor the burn continuously and completely extinguish it before leaving the area.",
-      "Maintain agricultural machinery and electrical equipment to reduce accidental ignition.",
-    ],
-  },
-  {
-    fireType: "MINING FIRE",
-    measures: [
-      "Monitor combustible gases, temperature, smoke, and other fire indicators in high-risk areas.",
-      "Maintain effective mine ventilation and regularly inspect ventilation systems.",
-      "Control the accumulation of combustible coal, dust, oil, and other materials.",
-      "Regularly inspect electrical equipment, machinery, cables, and power systems for faults or overheating.",
-      "Follow strict hot-work, equipment-isolation, and permit-to-work procedures.",
-      "Maintain appropriate fire detection, suppression equipment, escape routes, and worker training.",
-    ],
-  },
-];
 
 type HistoryEvidence = {
   state: "available" | "cached" | "unavailable";
@@ -209,6 +165,7 @@ export default function Home() {
   const [activeLayer, setActiveLayer] = useState("Thermal");
   const [verifierOpen, setVerifierOpen] = useState(false);
   const [hasInteractedWithMap, setHasInteractedWithMap] = useState(false);
+  const [hasSelectedHotspot, setHasSelectedHotspot] = useState(false);
   const [copied, setCopied] = useState(false);
   const [authorityForm, setAuthorityForm] = useState({
     sourceType: "authority" as "authority" | "facility",
@@ -230,10 +187,21 @@ export default function Home() {
   const thermalFieldRef = useRef<HTMLDivElement>(null);
   const analysisFieldRef = useRef<HTMLElement>(null);
   const { user, isAuthenticated } = useAuth();
+  const selectHotspot = (hotspot: Hotspot) => {
+    setSelected(hotspot);
+    setHasSelectedHotspot(true);
+  };
   const corroboration = trpc.corroboration.run.useMutation();
   const authorityRecord = trpc.incidentEvidence.record.useMutation();
   const indiaHotspots = trpc.getIndiaHotspots.useQuery(undefined, { refetchInterval: 5 * 60_000 });
-  const liveWeather = trpc.getLiveWeather.useQuery({ lat: 22.4, lng: 78.2 }, { refetchInterval: 5 * 60_000, staleTime: 60_000 });
+  const liveWeatherQuery = trpc.getLiveWeather.useQuery(
+    { lat: selected.location.lat, lng: selected.location.lng },
+    { enabled: hasSelectedHotspot, refetchInterval: 5 * 60_000, staleTime: 60_000 },
+  );
+  const liveWeatherMatchesSelection = hasSelectedHotspot && liveWeatherQuery.data !== undefined
+    && liveWeatherQuery.data.latitude.toFixed(2) === selected.location.lat.toFixed(2)
+    && liveWeatherQuery.data.longitude.toFixed(2) === selected.location.lng.toFixed(2);
+  const liveWeather = { ...liveWeatherQuery, data: liveWeatherMatchesSelection ? liveWeatherQuery.data : undefined };
   const persistenceAlerts = trpc.getPersistentHotspotAlerts.useQuery(undefined, { refetchInterval: 5 * 60_000, staleTime: 60_000 });
 
   useLayoutEffect(() => {
@@ -256,30 +224,38 @@ export default function Home() {
     const latitude = Number(row.latitude);
     const longitude = Number(row.longitude);
     const context = verifiedMapContext[`FIRMS-${row.id}`];
+    const rawFrpMw = context?.frpMw ?? row.frpMw ?? row.frp;
+    const parsedFrpMw = rawFrpMw == null ? NaN : Number(rawFrpMw);
+    const frpMw = Number.isFinite(parsedFrpMw) ? parsedFrpMw : null;
     return {
       id: `FIRMS-${row.id}`,
       facility: `NASA FIRMS detection ${row.id}`,
       place: `Live NASA FIRMS detection ${row.id}`,
       coords: `${latitude.toFixed(4)}°N · ${longitude.toFixed(4)}°E`,
-      frp: row.brightness ? `${Number(row.brightness).toFixed(1)} K` : "—",
+      frp: frpMw !== null ? `${frpMw.toFixed(1)} MW` : "—",
       confidence: row.confidence ?? "—",
       recency: `${String(row.acquiredDate).slice(0, 10)} ${row.acquiredTime ?? ""} UTC`.trim(),
       score: 55,
       outcome: "Requires source verification",
       location: { lat: latitude, lng: longitude },
-      frpMw: context?.frpMw ?? row.frpMw ?? null,
+      frpMw: context?.frpMw ?? frpMw,
       namedFacilityMatch: context?.namedFacilityMatch ?? false,
       activeMonths: context?.activeMonths ?? null,
     };
   }).filter(target => Number.isFinite(target.location.lat) && Number.isFinite(target.location.lng));
-  const fallbackHotspots = (snapshotTargets.length > 0 ? snapshotTargets : hotspots).map(hotspot => ({
+  const mapTargets = snapshotTargets.length > 0 ? snapshotTargets : hotspots;
+  const mapFrpValues = mapTargets.map(hotspot => hotspot.frpMw);
+  const fallbackHotspots = mapTargets.map(hotspot => ({
     id: hotspot.id,
     location: hotspot.location,
     title: `${hotspot.place} — click to verify`,
-    color: thermalMarkerColor(hotspot.frpMw, snapshotTargets.map(item => item.frpMw)),
+    color: thermalMarkerColor(hotspot.frpMw, mapFrpValues),
     radiusM: hotspot.score > 70 ? 9_000 : 6_000,
+    frpMw: hotspot.frpMw,
+    namedFacilityMatch: hotspot.namedFacilityMatch,
+    activeMonths: hotspot.activeMonths,
     onClick: () => { setHasInteractedWithMap(true); setVerifierOpen(true); selectAndVerify(hotspot); },
-    onSelect: () => setHasInteractedWithMap(true),
+    onSelect: () => { setHasInteractedWithMap(true); selectHotspot(hotspot); },
   }));
   const selectPersistenceAlert = (alert: PersistenceAlert) => {
     const target = (snapshotTargets.length > 0 ? snapshotTargets : hotspots).find(hotspot =>
@@ -287,7 +263,7 @@ export default function Home() {
       Math.abs(hotspot.location.lng - alert.longitude) < 0.0002,
     );
     if (!target) return;
-    setSelected(target);
+    selectHotspot(target);
     setHasInteractedWithMap(true);
     setVerifierOpen(false);
     analysisFieldRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -308,7 +284,7 @@ export default function Home() {
     const { selectedTarget, verificationInput } = selectHotspotForVerification(hotspot);
     const requestSequence = verificationRequestSequence.current + 1;
     verificationRequestSequence.current = requestSequence;
-    setSelected(selectedTarget);
+    selectHotspot(selectedTarget);
     setVerificationPresentation(beginHotspotVerification(selectedTarget.id, requestSequence));
     corroboration.reset();
     corroboration.mutate(verificationInput, {
@@ -356,7 +332,7 @@ export default function Home() {
   };
 
   const openVerifier = (hotspot = selected) => {
-    setSelected(hotspot);
+    selectHotspot(hotspot);
     setVerifierOpen(true);
     if (verificationPresentation.targetId !== hotspot.id || verificationPresentation.state !== "complete") runVerifier(hotspot);
   };
@@ -452,11 +428,11 @@ export default function Home() {
       anchor: new google.maps.Point(size / 2, size / 2),
     });
     const targets = snapshotTargets.length > 0 ? snapshotTargets : hotspots;
+    const thermalValues = targets.map(item => item.frpMw).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+    const thermalMin = thermalValues.length ? Math.min(...thermalValues) : 0;
+    const thermalMax = thermalValues.length ? Math.max(...thermalValues) : 1;
     targets.forEach(hotspot => {
-      const thermalColor = hotspot.score > 70 ? "#d46b63" : "#e0ac68";
-      const thermalValues = targets.map(item => item.frpMw).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
-      const thermalMin = thermalValues.length ? Math.min(...thermalValues) : 0;
-      const thermalMax = thermalValues.length ? Math.max(...thermalValues) : 1;
+      const thermalColor = thermalMarkerColor(hotspot.frpMw, thermalValues);
       const thermalRatio = typeof hotspot.frpMw === "number" && thermalMax !== thermalMin ? (hotspot.frpMw - thermalMin) / (thermalMax - thermalMin) : 0.5;
       const thermalSize = 30 + Math.round(thermalRatio * 18);
       const thermalOpacity = 0.58 + thermalRatio * 0.36;
@@ -470,6 +446,8 @@ export default function Home() {
       const persistenceMonths = activeLayer === "Persistence" && typeof hotspot.activeMonths === "number" ? Math.min(4, Math.max(0, hotspot.activeMonths)) : 0;
       const persistenceRings = Array.from({ length: persistenceMonths }, (_, index) => new google.maps.Circle({ map, center: hotspot.location, radius: radius + (index + 1) * 2_500, strokeColor: "#786aa8", strokeOpacity: 0.7 - index * 0.12, strokeWeight: 1.2, fillOpacity: 0, clickable: false }));
       const showSummary = () => {
+        setHasInteractedWithMap(true);
+        selectHotspot(hotspot);
         const content = document.createElement("div");
         content.className = "fireguard-google-popup";
         content.innerHTML = `<span class="fireguard-popup-kicker">LIVE EVIDENCE · NASA FIRMS</span><strong>${hotspot.place}</strong><code>${hotspot.coords}</code><div class="fireguard-provider-grid"><span><b>PROVIDER</b>NASA FIRMS</span><span><b>VIEW</b>${activeLayer} · source context</span><span><b>RADIUS</b>${Math.round((hotspot.score > 70 ? 9_000 : 6_000) / 1000)} km</span><span><b>STATUS</b>Awaiting verification</span></div><small>Satellite detection context is independent of the final FireGuard conclusion.</small>`;
@@ -493,7 +471,7 @@ export default function Home() {
       <div ref={thermalFieldRef} className="thermal-field" aria-hidden="true"><i /><i /><i /></div>
       <header className="mission-header">
         <a className="brand-lockup" href="#top" aria-label="FireGuard India home"><img src="/manus-storage/sentinel-contour-mark_ba2d7e8a.png" alt="FireGuard contour mark" /><span>FIREGUARD / INDIA<small>THERMAL INTELLIGENCE</small></span></a>
-        <nav className="mission-nav" aria-label="Primary navigation"><a href="#workbench">Analysis field</a><a href="#pipeline">Method</a><a href="#conditions">Conditions</a><a href="#sources">Sources</a></nav>
+        <nav className="mission-nav" aria-label="Primary navigation"><a href="#workbench">Analysis field</a><a href="#pipeline">Method</a><a href="#conditions">Conditions</a><a href="#preparedness">Preparedness</a><a href="#sources">Sources</a></nav>
         <div className="mission-actions"><button onClick={copyLink}>{copied ? "Link copied" : "Share brief"}</button><button onClick={() => window.print()}>Print brief</button><span><i /> RESEARCH PROTOTYPE</span></div>
       </header>
 
@@ -507,19 +485,18 @@ export default function Home() {
           <div className="section-cap analysis-field-cap"><div><h2 className="bungee-inline-regular">ACTIVE ANALYSIS FIELD</h2><p className="analysis-observation-line limelight-observation">Current India-wide thermal observation</p></div><div className="analysis-field-meta"><p className="bungee-inline-regular analysis-subtitle">From thermal signal to an evidence-backed screen.</p><ClimateClock timezone={liveWeather.data?.timezone ?? null} /></div></div>
           <div className={`workbench-shell ${verifierOpen ? "verification-open" : "verification-idle"}`}>
             <div className="map-workbench">
-              <div className="gis-visualization-label"><div><p className="eyebrow">GIS-BASED VISUALIZATION</p><p>Geolocated thermal detections rendered as a live map overlay, color-coded by fire radiative power.</p></div></div>
-              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} focusHotspot={focusedHotspot} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span><div className="thermal-gradient-legend" aria-label="Low to high thermal intensity, based on FRP in megawatts"><span>THERMAL INTENSITY · FRP (MW)</span><i aria-hidden="true" /><small><span>LOW</span><span>HIGH</span></small></div>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
+              <div className="gis-visualization-label"><div><p className="eyebrow">GIS-BASED VISUALIZATION</p><p>Geolocated thermal detections shown as red hotspot markers on a live map.</p></div></div>
+              <div className="map-stage"><MapView className="india-map" initialCenter={{ lat: 22.4, lng: 78.2 }} initialZoom={5} onMapReady={onMapReady} fallbackHotspots={fallbackHotspots} activeLayer={activeLayer} focusHotspot={focusedHotspot} wind={liveWeather.data} onFirstHotspotClick={() => setHasInteractedWithMap(true)} /><span className="map-live-overlay">LIVE HOTSPOTS — {snapshotTargets.length} hotspots detected</span>{!hasInteractedWithMap && <span className="map-idle-hint"><i className="hint-rule" aria-hidden="true" />Click any marker to investigate</span>}<div className="map-attribution">{snapshotTargets.length > 0 ? `${snapshotSourceLabel(snapshotSource).toUpperCase()} · REFRESHED ${new Date(snapshotFetchedAt).toLocaleString("en-IN", { timeZoneName: "short" }).toUpperCase()}` : "FIRMS SNAPSHOT PENDING · NO VISIT-TRIGGERED LIVE CALL"}</div></div>
             </div>
             {verifierOpen && <div id="verification-results" className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} mlFeatures={lastMLFeatures} liveHotspotCount={snapshotTargets.length} /></div>}
           </div>
-          <LiveClimateDashboard weather={liveWeather.data} alerts={persistenceAlerts.data ?? []} loading={persistenceAlerts.isLoading} onSelectAlert={selectPersistenceAlert} />
+          <LiveClimateDashboard weather={liveWeather.data} selectedHotspot={hasSelectedHotspot ? selected : undefined} weatherLoading={hasSelectedHotspot && liveWeatherQuery.isFetching} alerts={persistenceAlerts.data ?? []} loading={persistenceAlerts.isLoading} onSelectAlert={selectPersistenceAlert} classification={selectedVerificationState === "complete" ? selectedVerification?.mlPrediction?.classification ?? null : null} />
         </section>
 
         <section id="pipeline" className="investigation-section" aria-label="Thermal investigation method"><div className="section-cap"><div><p className="eyebrow">INVESTIGATION PIPELINE</p><h2>A thermal anomaly does not explain itself.</h2></div><p>Every assessment keeps acquisition, context and corroboration separate so the conclusion can be reviewed rather than merely accepted.</p></div><ol className="investigation-flow"><li><b>01</b><div><h3>Thermal signal</h3><p>Something unusual was observed.</p></div></li><li><b>02</b><div><h3>Location context</h3><p>What exists around the coordinate?</p></div></li><li><b>03</b><div><h3>Temporal behaviour</h3><p>Does the signal recur in place?</p></div></li><li><b>04</b><div><h3>Satellite evidence</h3><p>Does a second source agree?</p></div></li><li><b>05</b><div><h3>Screened outcome</h3><p>What can responsibly be said?</p></div></li></ol></section>
 
         <section className="evidence-board" aria-label="Data, spatial, and historical analysis"><div className="source-flow"><p className="eyebrow">EVIDENCE INPUTS</p><div><span>NASA FIRMS<small>Thermal detection</small></span><i /><span>OPENSTREETMAP<small>Location context</small></span><i /><span>HISTORICAL OBSERVATIONS<small>Temporal behaviour</small></span><i /><span>WEATHER CONTEXT<small>Environmental conditions</small></span></div><b>CONCURRENT SCREENING</b></div><div className="evidence-grid"><article className="classification-panel"><p className="eyebrow">CLASSIFICATION INTERFACE</p><h2>Observed heat is not its source.</h2><div className="classification-state"><span>SCREENING CLASS</span><strong>INDUSTRIAL / FIRE / OTHER / UNCERTAIN</strong><small>Demonstration of evidence categories. Live verifier results remain source-backed.</small></div><ul><li><i /> Industrial setting nearby</li><li><i /> Recurrence assessed over time</li><li><i /> Cross-platform check recorded</li><li><i /> Authority evidence required for confirmation</li></ul></article><MLPredictionPanel prediction={lastMLPrediction} features={lastMLFeatures ?? undefined} /><HistoricalAnalysis selected={selected} history={corroboration.data?.detectionId === selected.id ? corroboration.data.firmsHistory : undefined} /><article className="spatial-panel"><p className="eyebrow">SPATIAL RELATIONSHIP</p><div className="spatial-link"><b>THERMAL<br />ANOMALY</b><i /><span>LOCAL<br />CONTEXT</span><i /><strong>INDUSTRIAL<br />ASSET</strong></div><p>Map context helps establish proximity, not causation. The verifier retains the location and source state for review.</p></article></div></section>
 
-        <section className="preventive-measures-section" aria-labelledby="preventive-measures-title"><div className="preventive-measures-shell"><div className="preventive-measures-heading"><div><p className="eyebrow">FIELD DOCUMENTATION</p><h2 id="preventive-measures-title">PREVENTIVE MEASURES BY FIRE TYPE</h2></div><p>Recommended preventive measures for the four supported fire-type classifications. This reference table is documentation-only and does not alter screening results.</p></div><div className="preventive-measures-table-wrap"><table className="preventive-measures-table"><thead><tr><th scope="col">FIRE TYPE</th><th scope="col">PREVENTIVE MEASURES</th></tr></thead><tbody>{preventiveMeasuresByFireType.map(({ fireType, measures }) => <tr key={fireType}><th scope="row">{fireType}</th><td><ul>{measures.map(measure => <li key={measure}>{measure}</li>)}</ul></td></tr>)}</tbody></table></div></div></section>
 
         <section id="conditions" className="conditions-section"><div className="section-cap"><div><p className="eyebrow">SCREENING CONDITIONS</p><h2>Conditions before escalation.</h2></div><p>This catalogue makes the uncertainty surface visible. Thresholds must remain calibrated against verified outcomes and facility-specific behaviour.</p></div><div className="condition-register">{conditionFamilies.map(family => <article key={family.number}><b>{family.number}</b><div><h3>{family.title}</h3><p>{family.conditions}</p></div></article>)}</div></section>
 

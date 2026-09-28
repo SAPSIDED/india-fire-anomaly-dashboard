@@ -71,6 +71,13 @@
       "when": 1787863054294,
       "tag": "0009_cuddly_siren",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1790502427205,
+      "tag": "0010_condemned_spot",
+      "breakpoints": true
     }
   ]
 }

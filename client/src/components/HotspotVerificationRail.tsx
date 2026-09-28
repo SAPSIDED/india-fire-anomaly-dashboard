@@ -4,7 +4,7 @@ import type { HotspotVerificationState } from "@/lib/hotspotVerification";
 import { MLPredictionPanel } from "@/components/MLPredictionPanel";
 import { FinalAssessmentPanel } from "@/components/FinalAssessmentPanel";
 import type { ConclusionAiClassification, ConclusionRuleBasedResult } from "@shared/conclusion";
-import type { NativeMLFeatures } from "@/lib/nativeXgbPredictor";
+import { predictWithNativeXgb, type NativeMLFeatures } from "@/lib/nativeXgbPredictor";
 import "./HotspotVerificationRail.css";
 
 export type VerificationRailTarget = {
@@ -13,6 +13,7 @@ export type VerificationRailTarget = {
   place: string;
   coords: string;
   frp: string;
+  frpMw?: number | null;
   confidence: string;
   recency: string;
   score: number;
@@ -52,6 +53,7 @@ export type VerificationRailResult = {
     distanceKm: number;
     source: string;
   };
+  mlPrediction?: MLPrediction;
   classification: ConclusionRuleBasedResult;
 };
 
@@ -100,6 +102,25 @@ export function HotspotVerificationRail({
   const loading = state === "loading";
   const failed = state === "error";
   const complete = state === "complete" && result;
+  const verifiedFrpMw = state === "complete" && result
+    && typeof result.firmsCurrent.frpMw === "number"
+    && Number.isFinite(result.firmsCurrent.frpMw)
+    ? result.firmsCurrent.frpMw
+    : null;
+  const snapshotFrpMw = typeof selected.frpMw === "number" && Number.isFinite(selected.frpMw)
+    ? selected.frpMw
+    : null;
+  const displayedFrpMw = verifiedFrpMw ?? snapshotFrpMw;
+  const frpSource = verifiedFrpMw !== null
+    ? "Live FIRMS verification"
+    : snapshotFrpMw !== null
+      ? state === "complete"
+        ? "NASA FIRMS snapshot · live FRP unavailable"
+        : loading
+          ? "NASA FIRMS snapshot · verification in progress"
+          : "NASA FIRMS hotspot snapshot"
+      : null;
+  const effectiveMLPrediction = lastMLPrediction ?? (mlFeatures ? predictWithNativeXgb(mlFeatures) : null);
   const [activeStep, setActiveStep] = useState<number | null>(null);
 
   useEffect(() => {
@@ -140,15 +161,14 @@ export function HotspotVerificationRail({
       <div className="field-report-header">
         <dl className="instrument-support">
           <div>
-            <dt>FRP (MW)</dt>
+            <dt><span className="instrument-label-icon" aria-hidden="true">🔥</span> FRP (MW)</dt>
             <dd>
-              {complete && typeof result.firmsCurrent.frpMw === "number" && Number.isFinite(result.firmsCurrent.frpMw)
-                ? result.firmsCurrent.frpMw.toFixed(2)
-                : "Unavailable"}
+              {displayedFrpMw !== null ? displayedFrpMw.toFixed(2) : "Unavailable"}
+              {frpSource && <small className="instrument-support-source">{frpSource}</small>}
             </dd>
           </div>
           <div>
-            <dt>RECENCY</dt>
+            <dt><span className="instrument-label-icon" aria-hidden="true">🕒</span> RECENCY</dt>
             <dd>{selected.recency.replace("Observed ", "")}</dd>
           </div>
         </dl>
@@ -449,12 +469,12 @@ export function HotspotVerificationRail({
           </button>
         </div>
 
-        <MLPredictionPanel prediction={lastMLPrediction} features={mlFeatures ?? undefined} />
+        <MLPredictionPanel prediction={effectiveMLPrediction} />
 
-        {complete && lastMLPrediction && (
+        {complete && effectiveMLPrediction && (
           <FinalAssessmentPanel
             ruleBasedResult={result.classification}
-            mlResult={lastMLPrediction}
+            mlResult={effectiveMLPrediction}
             namedFacilityMatch={Boolean(
               result.gppdReference?.name || result.industrial.industrialFacilityName,
             )}
