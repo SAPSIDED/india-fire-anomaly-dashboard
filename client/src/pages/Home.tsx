@@ -36,6 +36,7 @@ type IndiaSnapshotHotspot = {
   latitude: string;
   longitude: string;
   brightness: string | null;
+  frp: string | null;
   confidence: string | null;
   acquiredDate: Date | string;
   acquiredTime: string | null;
@@ -220,7 +221,7 @@ export default function Home() {
       score: 55,
       outcome: "Requires source verification",
       location: { lat: latitude, lng: longitude },
-      frpMw: context?.frpMw ?? row.frpMw ?? null,
+      frpMw: context?.frpMw ?? (row.frp !== null && Number.isFinite(Number(row.frp)) ? Number(row.frp) : null),
       namedFacilityMatch: context?.namedFacilityMatch ?? false,
       activeMonths: context?.activeMonths ?? null,
     };
