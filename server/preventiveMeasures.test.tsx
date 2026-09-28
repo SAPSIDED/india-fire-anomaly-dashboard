@@ -15,7 +15,7 @@ describe("PreventiveMeasures", () => {
   it("shows all four fire types and their preventive measures at once", () => {
     render(<PreventiveMeasures classification="industrial_facility" />);
     const table = screen.getByRole("table", { name: "Preventive measures by fire type" });
-    expect(within(table).getByRole("columnheader", { name: "FIRE TYPE" })).toBeTruthy();
+    expect(within(table).getByRole("columnheader", { name: "FIRE TYPES" })).toBeTruthy();
     expect(within(table).getByRole("columnheader", { name: "PREVENTIVE MEASURES" })).toBeTruthy();
 
     for (const [type, sourceName, url] of expectedLinks) {

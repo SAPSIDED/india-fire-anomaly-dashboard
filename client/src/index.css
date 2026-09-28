@@ -484,23 +484,23 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .preparedness-safety-note strong { color: #f0c28e; }
 .preparedness-table-wrap { width: 100%; max-width: none; margin: 0; overflow: hidden; border: 1px solid rgba(0,250,154,.38); background: #1d5443; }
 .preparedness-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.preparedness-table th, .preparedness-table td { padding: 18px 17px; border-right: 1px solid rgba(226,229,221,.12); border-bottom: 1px solid rgba(226,229,221,.12); text-align: left; vertical-align: top; }
+.preparedness-table th, .preparedness-table td { padding: 21px 19px; border-right: 1px solid rgba(226,229,221,.12); border-bottom: 1px solid rgba(226,229,221,.12); text-align: left; vertical-align: top; }
 .preparedness-table tr:last-child > * { border-bottom: 0; }
 .preparedness-table tr > *:last-child { border-right: 0; }
-.preparedness-table thead th { color: #00FA9A; background: #174736; font: 600 9px/1.5 "IBM Plex Mono", monospace; letter-spacing: .09em; text-transform: uppercase; }
+.preparedness-table thead th { color: #f1e5cf; background: #174736; font: 600 12px/1.5 "IBM Plex Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
 .preparedness-table thead th:first-child { width: 25%; }
 .preparedness-table thead th:nth-child(2) { width: 75%; }
-.preparedness-table tbody th { color: #00FA9A; font-size: 13px; font-weight: 700; line-height: 1.35; }
+.preparedness-table tbody th { color: #e7d7bd; font-size: 15px; font-weight: 700; line-height: 1.4; }
 .preparedness-source-name { display: block; }
 .preparedness-source { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 0 0 13px; }
-.preparedness-source-label { color: #9fffd8; font: 600 8px/1.4 "IBM Plex Mono", monospace; letter-spacing: .12em; }
-.preparedness-source-link { display: inline-block; padding: 4px 7px; border: 1px solid #ffd166; border-radius: 2px; background: #0d2c25; color: #ffe7a3; font: 700 9px/1.4 "IBM Plex Mono", monospace; letter-spacing: .04em; text-decoration: underline; text-decoration-color: #ffd166; text-underline-offset: 3px; }
-.preparedness-source-link:hover, .preparedness-source-link:focus-visible { background: #ffd166; color: #102c25; text-decoration-color: #102c25; }
+.preparedness-source-label { color: #cdbd9f; font: 600 9px/1.4 "IBM Plex Mono", monospace; letter-spacing: .12em; }
+.preparedness-source-link { display: inline-block; padding: 6px 9px; border: 1px solid #bda879; border-radius: 2px; background: #102c25; color: #f1e5cf; font: 700 11px/1.45 "IBM Plex Mono", monospace; letter-spacing: .025em; text-decoration: underline; text-decoration-color: #cdbd9f; text-underline-offset: 3px; }
+.preparedness-source-link:hover, .preparedness-source-link:focus-visible { background: #e7d7bd; color: #17392f; text-decoration-color: #17392f; }
 .preparedness-source-note { display: block; margin-top: 8px; color: #d7b078; font: 8px/1.5 "IBM Plex Mono", monospace; letter-spacing: .025em; }
 .preparedness-resources, .preparedness-measures { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .preparedness-resources li { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 7px; color: #e0f0e7; font-size: 10px; line-height: 1.45; }
 .preparedness-resources code { padding: 2px 5px; border: 1px solid rgba(167,195,201,.17); background: rgba(167,195,201,.07); color: #b6cbd0; font: 8px/1.4 "IBM Plex Mono", monospace; overflow-wrap: anywhere; }
-.preparedness-measures li { position: relative; padding-left: 12px; color: #e0f0e7; font-size: 10px; line-height: 1.65; }
+.preparedness-measures li { position: relative; padding-left: 12px; color: #e0f0e7; font-size: 11px; line-height: 1.7; }
 .preparedness-measures li::before { position: absolute; top: .55em; left: 0; width: 4px; height: 4px; border-radius: 50%; background: #00FA9A; content: ""; }
 .preparedness-unavailable { margin: 0; color: #e0f0e7; font-size: 11px; line-height: 1.6; }
 .preparedness-footnote { max-width: 1280px; margin: 11px auto 0; color: #8e9995; font: 8px/1.55 "IBM Plex Mono", monospace; }

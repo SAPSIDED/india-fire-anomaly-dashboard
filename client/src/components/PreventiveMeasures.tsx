@@ -72,7 +72,7 @@ export function PreventiveMeasures({ classification: _classification }: { classi
         <table className="preparedness-table" aria-label="Preventive measures by fire type">
           <thead>
             <tr>
-              <th scope="col">FIRE TYPE</th>
+              <th scope="col">FIRE TYPES</th>
               <th scope="col">PREVENTIVE MEASURES</th>
             </tr>
           </thead>
