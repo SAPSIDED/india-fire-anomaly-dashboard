@@ -24,6 +24,9 @@ describe("HotspotVerificationRail", () => {
     const user = userEvent.setup();
     const { rerender } = render(<HotspotVerificationRail selected={selected} state="ready" onVerify={onVerify} />);
 
+    expect(screen.getByText(/FRP \(MW\)/i).querySelector(".instrument-label-icon")?.textContent).toBe("🔥");
+    expect(screen.getByText(/RECENCY/i).querySelector(".instrument-label-icon")?.textContent).toBe("🕒");
+
     await user.click(screen.getByRole("button", { name: /run source verification/i }));
     expect(onVerify).toHaveBeenCalledOnce();
 

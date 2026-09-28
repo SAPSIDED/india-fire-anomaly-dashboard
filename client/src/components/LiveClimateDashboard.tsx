@@ -54,7 +54,7 @@ export function LiveClimateDashboard({ weather, selectedHotspot, weatherLoading,
   return <>
     <section className="live-climate-dashboard" aria-labelledby="climate-dashboard-title">
     <div className="climate-dashboard-head"><div><p className="eyebrow">LIVE WIND CONDITIONS</p><h2 id="climate-dashboard-title">Conditions that move the risk.</h2><p>Select a hotspot to load its local Open-Meteo wind context. Weather is contextual only and does not change classification; the vector indicates a likely downwind direction from that hotspot.</p></div></div>
-    <div className="climate-wind-animation" aria-hidden="true"><i /><i /><i /><i /></div>
+    <div className="climate-wind-animation" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /><i /></div>
     <div className="climate-metrics" aria-live="polite">
       <div className="climate-metric climate-hotspot-metric" role="group" aria-label="Selected hotspot details">
         <span>SELECTED HOTSPOT</span>

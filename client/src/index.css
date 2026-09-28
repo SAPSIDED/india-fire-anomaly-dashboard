@@ -331,14 +331,18 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .wind-playback input { width: 100%; accent-color: #e0ac68; cursor: pointer; }
 .wind-playback span { color: #e0ac68; font: 8px "IBM Plex Mono", monospace; white-space: nowrap; }
 .live-climate-dashboard { position: relative; isolation: isolate; overflow: hidden; max-width: 1280px; margin: 14px auto 0; padding: clamp(22px, 3vw, 40px); border: 1px solid rgba(42,104,132,.28); border-top: 3px solid #347f9b; background: #ADD8E6; box-shadow: 0 12px 30px rgba(8,14,14,.18); }
-.climate-wind-animation { position: relative; z-index: 1; height: 42px; margin-top: 10px; overflow: hidden; pointer-events: none; }
-.climate-wind-animation i { position: absolute; right: -12%; display: block; width: 48%; height: 12px; border-top: 2px solid rgba(39,104,133,.62); border-radius: 50%; filter: drop-shadow(0 1px 0 rgba(255,255,255,.72)); animation: conditions-wind-flow 10s ease-in-out infinite; will-change: transform, opacity; }
-.climate-wind-animation i::after { content: ""; position: absolute; top: 5px; left: 18%; width: 72%; height: 8px; border-top: 1px solid rgba(255,255,255,.92); border-radius: 50%; }
-.climate-wind-animation i:nth-child(1) { top: 1px; width: 38%; animation-delay: -1s; animation-duration: 8.5s; }
-.climate-wind-animation i:nth-child(2) { top: 11px; width: 54%; animation-delay: -5s; animation-duration: 12s; }
-.climate-wind-animation i:nth-child(3) { top: 21px; width: 43%; animation-delay: -8s; animation-duration: 10.5s; }
-.climate-wind-animation i:nth-child(4) { top: 31px; width: 34%; animation-delay: -3s; animation-duration: 9.3s; }
-@keyframes conditions-wind-flow { 0% { transform: translate3d(115%, 1px, 0) rotate(-4deg) scaleX(.72); opacity: 0; } 18% { opacity: .46; } 38% { transform: translate3d(55%, -2px, 0) rotate(-1deg) scaleX(.94); opacity: .82; } 58% { transform: translate3d(-5%, 2px, 0) rotate(2deg) scaleX(1.06); opacity: .68; } 80% { transform: translate3d(-72%, -1px, 0) rotate(-1deg) scaleX(.9); opacity: .38; } 100% { transform: translate3d(-130%, 2px, 0) rotate(-4deg) scaleX(.72); opacity: 0; } }
+.climate-wind-animation { position: absolute; z-index: 0; inset: 0; overflow: hidden; pointer-events: none; }
+.climate-wind-animation i { position: absolute; right: -15%; display: block; width: clamp(180px, 48%, 640px); height: 28px; border-top: 2px solid rgba(23,81,110,.62); border-radius: 50%; filter: drop-shadow(0 1px 0 rgba(255,255,255,.72)); animation: conditions-wind-flow 16s ease-in-out infinite; will-change: transform, opacity; }
+.climate-wind-animation i::after { content: ""; position: absolute; top: 6px; left: 18%; width: 70%; height: 12px; border-top: 1px solid rgba(255,255,255,.9); border-radius: 50%; }
+.climate-wind-animation i:nth-child(1) { top: 7%; width: 36%; animation-delay: -1s; animation-duration: 13.5s; }
+.climate-wind-animation i:nth-child(2) { top: 18%; width: 52%; animation-delay: -5s; animation-duration: 18s; }
+.climate-wind-animation i:nth-child(3) { top: 29%; width: 44%; animation-delay: -8s; animation-duration: 15s; }
+.climate-wind-animation i:nth-child(4) { top: 40%; width: 58%; animation-delay: -3s; animation-duration: 20s; }
+.climate-wind-animation i:nth-child(5) { top: 51%; width: 40%; animation-delay: -11s; animation-duration: 16.5s; }
+.climate-wind-animation i:nth-child(6) { top: 62%; width: 49%; animation-delay: -7s; animation-duration: 14.5s; }
+.climate-wind-animation i:nth-child(7) { top: 73%; width: 42%; animation-delay: -13s; animation-duration: 19s; }
+.climate-wind-animation i:nth-child(8) { top: 84%; width: 54%; animation-delay: -9s; animation-duration: 17.5s; }
+@keyframes conditions-wind-flow { 0% { transform: translate3d(120%, 1px, 0) rotate(-5deg) scaleX(.74); opacity: 0; } 18% { transform: translate3d(84%, -1px, 0) rotate(-3deg) scaleX(.86); opacity: .42; } 38% { transform: translate3d(44%, -4px, 0) rotate(-1deg) scaleX(.98); opacity: .9; } 58% { transform: translate3d(-5%, 3px, 0) rotate(2deg) scaleX(1.08); opacity: .76; } 82% { transform: translate3d(-72%, -2px, 0) rotate(-1deg) scaleX(.92); opacity: .42; } 100% { transform: translate3d(-130%, 1px, 0) rotate(-5deg) scaleX(.74); opacity: 0; } }
 .climate-dashboard-head { position: relative; z-index: 1; }
 .climate-dashboard-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
 .climate-dashboard-head .eyebrow { color: #286e88; }
@@ -347,8 +351,8 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .climate-clock { min-width: 154px; padding: 12px 14px; border-left: 1px solid rgba(54,70,73,.24); text-align: right; }
 .climate-clock span, .climate-clock small { display: block; color: #7f8b86; font: 8px "IBM Plex Mono", monospace; letter-spacing: .08em; }
 .climate-clock strong { display: block; margin: 4px 0; color: #29363a; font: 700 25px "IBM Plex Mono", monospace; letter-spacing: -.08em; }
-.climate-metrics { display: grid; grid-template-columns: minmax(0, 1.15fr) repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
-.climate-metric { position: relative; min-height: 142px; padding: 20px; border: 1px solid rgba(54,70,73,.16); background: linear-gradient(145deg, rgba(255,252,246,.98), rgba(247,243,234,.9)); box-shadow: 0 6px 16px rgba(54,70,73,.045); }
+.climate-metrics { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1.15fr) repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 64px; }
+.climate-metric { position: relative; min-height: 142px; padding: 20px; border: 1px solid rgba(54,70,73,.16); background: linear-gradient(145deg, rgba(255,252,246,.76), rgba(247,243,234,.66)); box-shadow: 0 6px 16px rgba(54,70,73,.045); backdrop-filter: blur(2px); }
 .climate-metric > svg { color: #347f9b; }
 .climate-metric > span, .climate-metric small { display: block; color: #7f8b86; font: 8px "IBM Plex Mono", monospace; letter-spacing: .08em; }
 .climate-metric strong { display: block; margin: 7px 0 3px; color: #29363a; font: 700 22px var(--display-face); }
@@ -375,7 +379,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .alerts-empty { margin-top: 10px; padding: 18px; color: #71807c; background: rgba(255,252,246,.75); font: 12px/1.5 "IBM Plex Mono", monospace; }
 .climate-source-note { display: block; max-width: 1280px; margin: 10px auto 0; padding: 0 2px; color: #89938e; font: 9px/1.5 "IBM Plex Mono", monospace; }
 @media (max-width: 760px) { .wind-overlay { right: 12px; left: auto; bottom: 44px; transform: scale(.92); transform-origin: bottom right; } .climate-dashboard-head { display: block; } .climate-clock { margin-top: 20px; border-left: 0; border-top: 1px solid rgba(54,70,73,.24); text-align: left; } .climate-metrics { grid-template-columns: 1fr; } .persistence-section { margin-top: 12px; padding: 16px; } .alerts-heading { align-items: flex-start; flex-wrap: wrap; } .alerts-heading h2 { flex: 1 1 100%; font-size: clamp(24px, 7vw, 32px); line-height: 1.02; } .alerts-heading small { margin-left: auto; } .persistence-alert { grid-template-columns: 1fr; gap: 7px; } .persistence-alert p { text-align: left; } }
-@media (prefers-reduced-motion: reduce) { .climate-wind-animation i { animation: none; right: 8%; opacity: .34; transform: rotate(-3deg); } }
+@media (prefers-reduced-motion: reduce) { .climate-wind-animation i { animation: none; right: auto; left: 8%; opacity: .18; transform: rotate(-3deg); } }
 .workbench-shell.verification-idle { display: block; }
 .workbench-shell.verification-open { grid-template-columns: minmax(0, 1.7fr) minmax(290px, .62fr); }
 .workbench-shell.verification-open .investigation-dashboard-reveal { width: auto; margin: 0; }

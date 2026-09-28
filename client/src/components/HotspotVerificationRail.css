@@ -258,6 +258,7 @@
   margin: 0;
 }
 .instrument-support > div { min-width: 0; }
+.instrument-support dt .instrument-label-icon { display: inline-block; margin-right: 4px; font-size: 1.25em; line-height: 1; letter-spacing: 0; vertical-align: -1px; }
 .instrument-support dd {
   margin: 6px 0 0;
   color: #f2eee6;

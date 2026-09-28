@@ -160,14 +160,14 @@ export function HotspotVerificationRail({
       <div className="field-report-header">
         <dl className="instrument-support">
           <div>
-            <dt>FRP (MW)</dt>
+            <dt><span className="instrument-label-icon" aria-hidden="true">🔥</span> FRP (MW)</dt>
             <dd>
               {displayedFrpMw !== null ? displayedFrpMw.toFixed(2) : "Unavailable"}
               {frpSource && <small className="instrument-support-source">{frpSource}</small>}
             </dd>
           </div>
           <div>
-            <dt>RECENCY</dt>
+            <dt><span className="instrument-label-icon" aria-hidden="true">🕒</span> RECENCY</dt>
             <dd>{selected.recency.replace("Observed ", "")}</dd>
           </div>
         </dl>
