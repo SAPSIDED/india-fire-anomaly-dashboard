@@ -164,6 +164,7 @@ export default function Home() {
   const [activeLayer, setActiveLayer] = useState("Thermal");
   const [verifierOpen, setVerifierOpen] = useState(false);
   const [hasInteractedWithMap, setHasInteractedWithMap] = useState(false);
+  const [hasSelectedHotspot, setHasSelectedHotspot] = useState(false);
   const [copied, setCopied] = useState(false);
   const [authorityForm, setAuthorityForm] = useState({
     sourceType: "authority" as "authority" | "facility",
@@ -185,10 +186,21 @@ export default function Home() {
   const thermalFieldRef = useRef<HTMLDivElement>(null);
   const analysisFieldRef = useRef<HTMLElement>(null);
   const { user, isAuthenticated } = useAuth();
+  const selectHotspot = (hotspot: Hotspot) => {
+    setSelected(hotspot);
+    setHasSelectedHotspot(true);
+  };
   const corroboration = trpc.corroboration.run.useMutation();
   const authorityRecord = trpc.incidentEvidence.record.useMutation();
   const indiaHotspots = trpc.getIndiaHotspots.useQuery(undefined, { refetchInterval: 5 * 60_000 });
-  const liveWeather = trpc.getLiveWeather.useQuery({ lat: 22.4, lng: 78.2 }, { refetchInterval: 5 * 60_000, staleTime: 60_000 });
+  const liveWeatherQuery = trpc.getLiveWeather.useQuery(
+    { lat: selected.location.lat, lng: selected.location.lng },
+    { enabled: hasSelectedHotspot, refetchInterval: 5 * 60_000, staleTime: 60_000 },
+  );
+  const liveWeatherMatchesSelection = hasSelectedHotspot && liveWeatherQuery.data !== undefined
+    && liveWeatherQuery.data.latitude.toFixed(2) === selected.location.lat.toFixed(2)
+    && liveWeatherQuery.data.longitude.toFixed(2) === selected.location.lng.toFixed(2);
+  const liveWeather = { ...liveWeatherQuery, data: liveWeatherMatchesSelection ? liveWeatherQuery.data : undefined };
   const persistenceAlerts = trpc.getPersistentHotspotAlerts.useQuery(undefined, { refetchInterval: 5 * 60_000, staleTime: 60_000 });
 
   useLayoutEffect(() => {
@@ -242,7 +254,7 @@ export default function Home() {
     namedFacilityMatch: hotspot.namedFacilityMatch,
     activeMonths: hotspot.activeMonths,
     onClick: () => { setHasInteractedWithMap(true); setVerifierOpen(true); selectAndVerify(hotspot); },
-    onSelect: () => setHasInteractedWithMap(true),
+    onSelect: () => { setHasInteractedWithMap(true); selectHotspot(hotspot); },
   }));
   const selectPersistenceAlert = (alert: PersistenceAlert) => {
     const target = (snapshotTargets.length > 0 ? snapshotTargets : hotspots).find(hotspot =>
@@ -250,7 +262,7 @@ export default function Home() {
       Math.abs(hotspot.location.lng - alert.longitude) < 0.0002,
     );
     if (!target) return;
-    setSelected(target);
+    selectHotspot(target);
     setHasInteractedWithMap(true);
     setVerifierOpen(false);
     analysisFieldRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -271,7 +283,7 @@ export default function Home() {
     const { selectedTarget, verificationInput } = selectHotspotForVerification(hotspot);
     const requestSequence = verificationRequestSequence.current + 1;
     verificationRequestSequence.current = requestSequence;
-    setSelected(selectedTarget);
+    selectHotspot(selectedTarget);
     setVerificationPresentation(beginHotspotVerification(selectedTarget.id, requestSequence));
     corroboration.reset();
     corroboration.mutate(verificationInput, {
@@ -319,7 +331,7 @@ export default function Home() {
   };
 
   const openVerifier = (hotspot = selected) => {
-    setSelected(hotspot);
+    selectHotspot(hotspot);
     setVerifierOpen(true);
     if (verificationPresentation.targetId !== hotspot.id || verificationPresentation.state !== "complete") runVerifier(hotspot);
   };
@@ -433,6 +445,8 @@ export default function Home() {
       const persistenceMonths = activeLayer === "Persistence" && typeof hotspot.activeMonths === "number" ? Math.min(4, Math.max(0, hotspot.activeMonths)) : 0;
       const persistenceRings = Array.from({ length: persistenceMonths }, (_, index) => new google.maps.Circle({ map, center: hotspot.location, radius: radius + (index + 1) * 2_500, strokeColor: "#786aa8", strokeOpacity: 0.7 - index * 0.12, strokeWeight: 1.2, fillOpacity: 0, clickable: false }));
       const showSummary = () => {
+        setHasInteractedWithMap(true);
+        selectHotspot(hotspot);
         const content = document.createElement("div");
         content.className = "fireguard-google-popup";
         content.innerHTML = `<span class="fireguard-popup-kicker">LIVE EVIDENCE · NASA FIRMS</span><strong>${hotspot.place}</strong><code>${hotspot.coords}</code><div class="fireguard-provider-grid"><span><b>PROVIDER</b>NASA FIRMS</span><span><b>VIEW</b>${activeLayer} · source context</span><span><b>RADIUS</b>${Math.round((hotspot.score > 70 ? 9_000 : 6_000) / 1000)} km</span><span><b>STATUS</b>Awaiting verification</span></div><small>Satellite detection context is independent of the final FireGuard conclusion.</small>`;
@@ -475,7 +489,7 @@ export default function Home() {
             </div>
             {verifierOpen && <div id="verification-results" className="investigation-dashboard-reveal"><HotspotVerificationRail selected={selected} state={selectedVerificationState} result={selectedVerification} onVerify={() => selectedVerificationState === "complete" ? openVerifier(selected) : selectAndVerify(selected)} lastMLPrediction={lastMLPrediction} mlFeatures={lastMLFeatures} liveHotspotCount={snapshotTargets.length} /></div>}
           </div>
-          <LiveClimateDashboard weather={liveWeather.data} alerts={persistenceAlerts.data ?? []} loading={persistenceAlerts.isLoading} onSelectAlert={selectPersistenceAlert} />
+          <LiveClimateDashboard weather={liveWeather.data} selectedHotspot={hasSelectedHotspot ? selected : undefined} weatherLoading={hasSelectedHotspot && liveWeatherQuery.isFetching} alerts={persistenceAlerts.data ?? []} loading={persistenceAlerts.isLoading} onSelectAlert={selectPersistenceAlert} />
         </section>
 
         <section id="pipeline" className="investigation-section" aria-label="Thermal investigation method"><div className="section-cap"><div><p className="eyebrow">INVESTIGATION PIPELINE</p><h2>A thermal anomaly does not explain itself.</h2></div><p>Every assessment keeps acquisition, context and corroboration separate so the conclusion can be reviewed rather than merely accepted.</p></div><ol className="investigation-flow"><li><b>01</b><div><h3>Thermal signal</h3><p>Something unusual was observed.</p></div></li><li><b>02</b><div><h3>Location context</h3><p>What exists around the coordinate?</p></div></li><li><b>03</b><div><h3>Temporal behaviour</h3><p>Does the signal recur in place?</p></div></li><li><b>04</b><div><h3>Satellite evidence</h3><p>Does a second source agree?</p></div></li><li><b>05</b><div><h3>Screened outcome</h3><p>What can responsibly be said?</p></div></li></ol></section>
