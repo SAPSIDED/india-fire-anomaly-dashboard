@@ -100,6 +100,53 @@ const conditionFamilies = [
   { number: "08", title: "Corroboration governance", conditions: "Second-satellite agreement, image review, authority input, human analyst review, timestamps, provenance, uncertainty and abstention rules." },
 ];
 
+const preventiveMeasuresByFireType = [
+  {
+    fireType: "INDUSTRIAL FIRE",
+    measures: [
+      "Conduct regular inspection and maintenance of electrical, mechanical, and process equipment.",
+      "Maintain appropriate fire detection, alarm, sprinkler, and suppression systems.",
+      "Strictly control the storage and handling of flammable chemicals, fuels, gases, and other combustible materials.",
+      "Use hot-work permit procedures for welding, cutting, and other ignition-producing activities.",
+      "Keep emergency exits, fire lanes, hydrants, and firefighting equipment accessible at all times.",
+      "Conduct periodic fire drills and train workers in fire-prevention and emergency procedures.",
+    ],
+  },
+  {
+    fireType: "WILDFIRE",
+    measures: [
+      "Maintain vegetation clearance and firebreaks around vulnerable infrastructure and settlements.",
+      "Remove accumulated dry vegetation and other combustible fuel near high-risk areas.",
+      "Restrict unnecessary open flames and outdoor burning during periods of high fire risk.",
+      "Maintain roads and access routes for firefighting and emergency vehicles.",
+      "Monitor high-risk forest areas during periods of extreme heat, drought, and strong winds.",
+      "Maintain early-warning and fire-detection systems where available.",
+    ],
+  },
+  {
+    fireType: "AGRICULTURAL BURNING",
+    measures: [
+      "Prefer crop-residue management alternatives such as mulching, incorporation into soil, composting, or suitable residue-management equipment instead of open burning.",
+      "Avoid burning during strong winds or other conditions that can allow flames to spread rapidly.",
+      "Maintain cleared boundaries or firebreaks around areas where burning is legally permitted.",
+      "Keep water, firefighting tools, and personnel available whenever controlled burning is undertaken.",
+      "Monitor the burn continuously and completely extinguish it before leaving the area.",
+      "Maintain agricultural machinery and electrical equipment to reduce accidental ignition.",
+    ],
+  },
+  {
+    fireType: "MINING FIRE",
+    measures: [
+      "Monitor combustible gases, temperature, smoke, and other fire indicators in high-risk areas.",
+      "Maintain effective mine ventilation and regularly inspect ventilation systems.",
+      "Control the accumulation of combustible coal, dust, oil, and other materials.",
+      "Regularly inspect electrical equipment, machinery, cables, and power systems for faults or overheating.",
+      "Follow strict hot-work, equipment-isolation, and permit-to-work procedures.",
+      "Maintain appropriate fire detection, suppression equipment, escape routes, and worker training.",
+    ],
+  },
+];
+
 type HistoryEvidence = {
   state: "available" | "cached" | "unavailable";
   detections: number;
@@ -471,6 +518,8 @@ export default function Home() {
         <section id="pipeline" className="investigation-section" aria-label="Thermal investigation method"><div className="section-cap"><div><p className="eyebrow">INVESTIGATION PIPELINE</p><h2>A thermal anomaly does not explain itself.</h2></div><p>Every assessment keeps acquisition, context and corroboration separate so the conclusion can be reviewed rather than merely accepted.</p></div><ol className="investigation-flow"><li><b>01</b><div><h3>Thermal signal</h3><p>Something unusual was observed.</p></div></li><li><b>02</b><div><h3>Location context</h3><p>What exists around the coordinate?</p></div></li><li><b>03</b><div><h3>Temporal behaviour</h3><p>Does the signal recur in place?</p></div></li><li><b>04</b><div><h3>Satellite evidence</h3><p>Does a second source agree?</p></div></li><li><b>05</b><div><h3>Screened outcome</h3><p>What can responsibly be said?</p></div></li></ol></section>
 
         <section className="evidence-board" aria-label="Data, spatial, and historical analysis"><div className="source-flow"><p className="eyebrow">EVIDENCE INPUTS</p><div><span>NASA FIRMS<small>Thermal detection</small></span><i /><span>OPENSTREETMAP<small>Location context</small></span><i /><span>HISTORICAL OBSERVATIONS<small>Temporal behaviour</small></span><i /><span>WEATHER CONTEXT<small>Environmental conditions</small></span></div><b>CONCURRENT SCREENING</b></div><div className="evidence-grid"><article className="classification-panel"><p className="eyebrow">CLASSIFICATION INTERFACE</p><h2>Observed heat is not its source.</h2><div className="classification-state"><span>SCREENING CLASS</span><strong>INDUSTRIAL / FIRE / OTHER / UNCERTAIN</strong><small>Demonstration of evidence categories. Live verifier results remain source-backed.</small></div><ul><li><i /> Industrial setting nearby</li><li><i /> Recurrence assessed over time</li><li><i /> Cross-platform check recorded</li><li><i /> Authority evidence required for confirmation</li></ul></article><MLPredictionPanel prediction={lastMLPrediction} features={lastMLFeatures ?? undefined} /><HistoricalAnalysis selected={selected} history={corroboration.data?.detectionId === selected.id ? corroboration.data.firmsHistory : undefined} /><article className="spatial-panel"><p className="eyebrow">SPATIAL RELATIONSHIP</p><div className="spatial-link"><b>THERMAL<br />ANOMALY</b><i /><span>LOCAL<br />CONTEXT</span><i /><strong>INDUSTRIAL<br />ASSET</strong></div><p>Map context helps establish proximity, not causation. The verifier retains the location and source state for review.</p></article></div></section>
+
+        <section className="preventive-measures-section" aria-labelledby="preventive-measures-title"><div className="preventive-measures-shell"><div className="preventive-measures-heading"><div><p className="eyebrow">FIELD DOCUMENTATION</p><h2 id="preventive-measures-title">PREVENTIVE MEASURES BY FIRE TYPE</h2></div><p>Recommended preventive measures for the four supported fire-type classifications. This reference table is documentation-only and does not alter screening results.</p></div><div className="preventive-measures-table-wrap"><table className="preventive-measures-table"><thead><tr><th scope="col">FIRE TYPE</th><th scope="col">PREVENTIVE MEASURES</th></tr></thead><tbody>{preventiveMeasuresByFireType.map(({ fireType, measures }) => <tr key={fireType}><th scope="row">{fireType}</th><td><ul>{measures.map(measure => <li key={measure}>{measure}</li>)}</ul></td></tr>)}</tbody></table></div></div></section>
 
         <section id="conditions" className="conditions-section"><div className="section-cap"><div><p className="eyebrow">SCREENING CONDITIONS</p><h2>Conditions before escalation.</h2></div><p>This catalogue makes the uncertainty surface visible. Thresholds must remain calibrated against verified outcomes and facility-specific behaviour.</p></div><div className="condition-register">{conditionFamilies.map(family => <article key={family.number}><b>{family.number}</b><div><h3>{family.title}</h3><p>{family.conditions}</p></div></article>)}</div></section>
 
