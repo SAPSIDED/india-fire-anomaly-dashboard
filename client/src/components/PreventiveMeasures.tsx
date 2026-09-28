@@ -81,7 +81,10 @@ export function PreventiveMeasures({ classification: _classification }: { classi
               <tr key={fireType}>
                 <th scope="row"><span className="preparedness-source-name">{fireType}</span></th>
                 <td data-label="PREVENTIVE MEASURES">
-                  <a className="preparedness-source-link" href={sourceUrl} target="_blank" rel="noreferrer" aria-label={`${fireType}: ${sourceName}`}>{sourceName}</a>
+                  <div className="preparedness-source">
+                    <span className="preparedness-source-label">SOURCE</span>
+                    <a className="preparedness-source-link" href={sourceUrl} target="_blank" rel="noreferrer" aria-label={`${fireType}: ${sourceName}`}>{sourceName}</a>
+                  </div>
                   <ul className="preparedness-measures">
                     {measures.map(measure => <li key={measure}>{measure}</li>)}
                   </ul>
