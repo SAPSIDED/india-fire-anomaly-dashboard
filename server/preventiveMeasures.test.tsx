@@ -21,7 +21,8 @@ describe("PreventiveMeasures", () => {
     for (const [type, sourceName, url] of expectedLinks) {
       const row = within(table).getByRole("row", { name: new RegExp(type) });
       expect(row).toBeTruthy();
-      expect(within(row).getByRole("link", { name: `${type}: ${sourceName}` }).getAttribute("href")).toBe(url);
+      const measuresCell = within(row).getByRole("cell", { name: new RegExp(sourceName) });
+      expect(within(measuresCell).getByRole("link", { name: `${type}: ${sourceName}` }).getAttribute("href")).toBe(url);
     }
     expect(within(table).getAllByRole("row")).toHaveLength(5);
     expect(within(table).getAllByRole("listitem").length).toBe(24);
