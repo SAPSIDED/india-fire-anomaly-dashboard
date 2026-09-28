@@ -11,13 +11,24 @@ function rgbHex(rgb: readonly number[]) {
   return `#${rgb.map(channel => channel.toString(16).padStart(2, "0")).join("")}`;
 }
 
-/** Maps the current snapshot's observed FRP range to low-yellow, medium-orange, high-red. */
+function percentile(sortedValues: number[], fraction: number) {
+  const position = (sortedValues.length - 1) * fraction;
+  const lower = Math.floor(position);
+  const upper = Math.ceil(position);
+  if (lower === upper) return sortedValues[lower];
+  return sortedValues[lower] + (sortedValues[upper] - sortedValues[lower]) * (position - lower);
+}
+
+/** Maps the current snapshot's FRP distribution to low-yellow, medium-orange, high-red. */
 export function thermalMarkerColor(value: number | null | undefined, allValues: Array<number | null | undefined>) {
   if (typeof value !== "number" || !Number.isFinite(value)) return UNAVAILABLE_FRP;
   const values = allValues.filter((candidate): candidate is number => typeof candidate === "number" && Number.isFinite(candidate));
   if (values.length < 2) return rgbHex(MEDIUM_FRP);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  const sorted = [...values].sort((a, b) => a - b);
+  // Ignore only the most extreme tails so a few outliers do not make ordinary
+  // hotspots all appear yellow while preserving the real FRP ordering.
+  const min = values.length >= 20 ? percentile(sorted, 0.1) : sorted[0];
+  const max = values.length >= 20 ? percentile(sorted, 0.9) : sorted[sorted.length - 1];
   const normalized = max === min ? 0.5 : Math.max(0, Math.min(1, (value - min) / (max - min)));
   return rgbHex(normalized <= 0.5
     ? interpolate(LOW_FRP, MEDIUM_FRP, normalized * 2)
