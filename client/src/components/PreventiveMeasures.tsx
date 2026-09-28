@@ -1,10 +1,11 @@
 import React from "react";
 
-type Guidance = { fireType: string; measures: string[] };
+type Guidance = { fireType: string; sourceUrl: string; measures: string[] };
 
 const guidanceByClassification: Guidance[] = [
   {
     fireType: "INDUSTRIAL FIRE",
+    sourceUrl: "https://peso.gov.in/web/en/contact",
     measures: [
       "Conduct regular inspection and maintenance of electrical, mechanical, and process equipment.",
       "Maintain appropriate fire detection, alarm, sprinkler, and suppression systems.",
@@ -16,6 +17,7 @@ const guidanceByClassification: Guidance[] = [
   },
   {
     fireType: "WILDFIRE",
+    sourceUrl: "https://fsiforestfire.gov.in/",
     measures: [
       "Maintain vegetation clearance and firebreaks around vulnerable infrastructure and settlements.",
       "Remove accumulated dry vegetation and other combustible fuel near high-risk areas.",
@@ -27,6 +29,7 @@ const guidanceByClassification: Guidance[] = [
   },
   {
     fireType: "AGRICULTURAL BURNING",
+    sourceUrl: "https://cpcb.gov.in/query-form1.php",
     measures: [
       "Prefer crop-residue management alternatives such as mulching, incorporation into soil, composting, or suitable residue-management equipment instead of open burning.",
       "Avoid burning during strong winds or other conditions that can allow flames to spread rapidly.",
@@ -38,6 +41,7 @@ const guidanceByClassification: Guidance[] = [
   },
   {
     fireType: "MINING FIRE",
+    sourceUrl: "https://www.labour.gov.in/en/lodge-your-complaint",
     measures: [
       "Monitor combustible gases, temperature, smoke, and other fire indicators in high-risk areas.",
       "Maintain effective mine ventilation and regularly inspect ventilation systems.",
@@ -69,9 +73,9 @@ export function PreventiveMeasures({ classification: _classification }: { classi
             </tr>
           </thead>
           <tbody>
-            {guidanceByClassification.map(({ fireType, measures }) => (
+            {guidanceByClassification.map(({ fireType, sourceUrl, measures }) => (
               <tr key={fireType}>
-                <th scope="row">{fireType}</th>
+                <th scope="row"><span className="preparedness-source-name">{fireType}</span><a className="preparedness-source-link" href={sourceUrl} target="_blank" rel="noreferrer" aria-label={`${fireType} official website`}>Official website</a></th>
                 <td data-label="PREVENTIVE MEASURES">
                   <ul className="preparedness-measures">
                     {measures.map(measure => <li key={measure}>{measure}</li>)}
