@@ -1,6 +1,6 @@
-const LOW_FRP = [244, 211, 94] as const;
-const MEDIUM_FRP = [242, 140, 40] as const;
-const HIGH_FRP = [201, 40, 40] as const;
+const LOW_FRP = [255, 224, 70] as const;
+const MEDIUM_FRP = [235, 92, 18] as const;
+const HIGH_FRP = [190, 24, 24] as const;
 const UNAVAILABLE_FRP = "#9a8f84";
 
 function interpolate(from: readonly number[], to: readonly number[], amount: number) {

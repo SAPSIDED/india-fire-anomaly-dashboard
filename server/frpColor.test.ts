@@ -5,9 +5,9 @@ describe("thermalMarkerColor", () => {
   const frpValues = [1, 2, 3, 4, 5, 6];
 
   it("maps low, medium, and high FRP to yellow, orange, and red", () => {
-    expect(thermalMarkerColor(1, frpValues)).toBe("#f4d35e");
-    expect(thermalMarkerColor(3, frpValues)).toBe("#f29a33");
-    expect(thermalMarkerColor(6, frpValues)).toBe("#c92828");
+    expect(thermalMarkerColor(1, frpValues)).toBe("#ffe046");
+    expect(thermalMarkerColor(3, frpValues)).toBe("#ef761c");
+    expect(thermalMarkerColor(6, frpValues)).toBe("#be1818");
   });
 
   it("uses a neutral fallback when FRP is unavailable", () => {
