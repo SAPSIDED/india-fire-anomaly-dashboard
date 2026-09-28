@@ -473,36 +473,36 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 
 
 /* Preventive measures — all-fire-type documentation reference. */
-.preparedness-section { padding: clamp(42px, 5vw, 72px) clamp(18px, 7vw, 96px); border-top: 1px solid rgba(0,250,154,.34); border-bottom: 1px solid rgba(0,250,154,.24); background: #12382f; scroll-margin-top: 76px; }
+.preparedness-section { padding: clamp(42px, 5vw, 72px) clamp(18px, 7vw, 96px); border-top: 1px solid rgba(190,164,112,.55); border-bottom: 1px solid rgba(190,164,112,.42); background: #12382f; scroll-margin-top: 76px; }
 .preparedness-section .section-cap { margin-bottom: 26px; }
 .preparedness-section .section-cap h2 { max-width: 760px; color: #eceee9; }
 .preparedness-section .section-cap > p { color: #aab3b0; }
-.preparedness-section .eyebrow { color: #00FA9A; }
+.preparedness-section .eyebrow { color: #d5b978; }
 .preparedness-safety-note { display: flex; align-items: flex-start; gap: 11px; max-width: 1280px; margin: 0 auto 18px; padding: 14px 16px; border: 1px solid rgba(217,151,66,.26); border-left: 3px solid #d99742; background: rgba(217,151,66,.07); color: #e0f0e7; font-size: 11px; line-height: 1.65; }
 .preparedness-safety-note svg { flex: 0 0 auto; margin-top: 1px; color: #e0ac68; }
 .preparedness-safety-note p { margin: 0; }
 .preparedness-safety-note strong { color: #f0c28e; }
-.preparedness-table-wrap { width: 100%; max-width: none; margin: 0; overflow: hidden; border: 1px solid rgba(0,250,154,.38); background: #1d5443; }
+.preparedness-table-wrap { width: 100%; max-width: none; margin: 0; overflow: hidden; border: 1px solid rgba(190,164,112,.55); background: #1d5443; }
 .preparedness-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .preparedness-table th, .preparedness-table td { padding: 21px 19px; border-right: 1px solid rgba(226,229,221,.12); border-bottom: 1px solid rgba(226,229,221,.12); text-align: left; vertical-align: top; }
 .preparedness-table tr:last-child > * { border-bottom: 0; }
 .preparedness-table tr > *:last-child { border-right: 0; }
-.preparedness-table thead th { color: #f1e5cf; background: #174736; font: 600 12px/1.5 "IBM Plex Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+.preparedness-table thead th { color: #fff5e4; background: #174736; font: 700 14px/1.5 "IBM Plex Mono", monospace; letter-spacing: .075em; text-transform: uppercase; }
 .preparedness-table thead th:first-child { width: 25%; }
 .preparedness-table thead th:nth-child(2) { width: 75%; }
-.preparedness-table tbody th { color: #e7d7bd; font-size: 15px; font-weight: 700; line-height: 1.4; }
+.preparedness-table tbody th { color: #f4e5c9; font-size: 17px; font-weight: 700; line-height: 1.45; }
 .preparedness-source-name { display: block; }
 .preparedness-source { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 0 0 13px; }
-.preparedness-source-label { color: #cdbd9f; font: 600 9px/1.4 "IBM Plex Mono", monospace; letter-spacing: .12em; }
-.preparedness-source-link { display: inline-block; padding: 6px 9px; border: 1px solid #bda879; border-radius: 2px; background: #102c25; color: #f1e5cf; font: 700 11px/1.45 "IBM Plex Mono", monospace; letter-spacing: .025em; text-decoration: underline; text-decoration-color: #cdbd9f; text-underline-offset: 3px; }
-.preparedness-source-link:hover, .preparedness-source-link:focus-visible { background: #e7d7bd; color: #17392f; text-decoration-color: #17392f; }
+.preparedness-source-label { color: #f1dfbd; font: 700 11px/1.45 "IBM Plex Mono", monospace; letter-spacing: .07em; }
+.preparedness-source-link { display: inline-block; padding: 7px 11px; border: 1px solid #f1dfbd; border-radius: 3px; background: #f1dfbd; color: #17392f; font: 700 13px/1.45 "IBM Plex Mono", monospace; letter-spacing: .01em; text-decoration: underline; text-decoration-color: #6e5530; text-underline-offset: 3px; box-shadow: 0 1px 0 rgba(0,0,0,.12); }
+.preparedness-source-link:hover, .preparedness-source-link:focus-visible { background: #fff8eb; border-color: #fff8eb; color: #17392f; text-decoration-color: #17392f; }
 .preparedness-source-note { display: block; margin-top: 8px; color: #d7b078; font: 8px/1.5 "IBM Plex Mono", monospace; letter-spacing: .025em; }
 .preparedness-resources, .preparedness-measures { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .preparedness-resources li { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 7px; color: #e0f0e7; font-size: 10px; line-height: 1.45; }
 .preparedness-resources code { padding: 2px 5px; border: 1px solid rgba(167,195,201,.17); background: rgba(167,195,201,.07); color: #b6cbd0; font: 8px/1.4 "IBM Plex Mono", monospace; overflow-wrap: anywhere; }
-.preparedness-measures li { position: relative; padding-left: 12px; color: #e0f0e7; font-size: 11px; line-height: 1.7; }
-.preparedness-measures li::before { position: absolute; top: .55em; left: 0; width: 4px; height: 4px; border-radius: 50%; background: #00FA9A; content: ""; }
-.preparedness-unavailable { margin: 0; color: #e0f0e7; font-size: 11px; line-height: 1.6; }
+.preparedness-measures li { position: relative; padding-left: 15px; color: #f0f0e7; font-size: 13px; line-height: 1.75; }
+.preparedness-measures li::before { position: absolute; top: .62em; left: 0; width: 5px; height: 5px; border-radius: 50%; background: #d5b978; content: ""; }
+.preparedness-unavailable { margin: 0; color: #f0f0e7; font-size: 13px; line-height: 1.65; }
 .preparedness-footnote { max-width: 1280px; margin: 11px auto 0; color: #8e9995; font: 8px/1.55 "IBM Plex Mono", monospace; }
 @media (max-width: 760px) {
   .preparedness-section { padding: 54px 18px; }
@@ -512,10 +512,10 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
   .preparedness-table, .preparedness-table tbody { display: block; width: 100%; }
   .preparedness-table thead { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
   .preparedness-table tr { display: block; margin-bottom: 11px; border: 1px solid rgba(0,250,154,.28); background: #1f5846; }
-  .preparedness-table tbody th { display: block; padding: 15px 15px 12px; border-right: 0; border-bottom: 1px solid rgba(226,229,221,.12); font-size: 14px; }
-  .preparedness-table td { display: block; padding: 12px 15px; border: 0; }
+  .preparedness-table tbody th { display: block; padding: 17px 15px 14px; border-right: 0; border-bottom: 1px solid rgba(226,229,221,.12); font-size: 16px; }
+  .preparedness-table td { display: block; padding: 15px; border: 0; }
   .preparedness-table td + td { border-top: 1px solid rgba(226,229,221,.1); }
-  .preparedness-table td::before { display: block; margin-bottom: 8px; color: #00FA9A; content: attr(data-label); font: 600 9px/1.5 "IBM Plex Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
-  .preparedness-resources li, .preparedness-measures li { font-size: 11px; }
+  .preparedness-table td::before { display: block; margin-bottom: 10px; color: #d5b978; content: attr(data-label); font: 700 11px/1.5 "IBM Plex Mono", monospace; letter-spacing: .075em; text-transform: uppercase; }
+  .preparedness-resources li, .preparedness-measures li { font-size: 13px; }
   .preparedness-footnote { margin-top: 9px; }
 }
