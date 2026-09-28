@@ -211,7 +211,7 @@ export default function Home() {
     const latitude = Number(row.latitude);
     const longitude = Number(row.longitude);
     const context = verifiedMapContext[`FIRMS-${row.id}`];
-    const rawFrpMw = context?.frpMw ?? row.frpMw;
+    const rawFrpMw = context?.frpMw ?? row.frpMw ?? row.frp;
     const parsedFrpMw = rawFrpMw == null ? NaN : Number(rawFrpMw);
     const frpMw = Number.isFinite(parsedFrpMw) ? parsedFrpMw : null;
     return {
