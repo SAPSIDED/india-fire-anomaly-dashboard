@@ -419,7 +419,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .thermal-gradient-legend {
   top: auto !important;
   right: auto !important;
-  bottom: 18px !important;
+  bottom: 76px !important;
   left: 14px !important;
   z-index: 2000 !important;
   position: absolute !important;
@@ -448,5 +448,5 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px
 .thermal-legend-item b { color: #fff8ec; font-weight: 600; }
 .thermal-legend-note { margin: 2px 0 0; color: #d9d1c3; font: 8px/1.35 "IBM Plex Mono", monospace; }
 @media (max-width: 760px) {
-  .thermal-gradient-legend { top: auto !important; right: auto !important; bottom: 62px !important; left: 10px !important; width: min(190px, calc(100% - 20px)); }
+  .thermal-gradient-legend { top: auto !important; right: auto !important; bottom: 96px !important; left: 10px !important; width: min(190px, calc(100% - 20px)); }
 }

@@ -338,11 +338,11 @@ export function MapView({ className, initialCenter = { lat: 37.7749, lng: -122.4
   const thermalLegend = <div className="thermal-gradient-legend" aria-label="FRP thermal intensity legend">
     <strong className="thermal-legend-title">FRP THERMAL INTENSITY</strong>
     <div className="thermal-legend-items">
-      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-low" /><span><b>Yellow</b><em>Low FRP</em></span></div>
-      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-medium" /><span><b>Orange</b><em>Medium FRP</em></span></div>
-      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-high" /><span><b>Red</b><em>High FRP</em></span></div>
+      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-low" /><span><b>Yellow</b><em>&lt; 5 MW · Low</em></span></div>
+      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-medium" /><span><b>Orange</b><em>5–&lt;20 MW · Medium</em></span></div>
+      <div className="thermal-legend-item"><i className="thermal-legend-swatch thermal-high" /><span><b>Red</b><em>≥ 20 MW · High</em></span></div>
     </div>
-    <p className="thermal-legend-note">Relative to the current hotspot snapshot</p>
+    <p className="thermal-legend-note">Fixed MW bands · consistent every day</p>
   </div>;
 
   if (useLeaflet) {
